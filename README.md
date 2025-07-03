@@ -10,6 +10,7 @@ This repository contains a simple Pomodoro desktop application written in Python
 - Tracks how many Pomodoros you have completed today
 - Displays remaining time
 - Works offline on macOS (Python and tkinter are usually included)
+- Optional dark mode for late-night sessions
 
 ## Usage
 
