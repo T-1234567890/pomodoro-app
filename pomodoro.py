@@ -6,6 +6,70 @@ from datetime import date
 
 DATA_FILE = 'pomodoro_data.json'
 
+
+class CountdownWindow:
+    """Simple countdown timer window displayed as a separate page."""
+
+    def __init__(self, master):
+        self.top = tk.Toplevel(master)
+        self.top.title('Countdown Timer')
+
+        self.time_var = tk.StringVar(value='5')
+        tk.Label(self.top, text='Minutes:').grid(row=0, column=0)
+        tk.Entry(self.top, textvariable=self.time_var, width=5).grid(row=0, column=1)
+
+        self.time_label = tk.Label(self.top, text='00:00', font=('Helvetica', 24))
+        self.time_label.grid(row=1, column=0, columnspan=2, pady=10)
+
+        tk.Button(self.top, text='Start', command=self.start).grid(row=2, column=0)
+        tk.Button(self.top, text='Reset', command=self.reset).grid(row=2, column=1)
+
+        self.remaining = 0
+        self.timer_id = None
+        self.running = False
+
+    def apply_theme(self, bg: str, fg: str):
+        self.top.config(bg=bg)
+        for widget in [self.time_label]:
+            widget.config(bg=bg, fg=fg)
+        for child in self.top.winfo_children():
+            if isinstance(child, tk.Label) or isinstance(child, tk.Button) or isinstance(child, tk.Entry):
+                child.config(bg=bg, fg=fg)
+            if isinstance(child, tk.Entry):
+                child.config(insertbackground=fg)
+
+    def format_time(self, secs: int) -> str:
+        m, s = divmod(secs, 60)
+        return f'{m:02d}:{s:02d}'
+
+    def start(self):
+        if not self.running:
+            try:
+                self.remaining = int(float(self.time_var.get()) * 60)
+            except ValueError:
+                messagebox.showerror('Error', 'Enter a number for minutes')
+                return
+            self.running = True
+            self.countdown()
+
+    def reset(self):
+        if self.timer_id:
+            self.top.after_cancel(self.timer_id)
+            self.timer_id = None
+        self.running = False
+        self.time_label.config(text='00:00')
+
+    def countdown(self):
+        self.time_label.config(text=self.format_time(self.remaining))
+        if self.remaining > 0:
+            self.remaining -= 1
+            self.timer_id = self.top.after(1000, self.countdown)
+        else:
+            self.running = False
+            self.timer_id = None
+            messagebox.showinfo('Done', "Time's up!")
+
+
 class PomodoroApp:
     def __init__(self, master):
         self.master = master
@@ -51,6 +115,10 @@ class PomodoroApp:
                                               command=self.toggle_dark_mode)
         self.dark_mode_check.grid(row=5, column=0, columnspan=3)
 
+        self.countdown_button = tk.Button(master, text='Open Countdown',
+                                          command=self.open_countdown)
+        self.countdown_button.grid(row=6, column=0, columnspan=3, pady=(5, 0))
+
     def load_data(self):
         today = date.today().isoformat()
         if os.path.exists(DATA_FILE):
@@ -80,7 +148,7 @@ class PomodoroApp:
         widgets = [
             self.work_label, self.break_label, self.time_label,
             self.start_button, self.pause_button, self.reset_button,
-            self.count_label, self.dark_mode_check
+            self.count_label, self.dark_mode_check, self.countdown_button
         ]
         for w in widgets:
             w.config(bg=bg, fg=fg)
@@ -92,6 +160,12 @@ class PomodoroApp:
             self.apply_theme('#2e2e2e', '#ffffff')
         else:
             self.apply_theme(self.default_bg, self.default_fg)
+
+    def open_countdown(self):
+        """Open the countdown timer window."""
+        win = CountdownWindow(self.master)
+        if self.dark_mode_var.get():
+            win.apply_theme('#2e2e2e', '#ffffff')
 
     def start(self):
         if not self.running:

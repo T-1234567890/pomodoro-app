@@ -22,3 +22,8 @@ python3 pomodoro.py
 
 The first time a work session completes, the count for the current day increases. The count is stored in `pomodoro_data.json` in the same directory.
 
+## Countdown Timer
+
+The Pomodoro window includes an **Open Countdown** button that launches a
+separate countdown timer page. Use it when you need a quick timer outside the
+Pomodoro workflow.
