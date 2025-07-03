@@ -2,6 +2,7 @@ import json
 import os
 import tkinter as tk
 from tkinter import messagebox
+from music_player import MusicPlayerApp
 from datetime import date
 
 DATA_FILE = 'pomodoro_data.json'
@@ -119,6 +120,10 @@ class PomodoroApp:
                                           command=self.open_countdown)
         self.countdown_button.grid(row=6, column=0, columnspan=3, pady=(5, 0))
 
+        self.music_button = tk.Button(master, text='Open Music Player',
+                                      command=self.open_music_player)
+        self.music_button.grid(row=7, column=0, columnspan=3, pady=(5, 0))
+
     def load_data(self):
         today = date.today().isoformat()
         if os.path.exists(DATA_FILE):
@@ -166,6 +171,13 @@ class PomodoroApp:
         win = CountdownWindow(self.master)
         if self.dark_mode_var.get():
             win.apply_theme('#2e2e2e', '#ffffff')
+
+    def open_music_player(self):
+        """Open the simple music player window."""
+        win = tk.Toplevel(self.master)
+        player = MusicPlayerApp(win)
+        if self.dark_mode_var.get() and hasattr(player, 'apply_theme'):
+            player.apply_theme('#2e2e2e', '#ffffff')
 
     def start(self):
         if not self.running:
