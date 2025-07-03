@@ -1,5 +1,6 @@
 import os
 import sys
+
 import subprocess
 import tkinter as tk
 from tkinter import filedialog, messagebox
@@ -36,6 +37,7 @@ def play_audio(path):
         return None
 
 
+
 nplayers = []
 
 
@@ -50,14 +52,11 @@ class MusicPlayerApp:
         self.title_var = tk.StringVar()
         self.artist_var = tk.StringVar()
 
+
         tk.Button(master, text='Open', command=self.open_file).grid(row=0, column=0)
         tk.Button(master, text='Play', command=self.play).grid(row=0, column=1)
         tk.Button(master, text='Stop', command=self.stop).grid(row=0, column=2)
 
-        tk.Label(master, text='Title:').grid(row=1, column=0, sticky='e')
-        tk.Label(master, text='Artist:').grid(row=2, column=0, sticky='e')
-        tk.Label(master, textvariable=self.title_var).grid(row=1, column=1, columnspan=2, sticky='w')
-        tk.Label(master, textvariable=self.artist_var).grid(row=2, column=1, columnspan=2, sticky='w')
 
     def apply_theme(self, bg: str, fg: str):
         """Apply background/foreground colors to widgets."""
@@ -90,6 +89,7 @@ class MusicPlayerApp:
         if sys.platform.startswith('win'):
             import winsound
             winsound.PlaySound(None, winsound.SND_PURGE)
+
 
 
 if __name__ == '__main__':
