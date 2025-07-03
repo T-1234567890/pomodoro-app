@@ -24,8 +24,6 @@ The first time a work session completes, the count for the current day increases
 
 ## Countdown Timer
 
-This repository also includes a simple countdown timer application. Run it with:
-
-```bash
-python3 countdown.py
-```
+The Pomodoro window includes an **Open Countdown** button that launches a
+separate countdown timer page. Use it when you need a quick timer outside the
+Pomodoro workflow.
