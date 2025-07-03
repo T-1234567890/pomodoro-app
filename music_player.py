@@ -5,6 +5,7 @@ import subprocess
 import tkinter as tk
 from tkinter import filedialog, messagebox
 import shutil
+from ui_utils import apply_simple_style
 
 
 def read_id3v1_tags(path):
@@ -110,6 +111,9 @@ class MusicPlayerApp:
 
         self.update_id = self.update_external()
         self.master.bind('<Destroy>', self._on_destroy)
+
+        # Apply a minimal style for a consistent look
+        apply_simple_style(master)
 
 
     def apply_theme(self, bg: str, fg: str):

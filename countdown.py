@@ -1,5 +1,6 @@
 import tkinter as tk
 from tkinter import messagebox
+from ui_utils import apply_simple_style
 
 class CountdownApp:
     def __init__(self, master):
@@ -18,6 +19,9 @@ class CountdownApp:
         self.remaining = 0
         self.running = False
         self.timer_id = None
+
+        # Apply a minimal style to match the other tools
+        apply_simple_style(master)
 
     def format_time(self, secs):
         m, s = divmod(secs, 60)
