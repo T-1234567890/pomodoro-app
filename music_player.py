@@ -4,6 +4,7 @@ import sys
 import subprocess
 import tkinter as tk
 from tkinter import filedialog, messagebox
+import shutil
 
 
 def read_id3v1_tags(path):
@@ -37,6 +38,46 @@ def play_audio(path):
         return None
 
 
+def get_external_playback():
+    """Return title and artist from another music player if available."""
+    if shutil.which('playerctl'):
+        try:
+            title = subprocess.check_output(
+                ['playerctl', 'metadata', 'xesam:title'], text=True
+            ).strip()
+            artist = subprocess.check_output(
+                ['playerctl', 'metadata', 'xesam:artist'], text=True
+            ).strip()
+            if title:
+                return title, artist
+        except Exception:
+            pass
+    if sys.platform == 'darwin':
+        for app in ('Music', 'Spotify'):
+            script = (
+                'tell application "' + app + '"\n'
+                'if it is running then\n'
+                'try\n'
+                'set t to the name of the current track\n'
+                'set a to the artist of the current track\n'
+                'return t & "|" & a\n'
+                'end try\n'
+                'end if\n'
+                'end tell'
+            )
+            try:
+                out = subprocess.check_output(
+                    ['osascript', '-e', script], text=True
+                ).strip()
+                if '|' in out:
+                    t, a = out.split('|', 1)
+                    if t:
+                        return t, a
+            except Exception:
+                pass
+    return '', ''
+
+
 
 nplayers = []
 
@@ -51,6 +92,7 @@ class MusicPlayerApp:
 
         self.title_var = tk.StringVar()
         self.artist_var = tk.StringVar()
+        self.external_var = tk.StringVar(value='')
 
 
         tk.Button(master, text='Open', command=self.open_file).grid(row=0, column=0)
@@ -62,6 +104,11 @@ class MusicPlayerApp:
 
         tk.Label(master, text='Artist:').grid(row=2, column=0, sticky='e')
         tk.Label(master, textvariable=self.artist_var, anchor='w').grid(row=2, column=1, columnspan=2, sticky='w')
+
+        tk.Label(master, text='Other Player:').grid(row=3, column=0, sticky='e')
+        tk.Label(master, textvariable=self.external_var, anchor='w').grid(row=3, column=1, columnspan=2, sticky='w')
+
+        self.update_external()
 
 
     def apply_theme(self, bg: str, fg: str):
@@ -95,6 +142,15 @@ class MusicPlayerApp:
         if sys.platform.startswith('win'):
             import winsound
             winsound.PlaySound(None, winsound.SND_PURGE)
+
+    def update_external(self):
+        """Periodically update information from other music players."""
+        title, artist = get_external_playback()
+        if title:
+            self.external_var.set(f'{title} - {artist}' if artist else title)
+        else:
+            self.external_var.set('')
+        self.master.after(5000, self.update_external)
 
 
 

@@ -46,4 +46,6 @@ python3 music_player.py
 
 Only basic playback commands (play/stop) are provided and the script falls back
 on commands like `afplay` or `aplay` depending on your platform.
+If you have `playerctl` on Linux or AppleScript support on macOS, the player
+also displays the track currently playing in other music applications.
 
