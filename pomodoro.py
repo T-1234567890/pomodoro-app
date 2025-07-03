@@ -17,14 +17,20 @@ class PomodoroApp:
         self.is_break = False
         self.timer_id = None
         self.data = self.load_data()
+        self.default_bg = master.cget('bg')
+        self.default_fg = 'black'
 
         # UI Setup
-        tk.Label(master, text='Work minutes:').grid(row=0, column=0)
-        tk.Label(master, text='Break minutes:').grid(row=1, column=0)
+        self.work_label = tk.Label(master, text='Work minutes:')
+        self.break_label = tk.Label(master, text='Break minutes:')
+        self.work_label.grid(row=0, column=0)
+        self.break_label.grid(row=1, column=0)
         self.work_var = tk.StringVar(value='25')
         self.break_var = tk.StringVar(value='5')
-        tk.Entry(master, textvariable=self.work_var, width=5).grid(row=0, column=1)
-        tk.Entry(master, textvariable=self.break_var, width=5).grid(row=1, column=1)
+        self.work_entry = tk.Entry(master, textvariable=self.work_var, width=5)
+        self.break_entry = tk.Entry(master, textvariable=self.break_var, width=5)
+        self.work_entry.grid(row=0, column=1)
+        self.break_entry.grid(row=1, column=1)
 
         self.time_label = tk.Label(master, text=self.format_time(self.work_seconds), font=('Helvetica', 24))
         self.time_label.grid(row=2, column=0, columnspan=3, pady=10)
@@ -38,6 +44,12 @@ class PomodoroApp:
 
         self.count_label = tk.Label(master, text=f'Today\'s pomodoros: {self.data["count"]}')
         self.count_label.grid(row=4, column=0, columnspan=3, pady=5)
+
+        self.dark_mode_var = tk.BooleanVar()
+        self.dark_mode_check = tk.Checkbutton(master, text='Dark Mode',
+                                              variable=self.dark_mode_var,
+                                              command=self.toggle_dark_mode)
+        self.dark_mode_check.grid(row=5, column=0, columnspan=3)
 
     def load_data(self):
         today = date.today().isoformat()
@@ -62,6 +74,24 @@ class PomodoroApp:
         mins = seconds // 60
         secs = seconds % 60
         return f'{mins:02d}:{secs:02d}'
+
+    def apply_theme(self, bg, fg):
+        self.master.config(bg=bg)
+        widgets = [
+            self.work_label, self.break_label, self.time_label,
+            self.start_button, self.pause_button, self.reset_button,
+            self.count_label, self.dark_mode_check
+        ]
+        for w in widgets:
+            w.config(bg=bg, fg=fg)
+        for entry in [self.work_entry, self.break_entry]:
+            entry.config(bg=bg, fg=fg, insertbackground=fg)
+
+    def toggle_dark_mode(self):
+        if self.dark_mode_var.get():
+            self.apply_theme('#2e2e2e', '#ffffff')
+        else:
+            self.apply_theme(self.default_bg, self.default_fg)
 
     def start(self):
         if not self.running:
