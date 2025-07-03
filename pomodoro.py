@@ -181,16 +181,17 @@ class PomodoroApp:
 
     def start(self):
         if not self.running:
-            try:
-                self.work_seconds = int(float(self.work_var.get()) * 60)
-                self.break_seconds = int(float(self.break_var.get()) * 60)
-            except ValueError:
-                messagebox.showerror('Error', 'Please enter valid numbers for minutes')
-                return
-            if not self.is_break:
-                self.remaining_seconds = self.work_seconds
-            else:
-                self.remaining_seconds = self.break_seconds
+            # Only calculate the durations when starting fresh
+            if self.remaining_seconds <= 0:
+                try:
+                    self.work_seconds = int(float(self.work_var.get()) * 60)
+                    self.break_seconds = int(float(self.break_var.get()) * 60)
+                except ValueError:
+                    messagebox.showerror('Error', 'Please enter valid numbers for minutes')
+                    return
+                self.remaining_seconds = self.work_seconds if not self.is_break else self.break_seconds
+
+            # Start or resume the countdown without resetting remaining_seconds
             self.running = True
             self.start_button.config(state='disabled')
             self.pause_button.config(state='normal')
@@ -212,6 +213,7 @@ class PomodoroApp:
             self.timer_id = None
         self.running = False
         self.is_break = False
+        self.remaining_seconds = 0
         self.start_button.config(text='Start', state='normal')
         self.pause_button.config(state='disabled')
         self.reset_button.config(state='disabled')
