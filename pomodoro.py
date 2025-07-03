@@ -4,6 +4,7 @@ import tkinter as tk
 from tkinter import messagebox
 from music_player import MusicPlayerApp
 from datetime import date
+from ui_utils import apply_simple_style
 
 DATA_FILE = 'pomodoro_data.json'
 
@@ -28,6 +29,9 @@ class CountdownWindow:
         self.remaining = 0
         self.timer_id = None
         self.running = False
+
+        # Apply the repository's simple theme
+        apply_simple_style(self.top)
 
     def apply_theme(self, bg: str, fg: str):
         self.top.config(bg=bg)
@@ -124,6 +128,9 @@ class PomodoroApp:
                                       command=self.open_music_player)
         self.music_button.grid(row=7, column=0, columnspan=3, pady=(5, 0))
 
+        # Apply a minimal style by default
+        apply_simple_style(master)
+
     def load_data(self):
         today = date.today().isoformat()
         if os.path.exists(DATA_FILE):
@@ -169,6 +176,7 @@ class PomodoroApp:
     def open_countdown(self):
         """Open the countdown timer window."""
         win = CountdownWindow(self.master)
+        apply_simple_style(win.top)
         if self.dark_mode_var.get():
             win.apply_theme('#2e2e2e', '#ffffff')
 
@@ -176,6 +184,7 @@ class PomodoroApp:
         """Open the simple music player window."""
         win = tk.Toplevel(self.master)
         player = MusicPlayerApp(win)
+        apply_simple_style(win)
         if self.dark_mode_var.get() and hasattr(player, 'apply_theme'):
             player.apply_theme('#2e2e2e', '#ffffff')
 
