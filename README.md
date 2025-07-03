@@ -47,6 +47,3 @@ python3 music_player.py
 Only basic playback commands (play/stop) are provided and the script falls back
 on commands like `afplay` or `aplay` depending on your platform.
 
-If supported, the player also shows the title and artist currently playing in
-other music software (via `osascript` on macOS or `playerctl` on Linux). Click
-"Refresh Info" to update this information.
