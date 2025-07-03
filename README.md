@@ -25,3 +25,28 @@ The first time a work session completes, the count for the current day increases
 ## Countdown Timer
 
 
+The repository also includes a countdown timer and a minimal music player.
+
+### Countdown Timer
+Run the simple timer or open it from the Pomodoro app with the "Open Countdown" button:
+
+```bash
+python3 countdown.py
+```
+
+### Music Player
+You can open the player from the Pomodoro window using the "Open Music Player"
+button, or run it standalone. The script lets you open a local audio file,
+view its basic ID3v1 metadata, and play it using the operating system's default
+utilities. Launch it with:
+
+```bash
+python3 music_player.py
+```
+
+Only basic playback commands (play/stop) are provided and the script falls back
+on commands like `afplay` or `aplay` depending on your platform.
+
+If supported, the player also shows the title and artist currently playing in
+other music software (via `osascript` on macOS or `playerctl` on Linux). Click
+"Refresh Info" to update this information.
