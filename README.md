@@ -46,3 +46,4 @@ python3 music_player.py
 
 Only basic playback commands (play/stop) are provided and the script falls back
 on commands like `afplay` or `aplay` depending on your platform.
+
