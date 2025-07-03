@@ -108,7 +108,8 @@ class MusicPlayerApp:
         tk.Label(master, text='Other Player:').grid(row=3, column=0, sticky='e')
         tk.Label(master, textvariable=self.external_var, anchor='w').grid(row=3, column=1, columnspan=2, sticky='w')
 
-        self.update_external()
+        self.update_id = self.update_external()
+        self.master.bind('<Destroy>', self._on_destroy)
 
 
     def apply_theme(self, bg: str, fg: str):
@@ -150,7 +151,15 @@ class MusicPlayerApp:
             self.external_var.set(f'{title} - {artist}' if artist else title)
         else:
             self.external_var.set('')
-        self.master.after(5000, self.update_external)
+        self.update_id = self.master.after(5000, self.update_external)
+        return self.update_id
+
+    def _on_destroy(self, event):
+        if event.widget is self.master and hasattr(self, 'update_id'):
+            try:
+                self.master.after_cancel(self.update_id)
+            except Exception:
+                pass
 
 
 
