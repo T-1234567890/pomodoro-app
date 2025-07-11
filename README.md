@@ -53,3 +53,6 @@ also displays the track currently playing in other music applications.
 ## 免责声明
 本仓库全部内容由 ChatGPT Xcode 制作。该代码可能含有错误，使用前请自行验证。
 
+
+## Disclaimer
+All content in this repository was produced by ChatGPT Xcode. The code may contain errors, so please verify it before use.
