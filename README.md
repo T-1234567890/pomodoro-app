@@ -49,3 +49,7 @@ on commands like `afplay` or `aplay` depending on your platform.
 If you have `playerctl` on Linux or AppleScript support on macOS, the player
 also displays the track currently playing in other music applications.
 
+
+## 免责声明
+本仓库全部内容由 ChatGPT Xcode 制作。该代码可能含有错误，使用前请自行验证。
+
