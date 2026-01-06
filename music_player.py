@@ -5,7 +5,15 @@ import subprocess
 import tkinter as tk
 from tkinter import filedialog, messagebox
 import shutil
-from ui_utils import apply_simple_style
+from ui_utils import (
+    apply_glass_style,
+    create_glass_card,
+    style_body,
+    style_glass_button,
+    style_heading,
+    style_subtext,
+    GLASS_LIGHT_THEME
+)
 
 
 def read_id3v1_tags(path):
@@ -87,6 +95,7 @@ class MusicPlayerApp:
     def __init__(self, master):
         self.master = master
         master.title('Simple Music Player')
+        self.theme = GLASS_LIGHT_THEME
 
         self.filepath = ''
         self.process = None
@@ -96,32 +105,56 @@ class MusicPlayerApp:
         self.external_var = tk.StringVar(value='')
 
 
-        tk.Button(master, text='Open', command=self.open_file).grid(row=0, column=0)
-        tk.Button(master, text='Play', command=self.play).grid(row=0, column=1)
-        tk.Button(master, text='Stop', command=self.stop).grid(row=0, column=2)
+        apply_glass_style(master, self.theme)
+        self.card = create_glass_card(master, self.theme)
+        self.card.grid(row=0, column=0, padx=18, pady=18)
+        self.card.grid_columnconfigure(1, weight=1)
 
-        tk.Label(master, text='Title:').grid(row=1, column=0, sticky='e')
-        tk.Label(master, textvariable=self.title_var, anchor='w').grid(row=1, column=1, columnspan=2, sticky='w')
+        self.header = tk.Label(self.card, text='Music Player')
+        self.subheader = tk.Label(self.card, text='Bring your own focus soundtrack.')
+        self.header.grid(row=0, column=0, columnspan=3, sticky='w', pady=(8, 0))
+        self.subheader.grid(row=1, column=0, columnspan=3, sticky='w', pady=(0, 10))
 
-        tk.Label(master, text='Artist:').grid(row=2, column=0, sticky='e')
-        tk.Label(master, textvariable=self.artist_var, anchor='w').grid(row=2, column=1, columnspan=2, sticky='w')
+        tk.Button(self.card, text='Open', command=self.open_file).grid(row=2, column=0, sticky='ew', padx=(0, 6))
+        tk.Button(self.card, text='Play', command=self.play).grid(row=2, column=1, sticky='ew', padx=6)
+        tk.Button(self.card, text='Stop', command=self.stop).grid(row=2, column=2, sticky='ew', padx=(6, 0))
 
-        tk.Label(master, text='Other Player:').grid(row=3, column=0, sticky='e')
-        tk.Label(master, textvariable=self.external_var, anchor='w').grid(row=3, column=1, columnspan=2, sticky='w')
+        tk.Label(self.card, text='Title').grid(row=3, column=0, sticky='w', pady=(10, 0))
+        tk.Label(self.card, textvariable=self.title_var, anchor='w').grid(row=3, column=1, columnspan=2, sticky='w', pady=(10, 0))
+
+        tk.Label(self.card, text='Artist').grid(row=4, column=0, sticky='w')
+        tk.Label(self.card, textvariable=self.artist_var, anchor='w').grid(row=4, column=1, columnspan=2, sticky='w')
+
+        tk.Label(self.card, text='Other Player').grid(row=5, column=0, sticky='w', pady=(6, 0))
+        tk.Label(self.card, textvariable=self.external_var, anchor='w').grid(row=5, column=1, columnspan=2, sticky='w', pady=(6, 0))
 
         self.update_id = self.update_external()
         self.master.bind('<Destroy>', self._on_destroy)
 
-        # Apply a minimal style for a consistent look
-        apply_simple_style(master)
+        self.apply_theme(self.theme)
 
 
-    def apply_theme(self, bg: str, fg: str):
+    def apply_theme(self, theme: dict = None):
         """Apply background/foreground colors to widgets."""
-        self.master.configure(bg=bg)
-        for child in self.master.winfo_children():
-            if isinstance(child, (tk.Button, tk.Label)):
-                child.configure(bg=bg, fg=fg)
+        self.theme = theme or GLASS_LIGHT_THEME
+        apply_glass_style(self.master, self.theme)
+        self.card.configure(bg=self.theme['card'], highlightbackground=self.theme['border'], highlightcolor=self.theme['border'])
+
+        for widget in [self.header, self.subheader]:
+            widget.configure(bg=self.theme['card'])
+        style_heading(self.header, self.theme)
+        style_subtext(self.subheader, self.theme)
+
+        buttons = [child for child in self.card.winfo_children() if isinstance(child, tk.Button)]
+        labels = [child for child in self.card.winfo_children() if isinstance(child, tk.Label)]
+
+        for btn in buttons:
+            style_glass_button(btn, self.theme, primary=btn['text'] in ('Play',))
+        for lbl in labels:
+            if lbl in (self.header, self.subheader):
+                continue
+            style_body(lbl, self.theme)
+        self.master.configure(bg=self.theme['window'])
 
     def open_file(self):
         path = filedialog.askopenfilename(title='Open Music File',
