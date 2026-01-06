@@ -160,7 +160,8 @@ class PomodoroApp:
         widgets = [
             self.work_label, self.break_label, self.time_label,
             self.start_button, self.pause_button, self.reset_button,
-            self.count_label, self.dark_mode_check, self.countdown_button
+            self.count_label, self.dark_mode_check, self.countdown_button,
+            self.music_button
         ]
         for w in widgets:
             w.config(bg=bg, fg=fg)
@@ -226,7 +227,12 @@ class PomodoroApp:
         self.start_button.config(text='Start', state='normal')
         self.pause_button.config(state='disabled')
         self.reset_button.config(state='disabled')
-        self.time_label.config(text=self.format_time(int(float(self.work_var.get()) * 60)))
+        try:
+            work_seconds = int(float(self.work_var.get()) * 60)
+        except ValueError:
+            work_seconds = self.work_seconds
+            messagebox.showwarning('Invalid input', 'Work minutes must be a number. Using the last valid value.')
+        self.time_label.config(text=self.format_time(work_seconds))
 
     def countdown(self):
         self.time_label.config(text=self.format_time(self.remaining_seconds))
