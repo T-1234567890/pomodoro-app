@@ -8,7 +8,9 @@ from datetime import date
 from ui_utils import (
     apply_glass_style,
     create_glass_card,
+    create_glass_tile,
     style_body,
+    style_caption,
     style_entry,
     style_glass_button,
     refresh_glass_button,
@@ -16,7 +18,9 @@ from ui_utils import (
     style_stat_label,
     style_subtext,
     style_switch,
+    style_timer_display,
     style_dropdown,
+    style_card_frame,
     GLASS_LIGHT_THEME,
     GLASS_DARK_THEME
 )
@@ -41,7 +45,7 @@ class CountdownWindow:
 
         apply_glass_style(self.top, self.theme)
         self.card = create_glass_card(self.top, self.theme)
-        self.card.grid(row=0, column=0, padx=18, pady=18)
+        self.card.grid(row=0, column=0, padx=18, pady=18, sticky='nsew')
         self.card.grid_columnconfigure(1, weight=1)
 
         self.time_var = tk.StringVar(value='5')
@@ -55,8 +59,12 @@ class CountdownWindow:
         self.minutes_label.grid(row=2, column=0, sticky='w', pady=(0, 6))
         self.minutes_entry.grid(row=2, column=1, sticky='e', pady=(0, 6))
 
-        self.time_label = tk.Label(self.card, text='00:00', font=('SF Pro Display', 28, 'bold'))
-        self.time_label.grid(row=3, column=0, columnspan=2, pady=10)
+        self.timer_frame = create_glass_tile(self.card, self.theme)
+        self.timer_frame.grid(row=3, column=0, columnspan=2, pady=(4, 12), sticky='ew')
+        self.timer_frame.grid_columnconfigure(0, weight=1)
+
+        self.time_label = tk.Label(self.timer_frame, text='00:00')
+        self.time_label.grid(row=0, column=0, padx=8, pady=6)
 
         self.start_btn = tk.Button(self.card, text='Start', command=self.start)
         self.reset_btn = tk.Button(self.card, text='Reset', command=self.reset)
@@ -109,14 +117,22 @@ class CountdownWindow:
     def apply_theme(self, theme):
         self.theme = theme
         apply_glass_style(self.top, theme)
+        style_card_frame(self.card, theme)
+        style_card_frame(self.timer_frame, theme, variant='alt')
+        base_bg = theme['card']
+        tile_bg = theme.get('card_alt', theme['card'])
+
         for widget in [
-            self.card, self.time_label, self.minutes_label,
+            self.card, self.minutes_label,
             self.minutes_entry, self.title_label, self.subtitle_label
         ]:
-            widget.configure(bg=theme['card'], fg=theme['text'])
+            widget.configure(bg=base_bg, fg=theme['text'])
+        for widget in (self.timer_frame, self.time_label):
+            widget.configure(bg=tile_bg, fg=theme['text'])
         style_heading(self.title_label, theme)
         style_subtext(self.subtitle_label, theme)
         style_body(self.minutes_label, theme)
+        style_timer_display(self.time_label, theme)
         style_entry(self.minutes_entry, theme)
         for btn in (self.start_btn, self.reset_btn):
             style_glass_button(btn, theme, primary=(btn is self.start_btn))
@@ -156,18 +172,21 @@ class PomodoroApp:
         for col in range(3):
             self.card.grid_columnconfigure(col, weight=1)
 
-        self.title_label = tk.Label(self.card, text='Pomodoro')
-        self.subtitle_label = tk.Label(self.card, text='Stay in the flow with focused sprints.')
-        self.title_label.grid(row=0, column=0, columnspan=3, sticky='w')
-        self.subtitle_label.grid(row=1, column=0, columnspan=3, sticky='w')
+        self.header_frame = tk.Frame(self.card, bg=self.current_theme['card'])
+        self.header_frame.grid(row=0, column=0, columnspan=3, sticky='ew', pady=(0, 6))
+        self.header_frame.grid_columnconfigure(0, weight=1)
+        self.title_label = tk.Label(self.header_frame, text='Pomodoro')
+        self.subtitle_label = tk.Label(self.header_frame, text='Stay in the flow with focused sprints.')
+        self.title_label.grid(row=0, column=0, sticky='w')
+        self.subtitle_label.grid(row=1, column=0, sticky='w', pady=(2, 0))
 
         # --- Presets ---
         preset_names = list(SESSION_PRESETS.keys())
         self.preset_var = tk.StringVar(value=preset_names[0])
         self.preset_label = tk.Label(self.card, text='Session preset')
         self.preset_menu = tk.OptionMenu(self.card, self.preset_var, *preset_names, command=self.apply_preset)
-        self.preset_label.grid(row=2, column=0, sticky='w')
-        self.preset_menu.grid(row=2, column=1, columnspan=2, sticky='ew')
+        self.preset_label.grid(row=1, column=0, sticky='w', pady=(2, 6))
+        self.preset_menu.grid(row=1, column=1, columnspan=2, sticky='ew', pady=(2, 6))
 
         # --- Inputs ---
         self.work_var = tk.StringVar(value='25')
@@ -185,43 +204,44 @@ class PomodoroApp:
         self.long_break_entry = tk.Entry(self.card, textvariable=self.long_break_var)
         self.long_break_interval_entry = tk.Entry(self.card, textvariable=self.long_break_interval_var)
 
-        self.work_label.grid(row=3, column=0, sticky='w')
-        self.work_entry.grid(row=3, column=1, sticky='ew')
-        self.break_label.grid(row=4, column=0, sticky='w')
-        self.break_entry.grid(row=4, column=1, sticky='ew')
-        self.long_break_label.grid(row=5, column=0, sticky='w')
-        self.long_break_entry.grid(row=5, column=1, sticky='ew')
-        self.interval_label.grid(row=6, column=0, sticky='w')
-        self.long_break_interval_entry.grid(row=6, column=1, sticky='ew')
+        self.work_label.grid(row=2, column=0, sticky='w', pady=(0, 2))
+        self.work_entry.grid(row=2, column=1, sticky='ew', pady=(0, 2))
+        self.break_label.grid(row=3, column=0, sticky='w', pady=(0, 2))
+        self.break_entry.grid(row=3, column=1, sticky='ew', pady=(0, 2))
+        self.long_break_label.grid(row=4, column=0, sticky='w', pady=(0, 2))
+        self.long_break_entry.grid(row=4, column=1, sticky='ew', pady=(0, 2))
+        self.interval_label.grid(row=5, column=0, sticky='w', pady=(0, 2))
+        self.long_break_interval_entry.grid(row=5, column=1, sticky='ew', pady=(0, 4))
 
         # --- Validation label ---
         self.validation_var = tk.StringVar(value='')
         self.validation_label = tk.Label(self.card, textvariable=self.validation_var)
-        self.validation_label.grid(row=4, column=0, columnspan=3, sticky='w')
+        self.validation_label.grid(row=6, column=0, columnspan=3, sticky='w', pady=(0, 4))
 
         # --- Timer Display ---
-        self.time_label = tk.Label(self.card, text=self.format_time(self.work_seconds),
-                                   font=('SF Pro Display', 32, 'bold'))
-        self.time_label.grid(row=7, column=0, columnspan=3)
+        self.timer_tile = create_glass_tile(self.card, self.current_theme)
+        self.timer_tile.grid(row=7, column=0, columnspan=3, sticky='ew', pady=(4, 10))
+        self.timer_tile.grid_columnconfigure(0, weight=1)
+        self.time_label = tk.Label(self.timer_tile, text=self.format_time(self.work_seconds))
+        self.time_label.grid(row=0, column=0, pady=(6, 2), padx=6)
+        self.cycle_status_label = tk.Label(self.timer_tile, text='')
+        self.cycle_status_label.grid(row=1, column=0, pady=(0, 6))
 
         # --- Action Buttons ---
         self.start_button = tk.Button(self.card, text='Start', command=self.start)
         self.pause_button = tk.Button(self.card, text='Pause', state='disabled', command=self.pause)
         self.reset_button = tk.Button(self.card, text='Reset', state='disabled', command=self.reset)
 
-        self.start_button.grid(row=8, column=0, sticky='ew')
-        self.pause_button.grid(row=8, column=1, sticky='ew')
-        self.reset_button.grid(row=8, column=2, sticky='ew')
+        self.start_button.grid(row=8, column=0, sticky='ew', pady=(0, 4))
+        self.pause_button.grid(row=8, column=1, sticky='ew', pady=(0, 4))
+        self.reset_button.grid(row=8, column=2, sticky='ew', pady=(0, 4))
 
         # --- Progress / Status ---
         self.count_label = tk.Label(self.card, text=f"Today's pomodoros: {self.data['count']}")
-        self.count_label.grid(row=9, column=0, columnspan=3)
-
-        self.cycle_status_label = tk.Label(self.card, text='')
-        self.cycle_status_label.grid(row=10, column=0, columnspan=3)
+        self.count_label.grid(row=9, column=0, columnspan=3, sticky='w', pady=(4, 2))
 
         # --- Toggles ---
-        self.toggles_frame = tk.Frame(self.card, bg=self.current_theme['card'])
+        self.toggles_frame = create_glass_tile(self.card, self.current_theme)
         self.dark_mode_var = tk.BooleanVar()
         self.sound_var = tk.BooleanVar(value=True)
 
@@ -234,17 +254,17 @@ class PomodoroApp:
 
         self.dark_mode_check.grid(row=0, column=0, padx=(0, 12))
         self.sound_check.grid(row=0, column=1)
-        self.toggles_frame.grid(row=11, column=0, columnspan=3, sticky='w')
+        self.toggles_frame.grid(row=10, column=0, columnspan=3, sticky='ew', pady=(4, 6))
 
         # --- Summary Panel ---
-        self.summary_frame = tk.Frame(self.card, bg=self.current_theme['card'])
+        self.summary_frame = create_glass_tile(self.card, self.current_theme)
         self.summary_title = tk.Label(self.summary_frame, text='Productivity summary')
         self.focus_time_label = tk.Label(self.summary_frame, text='Focus time')
         self.focus_time_value = tk.Label(self.summary_frame, text='0m')
         self.breaks_label = tk.Label(self.summary_frame, text='Breaks taken')
         self.breaks_value = tk.Label(self.summary_frame, text='0 short / 0 long')
 
-        self.summary_frame.grid(row=12, column=0, columnspan=3, sticky='ew')
+        self.summary_frame.grid(row=11, column=0, columnspan=3, sticky='ew', pady=(2, 8))
         self.summary_title.grid(row=0, column=0, columnspan=2, sticky='w')
         self.focus_time_label.grid(row=1, column=0, sticky='w')
         self.focus_time_value.grid(row=1, column=1, sticky='e')
@@ -255,8 +275,8 @@ class PomodoroApp:
         self.countdown_button = tk.Button(self.card, text='Open Countdown', command=self.open_countdown)
         self.music_button = tk.Button(self.card, text='Open Music Player', command=self.open_music_player)
 
-        self.countdown_button.grid(row=13, column=0, columnspan=3, sticky='ew')
-        self.music_button.grid(row=14, column=0, columnspan=3, sticky='ew')
+        self.countdown_button.grid(row=12, column=0, columnspan=3, sticky='ew')
+        self.music_button.grid(row=13, column=0, columnspan=3, sticky='ew')
 
         # Live Validation
         self.work_var.trace_add('write', lambda *_: self._on_input_change())
@@ -312,31 +332,45 @@ class PomodoroApp:
 
         style_heading(self.title_label, theme)
         style_subtext(self.subtitle_label, theme)
+        style_card_frame(self.card, theme)
+        style_card_frame(self.timer_tile, theme, variant='alt')
+        style_card_frame(self.summary_frame, theme, variant='alt')
+        style_card_frame(self.toggles_frame, theme, variant='alt')
+        self.header_frame.configure(bg=theme['card'])
 
         for lbl in [self.work_label, self.break_label,
                     self.long_break_label, self.interval_label,
-                    self.preset_label]:
+                    self.preset_label, self.cycle_status_label]:
             style_body(lbl, theme)
 
         for lbl in [self.count_label, self.cycle_status_label,
                     self.summary_title, self.focus_time_label,
                     self.focus_time_value, self.breaks_label,
-                    self.breaks_value, self.time_label, self.validation_label]:
+                    self.breaks_value, self.validation_label]:
             style_body(lbl, theme)
 
         style_heading(self.summary_title, theme)
         style_stat_label(self.focus_time_value, theme)
         style_stat_label(self.breaks_value, theme)
+        style_timer_display(self.time_label, theme)
+        style_caption(self.validation_label, theme)
+        style_subtext(self.cycle_status_label, theme)
         self.card.configure(bg=theme['card'], highlightbackground=theme['border'], highlightcolor=theme['border'])
-        self.summary_frame.configure(bg=theme['card'])
-        self.toggles_frame.configure(bg=theme['card'])
-        self.focus_time_label.configure(bg=theme['card'])
-        self.breaks_label.configure(bg=theme['card'])
+        tile_bg = theme.get('card_alt', theme['card'])
+        self.summary_frame.configure(bg=tile_bg)
+        self.toggles_frame.configure(bg=tile_bg)
+        self.timer_tile.configure(bg=tile_bg)
+        self.header_frame.configure(bg=theme['card'])
+        self.focus_time_label.configure(bg=tile_bg)
+        self.breaks_label.configure(bg=tile_bg)
 
         for lbl in (self.title_label, self.subtitle_label, self.count_label, self.cycle_status_label, self.summary_title,
                     self.focus_time_label, self.focus_time_value, self.breaks_label, self.breaks_value, self.time_label,
                     self.validation_label):
-            lbl.configure(bg=theme['card'])
+            lbl.configure(bg=tile_bg if lbl in (self.time_label, self.cycle_status_label, self.summary_title,
+                                                self.focus_time_label, self.focus_time_value, self.breaks_label,
+                                                self.breaks_value)
+                          else theme['card'])
 
         style_dropdown(self.preset_menu, theme)
 
@@ -356,6 +390,8 @@ class PomodoroApp:
 
         style_switch(self.dark_mode_check, theme)
         style_switch(self.sound_check, theme)
+        for check in (self.dark_mode_check, self.sound_check):
+            check.configure(bg=tile_bg, activebackground=tile_bg, selectcolor=tile_bg)
 
         self.master.configure(bg=theme['window'])
         self._refresh_button_states()
