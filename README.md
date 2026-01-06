@@ -5,9 +5,13 @@ This repository contains a simple Pomodoro desktop application written in Python
 ## Features
 
 - Customizable work and break durations
+- Long-break interval support (configure duration and cadence)
+- Session presets for quickly switching routines
 - Start, pause/resume, and reset controls
 - Popup notification when a session finishes
+- Optional chime when sessions complete
 - Tracks how many Pomodoros you have completed today
+- Daily productivity summary (focus time, break counts)
 - Displays remaining time
 - Works offline on macOS (Python and tkinter are usually included)
 - Optional dark mode for late-night sessions
