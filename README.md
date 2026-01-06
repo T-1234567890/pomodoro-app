@@ -4,8 +4,16 @@ This repository contains a simple Pomodoro desktop application written in Python
 
 ## Version status
 
-- **Current version:** 0.3.0 Beta — latest update with the current feature set.
-- **Target version (upcoming):** 0.4.0 (UI Visual Update).
+- **Current version:** 0.4.1 Beta — Liquid Glass UI refresh and dark mode polish.
+- **Update history (archived):**
+  - 0.3.0 Beta — prior feature-complete release.
+
+## Changelog (short)
+
+- macOS 26-inspired liquid glass visuals with frosted cards and floating timer tile.
+- Clearer hierarchy between header, controls, timer, and summary sections.
+- Dark Mode contrast tuned for readability; buttons and disabled states remain legible.
+- Countdown and music player pick up the refreshed theme tokens and borders.
 
 ## Features
 
