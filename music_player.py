@@ -48,7 +48,7 @@ def play_audio(path):
 
 
 def get_external_playback():
-    """Return title and artist from another music player if available."""
+    """Return (title, artist, status) from another music player if available."""
     if shutil.which('playerctl'):
         try:
             title = subprocess.check_output(
@@ -57,8 +57,11 @@ def get_external_playback():
             artist = subprocess.check_output(
                 ['playerctl', 'metadata', 'xesam:artist'], text=True
             ).strip()
-            if title:
-                return title, artist
+            status = subprocess.check_output(
+                ['playerctl', 'status'], text=True
+            ).strip().lower()
+            if title or status:
+                return title, artist, status
         except Exception:
             pass
     if sys.platform == 'darwin':
@@ -67,9 +70,12 @@ def get_external_playback():
                 'tell application "' + app + '"\n'
                 'if it is running then\n'
                 'try\n'
+                'set playerState to the player state\n'
+                'if playerState is playing or playerState is paused then\n'
                 'set t to the name of the current track\n'
                 'set a to the artist of the current track\n'
-                'return t & "|" & a\n'
+                'return t & "|" & a & "|" & playerState\n'
+                'end if\n'
                 'end try\n'
                 'end if\n'
                 'end tell'
@@ -78,13 +84,13 @@ def get_external_playback():
                 out = subprocess.check_output(
                     ['osascript', '-e', script], text=True
                 ).strip()
-                if '|' in out:
-                    t, a = out.split('|', 1)
+                if out.count('|') >= 2:
+                    t, a, s = out.split('|', 2)
                     if t:
-                        return t, a
+                        return t, a, s.lower()
             except Exception:
                 pass
-    return '', ''
+    return '', '', ''
 
 
 
@@ -102,7 +108,8 @@ class MusicPlayerApp:
 
         self.title_var = tk.StringVar()
         self.artist_var = tk.StringVar()
-        self.external_var = tk.StringVar(value='')
+        self.external_var = tk.StringVar(value='No external player detected')
+        self.external_status_var = tk.StringVar(value='')
 
 
         apply_glass_style(master, self.theme)
@@ -127,6 +134,17 @@ class MusicPlayerApp:
 
         tk.Label(self.card, text='Other Player').grid(row=5, column=0, sticky='w', pady=(6, 0))
         tk.Label(self.card, textvariable=self.external_var, anchor='w').grid(row=5, column=1, columnspan=2, sticky='w', pady=(6, 0))
+        self.external_status_label = tk.Label(self.card, textvariable=self.external_status_var, anchor='w')
+        self.external_status_label.grid(row=6, column=1, sticky='w')
+
+        self.external_controls = tk.Frame(self.card, bg=self.theme['card'])
+        self.external_controls.grid(row=6, column=0, sticky='w', pady=(6, 0))
+        self.btn_ext_prev = tk.Button(self.external_controls, text='Prev', command=self.external_previous)
+        self.btn_ext_playpause = tk.Button(self.external_controls, text='Play/Pause', command=self.external_play_pause)
+        self.btn_ext_next = tk.Button(self.external_controls, text='Next', command=self.external_next)
+
+        for idx, btn in enumerate((self.btn_ext_prev, self.btn_ext_playpause, self.btn_ext_next)):
+            btn.grid(row=0, column=idx, padx=(0 if idx == 0 else 6, 0))
 
         self.update_id = self.update_external()
         self.master.bind('<Destroy>', self._on_destroy)
@@ -147,6 +165,8 @@ class MusicPlayerApp:
 
         buttons = [child for child in self.card.winfo_children() if isinstance(child, tk.Button)]
         labels = [child for child in self.card.winfo_children() if isinstance(child, tk.Label)]
+        buttons.extend([self.btn_ext_prev, self.btn_ext_playpause, self.btn_ext_next])
+        labels.append(self.external_status_label)
 
         for btn in buttons:
             style_glass_button(btn, self.theme, primary=btn['text'] in ('Play',))
@@ -183,13 +203,63 @@ class MusicPlayerApp:
 
     def update_external(self):
         """Periodically update information from other music players."""
-        title, artist = get_external_playback()
-        if title:
-            self.external_var.set(f'{title} - {artist}' if artist else title)
+        title, artist, status = get_external_playback()
+        if title or status:
+            self.external_var.set(f'{title} - {artist}' if artist else (title or 'Unknown track'))
+            self.external_status_var.set(status.title() if status else '')
+            self._set_external_controls_state(True)
         else:
-            self.external_var.set('')
+            self.external_var.set('No external player detected')
+            self.external_status_var.set('')
+            self._set_external_controls_state(False)
         self.update_id = self.master.after(5000, self.update_external)
         return self.update_id
+
+    def _set_external_controls_state(self, enabled: bool):
+        state = tk.NORMAL if enabled else tk.DISABLED
+        for btn in (self.btn_ext_prev, self.btn_ext_playpause, self.btn_ext_next):
+            btn.configure(state=state)
+
+    def external_play_pause(self):
+        self._send_external_command('play-pause')
+
+    def external_next(self):
+        self._send_external_command('next')
+
+    def external_previous(self):
+        self._send_external_command('previous')
+
+    def _send_external_command(self, command: str):
+        """Send a transport command to an external music player."""
+        handled = False
+        if shutil.which('playerctl'):
+            try:
+                subprocess.check_call(['playerctl', command])
+                handled = True
+            except Exception:
+                pass
+        if not handled and sys.platform == 'darwin':
+            for app, action in (
+                ('Music', {'play-pause': 'playpause', 'next': 'next track', 'previous': 'previous track'}),
+                ('Spotify', {'play-pause': 'playpause', 'next': 'next track', 'previous': 'previous track'})
+            ):
+                if command not in action:
+                    continue
+                script = (
+                    f'tell application "{app}"\n'
+                    'if it is running then\n'
+                    f'try\n{action[command]}\nreturn "ok"\nend try\nend if\n'
+                    'end tell'
+                )
+                try:
+                    out = subprocess.check_output(['osascript', '-e', script], text=True).strip()
+                    if out == 'ok':
+                        handled = True
+                        break
+                except Exception:
+                    continue
+        if not handled:
+            messagebox.showinfo('External control', 'No controllable external player found.')
 
     def _on_destroy(self, event):
         if event.widget is self.master and hasattr(self, 'update_id'):
