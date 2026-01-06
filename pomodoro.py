@@ -10,6 +10,7 @@ from ui_utils import (
     style_body,
     style_entry,
     style_glass_button,
+    refresh_glass_button,
     style_heading,
     style_stat_label,
     style_subtext,
@@ -129,6 +130,8 @@ class PomodoroApp:
         self.timer_id = None
         self.data = self.load_data()
         self.child_windows = []
+        self.pulse_job = None
+        self.pulse_up = True
 
         # Base window styling
         apply_glass_style(master, self.current_theme)
@@ -236,11 +239,15 @@ class PomodoroApp:
             style_entry(entry, theme)
 
         # Buttons
-        style_glass_button(self.start_button, theme, primary=True)
-        style_glass_button(self.pause_button, theme, primary=False)
-        style_glass_button(self.reset_button, theme, primary=False)
-        style_glass_button(self.countdown_button, theme, primary=False)
-        style_glass_button(self.music_button, theme, primary=False)
+        for btn, primary in [
+            (self.start_button, True),
+            (self.pause_button, False),
+            (self.reset_button, False),
+            (self.countdown_button, False),
+            (self.music_button, False),
+        ]:
+            style_glass_button(btn, theme, primary=primary)
+            refresh_glass_button(btn, theme)
 
         # Window background outside card
         self.master.configure(bg=theme['window'])
@@ -251,6 +258,7 @@ class PomodoroApp:
         for child in list(self.child_windows):
             if isinstance(child, CountdownWindow):
                 child.apply_theme(theme)
+        self._refresh_button_states()
 
     def open_countdown(self):
         """Open the countdown timer window."""
@@ -271,6 +279,12 @@ class PomodoroApp:
         except ValueError:
             pass
 
+    def _refresh_button_states(self):
+        """Re-apply glass visuals after state changes to keep dark mode consistent."""
+        for btn in [self.start_button, self.pause_button, self.reset_button,
+                    self.countdown_button, self.music_button]:
+            refresh_glass_button(btn, self.current_theme)
+
     def start(self):
         if not self.running:
             # Only calculate the durations when starting fresh
@@ -288,6 +302,8 @@ class PomodoroApp:
             self.start_button.config(state='disabled')
             self.pause_button.config(state='normal')
             self.reset_button.config(state='normal')
+            self._refresh_button_states()
+            self._start_pulse()
             self.countdown()
 
     def pause(self):
@@ -298,6 +314,8 @@ class PomodoroApp:
                 self.timer_id = None
             self.start_button.config(text='Resume', state='normal')
             self.pause_button.config(state='disabled')
+            self._refresh_button_states()
+            self._stop_pulse()
 
     def reset(self):
         if self.timer_id:
@@ -315,6 +333,8 @@ class PomodoroApp:
             work_seconds = self.work_seconds
             messagebox.showwarning('Invalid input', 'Work minutes must be a number. Using the last valid value.')
         self.time_label.config(text=self.format_time(work_seconds))
+        self._stop_pulse()
+        self._refresh_button_states()
 
     def countdown(self):
         self.time_label.config(text=self.format_time(self.remaining_seconds))
@@ -334,6 +354,8 @@ class PomodoroApp:
                 self.start_button.config(text='Start Break', state='disabled')
                 self.pause_button.config(state='normal')
                 self.running = True
+                self._refresh_button_states()
+                self._start_pulse()
                 self.countdown()
             else:
                 messagebox.showinfo('Break Over', 'Break over! Ready for another pomodoro.')
@@ -342,6 +364,31 @@ class PomodoroApp:
                 self.pause_button.config(state='disabled')
                 self.reset_button.config(state='disabled')
                 self.time_label.config(text=self.format_time(int(float(self.work_var.get()) * 60)))
+                self._stop_pulse()
+                self._refresh_button_states()
+
+    def _start_pulse(self):
+        """Create a subtle breathing animation on the timer label."""
+        self._stop_pulse()
+        self.pulse_up = True
+        self._pulse()
+
+    def _pulse(self):
+        if not self.running:
+            return
+        theme = self.current_theme
+        fg = theme['text']
+        accent = theme['glow']
+        current_color = accent if self.pulse_up else fg
+        self.time_label.configure(fg=current_color)
+        self.pulse_up = not self.pulse_up
+        self.pulse_job = self.master.after(700, self._pulse)
+
+    def _stop_pulse(self):
+        if self.pulse_job:
+            self.master.after_cancel(self.pulse_job)
+            self.pulse_job = None
+        self.time_label.configure(fg=self.current_theme['text'])
 
 if __name__ == '__main__':
     root = tk.Tk()

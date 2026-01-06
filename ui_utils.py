@@ -13,7 +13,11 @@ GLASS_LIGHT_THEME = {
     'accent': '#4f7cff',
     'accent_active': '#2f5ee8',
     'entry_bg': '#eef2fb',
-    'border': '#d9e2f3'
+    'border': '#d9e2f3',
+    'disabled_bg': '#e0e6f5',
+    'disabled_text': '#9caac7',
+    'shadow': '#c9d4ef',
+    'glow': '#8fa8ff'
 }
 
 GLASS_DARK_THEME = {
@@ -24,7 +28,11 @@ GLASS_DARK_THEME = {
     'accent': '#6c8dff',
     'accent_active': '#4f74f5',
     'entry_bg': '#12151c',
-    'border': '#2a3040'
+    'border': '#2a3040',
+    'disabled_bg': '#1f2533',
+    'disabled_text': '#6e7990',
+    'shadow': '#0c0f16',
+    'glow': '#7ea3ff'
 }
 
 
@@ -138,14 +146,36 @@ def style_switch(check: tk.Checkbutton, theme: dict = None):
 
 def style_glass_button(button: tk.Button, theme: dict = None, primary: bool = True):
     theme = theme or GLASS_LIGHT_THEME
-    bg = theme['accent'] if primary else theme['entry_bg']
-    fg = '#ffffff' if primary else theme['text']
+    button._glass_theme = theme
+    button._glass_primary = primary
+    _apply_glass_button_style(button)
+
+
+def refresh_glass_button(button: tk.Button, theme: dict = None):
+    """Re-apply glass button visuals, useful after state changes."""
+    if theme:
+        button._glass_theme = theme
+    _apply_glass_button_style(button)
+
+
+def _apply_glass_button_style(button: tk.Button):
+    theme = getattr(button, '_glass_theme', GLASS_LIGHT_THEME)
+    primary = getattr(button, '_glass_primary', True)
+    state = str(button.cget('state'))
+    base_bg = theme['accent'] if primary else theme['entry_bg']
+    base_fg = '#ffffff' if primary else theme['text']
     active_bg = theme['accent_active'] if primary else theme['border']
+    if state == 'disabled':
+        bg = theme['disabled_bg']
+        fg = theme['disabled_text']
+    else:
+        bg = base_bg
+        fg = base_fg
     button.configure(
         bg=bg,
         fg=fg,
         activebackground=active_bg,
-        activeforeground=fg,
+        activeforeground=base_fg,
         relief='flat',
         bd=0,
         padx=12,
@@ -153,5 +183,5 @@ def style_glass_button(button: tk.Button, theme: dict = None, primary: bool = Tr
         font=('SF Pro Display', 11, 'bold'),
         cursor='hand2',
         highlightthickness=0,
-        disabledforeground=theme['muted_text']
+        disabledforeground=theme['disabled_text']
     )
