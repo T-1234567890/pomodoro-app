@@ -4,7 +4,19 @@ import tkinter as tk
 from tkinter import messagebox
 from music_player import MusicPlayerApp
 from datetime import date
-from ui_utils import apply_simple_style
+from ui_utils import (
+    apply_glass_style,
+    create_glass_card,
+    style_body,
+    style_entry,
+    style_glass_button,
+    style_heading,
+    style_stat_label,
+    style_subtext,
+    style_switch,
+    GLASS_LIGHT_THEME,
+    GLASS_DARK_THEME
+)
 
 DATA_FILE = 'pomodoro_data.json'
 
@@ -12,36 +24,42 @@ DATA_FILE = 'pomodoro_data.json'
 class CountdownWindow:
     """Simple countdown timer window displayed as a separate page."""
 
-    def __init__(self, master):
+    def __init__(self, master, theme=None, on_close=None):
+        self.theme = theme or GLASS_LIGHT_THEME
         self.top = tk.Toplevel(master)
         self.top.title('Countdown Timer')
+        self.on_close = on_close
+
+        apply_glass_style(self.top, self.theme)
+        self.card = create_glass_card(self.top, self.theme)
+        self.card.grid(row=0, column=0, padx=18, pady=18)
+        self.card.grid_columnconfigure(1, weight=1)
 
         self.time_var = tk.StringVar(value='5')
-        tk.Label(self.top, text='Minutes:').grid(row=0, column=0)
-        tk.Entry(self.top, textvariable=self.time_var, width=5).grid(row=0, column=1)
+        self.title_label = tk.Label(self.card, text='Countdown Timer')
+        self.subtitle_label = tk.Label(self.card, text='Quick timer for focused bursts.')
+        self.title_label.grid(row=0, column=0, columnspan=2, sticky='w', pady=(8, 0))
+        self.subtitle_label.grid(row=1, column=0, columnspan=2, sticky='w', pady=(0, 12))
 
-        self.time_label = tk.Label(self.top, text='00:00', font=('Helvetica', 24))
-        self.time_label.grid(row=1, column=0, columnspan=2, pady=10)
+        self.minutes_label = tk.Label(self.card, text='Minutes')
+        self.minutes_entry = tk.Entry(self.card, textvariable=self.time_var, width=8)
+        self.minutes_label.grid(row=2, column=0, sticky='w', pady=(0, 6))
+        self.minutes_entry.grid(row=2, column=1, sticky='e', pady=(0, 6))
 
-        tk.Button(self.top, text='Start', command=self.start).grid(row=2, column=0)
-        tk.Button(self.top, text='Reset', command=self.reset).grid(row=2, column=1)
+        self.time_label = tk.Label(self.card, text='00:00', font=('SF Pro Display', 28, 'bold'))
+        self.time_label.grid(row=3, column=0, columnspan=2, pady=10)
+
+        self.start_btn = tk.Button(self.card, text='Start', command=self.start)
+        self.reset_btn = tk.Button(self.card, text='Reset', command=self.reset)
+        self.start_btn.grid(row=4, column=0, padx=(0, 6), pady=(6, 0), sticky='ew')
+        self.reset_btn.grid(row=4, column=1, padx=(6, 0), pady=(6, 0), sticky='ew')
 
         self.remaining = 0
         self.timer_id = None
         self.running = False
 
-        # Apply the repository's simple theme
-        apply_simple_style(self.top)
-
-    def apply_theme(self, bg: str, fg: str):
-        self.top.config(bg=bg)
-        for widget in [self.time_label]:
-            widget.config(bg=bg, fg=fg)
-        for child in self.top.winfo_children():
-            if isinstance(child, tk.Label) or isinstance(child, tk.Button) or isinstance(child, tk.Entry):
-                child.config(bg=bg, fg=fg)
-            if isinstance(child, tk.Entry):
-                child.config(insertbackground=fg)
+        self.apply_theme(self.theme)
+        self.top.protocol('WM_DELETE_WINDOW', self.close)
 
     def format_time(self, secs: int) -> str:
         m, s = divmod(secs, 60)
@@ -74,11 +92,35 @@ class CountdownWindow:
             self.timer_id = None
             messagebox.showinfo('Done', "Time's up!")
 
+    def close(self):
+        """Close the countdown window and notify the parent."""
+        if self.timer_id:
+            self.top.after_cancel(self.timer_id)
+            self.timer_id = None
+        if callable(self.on_close):
+            self.on_close(self)
+        self.top.destroy()
+
+    def apply_theme(self, theme: dict):
+        self.theme = theme
+        apply_glass_style(self.top, theme)
+        for widget in [self.card, self.time_label, self.minutes_label, self.minutes_entry,
+                       self.title_label, self.subtitle_label]:
+            widget.configure(bg=theme['card'], fg=theme['text'])
+        style_heading(self.title_label, theme)
+        style_subtext(self.subtitle_label, theme)
+        style_body(self.minutes_label, theme)
+        style_entry(self.minutes_entry, theme)
+        self.time_label.configure(font=('SF Pro Display', 28, 'bold'), fg=theme['text'])
+        for btn in [self.start_btn, self.reset_btn]:
+            style_glass_button(btn, theme, primary=btn is self.start_btn)
+
 
 class PomodoroApp:
     def __init__(self, master):
         self.master = master
         self.master.title('Pomodoro Timer')
+        self.current_theme = GLASS_LIGHT_THEME
         self.running = False
         self.work_seconds = 25 * 60
         self.break_seconds = 5 * 60
@@ -86,50 +128,68 @@ class PomodoroApp:
         self.is_break = False
         self.timer_id = None
         self.data = self.load_data()
-        self.default_bg = master.cget('bg')
-        self.default_fg = 'black'
+        self.child_windows = []
 
-        # UI Setup
-        self.work_label = tk.Label(master, text='Work minutes:')
-        self.break_label = tk.Label(master, text='Break minutes:')
-        self.work_label.grid(row=0, column=0)
-        self.break_label.grid(row=1, column=0)
+        # Base window styling
+        apply_glass_style(master, self.current_theme)
+
+        # Layout structure
+        self.card = create_glass_card(master, self.current_theme)
+        self.card.grid(row=0, column=0, padx=20, pady=20, sticky='nsew')
+        for col in range(3):
+            self.card.grid_columnconfigure(col, weight=1)
+
+        # Header
+        self.title_label = tk.Label(self.card, text='Pomodoro')
+        self.subtitle_label = tk.Label(self.card, text='Stay in the flow with focused sprints.')
+        self.title_label.grid(row=0, column=0, columnspan=3, sticky='w', pady=(8, 0))
+        self.subtitle_label.grid(row=1, column=0, columnspan=3, sticky='w', pady=(0, 12))
+
+        # Inputs
+        self.work_label = tk.Label(self.card, text='Work minutes')
+        self.break_label = tk.Label(self.card, text='Break minutes')
         self.work_var = tk.StringVar(value='25')
         self.break_var = tk.StringVar(value='5')
-        self.work_entry = tk.Entry(master, textvariable=self.work_var, width=5)
-        self.break_entry = tk.Entry(master, textvariable=self.break_var, width=5)
-        self.work_entry.grid(row=0, column=1)
-        self.break_entry.grid(row=1, column=1)
+        self.work_entry = tk.Entry(self.card, textvariable=self.work_var, width=8)
+        self.break_entry = tk.Entry(self.card, textvariable=self.break_var, width=8)
+        self.work_label.grid(row=2, column=0, sticky='w', pady=(0, 6))
+        self.work_entry.grid(row=2, column=1, sticky='ew', pady=(0, 6))
+        self.break_label.grid(row=3, column=0, sticky='w', pady=(0, 12))
+        self.break_entry.grid(row=3, column=1, sticky='ew', pady=(0, 12))
 
-        self.time_label = tk.Label(master, text=self.format_time(self.work_seconds), font=('Helvetica', 24))
-        self.time_label.grid(row=2, column=0, columnspan=3, pady=10)
+        # Time display
+        self.time_label = tk.Label(self.card, text=self.format_time(self.work_seconds), font=('SF Pro Display', 32, 'bold'))
+        self.time_label.grid(row=4, column=0, columnspan=3, pady=(0, 12))
 
-        self.start_button = tk.Button(master, text='Start', command=self.start)
-        self.pause_button = tk.Button(master, text='Pause', command=self.pause, state='disabled')
-        self.reset_button = tk.Button(master, text='Reset', command=self.reset, state='disabled')
-        self.start_button.grid(row=3, column=0)
-        self.pause_button.grid(row=3, column=1)
-        self.reset_button.grid(row=3, column=2)
+        # Action buttons
+        self.start_button = tk.Button(self.card, text='Start', command=self.start)
+        self.pause_button = tk.Button(self.card, text='Pause', command=self.pause, state='disabled')
+        self.reset_button = tk.Button(self.card, text='Reset', command=self.reset, state='disabled')
+        self.start_button.grid(row=5, column=0, sticky='ew', padx=(0, 6))
+        self.pause_button.grid(row=5, column=1, sticky='ew', padx=6)
+        self.reset_button.grid(row=5, column=2, sticky='ew', padx=(6, 0))
 
-        self.count_label = tk.Label(master, text=f'Today\'s pomodoros: {self.data["count"]}')
-        self.count_label.grid(row=4, column=0, columnspan=3, pady=5)
+        # Progress / info
+        self.count_label = tk.Label(self.card, text=f'Today\'s pomodoros: {self.data["count"]}')
+        self.count_label.grid(row=6, column=0, columnspan=3, pady=(12, 4))
 
+        # Toggles
         self.dark_mode_var = tk.BooleanVar()
-        self.dark_mode_check = tk.Checkbutton(master, text='Dark Mode',
+        self.dark_mode_check = tk.Checkbutton(self.card, text='Dark Mode',
                                               variable=self.dark_mode_var,
                                               command=self.toggle_dark_mode)
-        self.dark_mode_check.grid(row=5, column=0, columnspan=3)
+        self.dark_mode_check.grid(row=7, column=0, columnspan=3, pady=(0, 12))
 
-        self.countdown_button = tk.Button(master, text='Open Countdown',
+        # Secondary actions
+        self.countdown_button = tk.Button(self.card, text='Open Countdown',
                                           command=self.open_countdown)
-        self.countdown_button.grid(row=6, column=0, columnspan=3, pady=(5, 0))
+        self.countdown_button.grid(row=8, column=0, columnspan=3, pady=(4, 0), sticky='ew')
 
-        self.music_button = tk.Button(master, text='Open Music Player',
+        self.music_button = tk.Button(self.card, text='Open Music Player',
                                       command=self.open_music_player)
-        self.music_button.grid(row=7, column=0, columnspan=3, pady=(5, 0))
+        self.music_button.grid(row=9, column=0, columnspan=3, pady=(6, 12), sticky='ew')
 
-        # Apply a minimal style by default
-        apply_simple_style(master)
+        self.apply_theme(self.current_theme)
 
     def load_data(self):
         today = date.today().isoformat()
@@ -155,39 +215,61 @@ class PomodoroApp:
         secs = seconds % 60
         return f'{mins:02d}:{secs:02d}'
 
-    def apply_theme(self, bg, fg):
-        self.master.config(bg=bg)
-        widgets = [
-            self.work_label, self.break_label, self.time_label,
-            self.start_button, self.pause_button, self.reset_button,
-            self.count_label, self.dark_mode_check, self.countdown_button,
-            self.music_button
-        ]
-        for w in widgets:
-            w.config(bg=bg, fg=fg)
+    def apply_theme(self, theme: dict):
+        self.current_theme = theme
+        apply_glass_style(self.master, theme)
+        for frame in [self.card]:
+            frame.configure(bg=theme['card'], highlightbackground=theme['border'], highlightcolor=theme['border'])
+
+        # Text styling
+        style_heading(self.title_label, theme)
+        style_subtext(self.subtitle_label, theme)
+        style_body(self.work_label, theme)
+        style_body(self.break_label, theme)
+        self.time_label.configure(bg=theme['card'], fg=theme['text'])
+        style_stat_label(self.count_label, theme)
+        style_switch(self.dark_mode_check, theme)
+        style_body(self.dark_mode_check, theme)
+
+        # Entry styling
         for entry in [self.work_entry, self.break_entry]:
-            entry.config(bg=bg, fg=fg, insertbackground=fg)
+            style_entry(entry, theme)
+
+        # Buttons
+        style_glass_button(self.start_button, theme, primary=True)
+        style_glass_button(self.pause_button, theme, primary=False)
+        style_glass_button(self.reset_button, theme, primary=False)
+        style_glass_button(self.countdown_button, theme, primary=False)
+        style_glass_button(self.music_button, theme, primary=False)
+
+        # Window background outside card
+        self.master.configure(bg=theme['window'])
 
     def toggle_dark_mode(self):
-        if self.dark_mode_var.get():
-            self.apply_theme('#2e2e2e', '#ffffff')
-        else:
-            self.apply_theme(self.default_bg, self.default_fg)
+        theme = GLASS_DARK_THEME if self.dark_mode_var.get() else GLASS_LIGHT_THEME
+        self.apply_theme(theme)
+        for child in list(self.child_windows):
+            if isinstance(child, CountdownWindow):
+                child.apply_theme(theme)
 
     def open_countdown(self):
         """Open the countdown timer window."""
-        win = CountdownWindow(self.master)
-        apply_simple_style(win.top)
-        if self.dark_mode_var.get():
-            win.apply_theme('#2e2e2e', '#ffffff')
+        win = CountdownWindow(self.master, theme=self.current_theme, on_close=self._remove_child_window)
+        self.child_windows.append(win)
 
     def open_music_player(self):
         """Open the simple music player window."""
         win = tk.Toplevel(self.master)
         player = MusicPlayerApp(win)
-        apply_simple_style(win)
-        if self.dark_mode_var.get() and hasattr(player, 'apply_theme'):
-            player.apply_theme('#2e2e2e', '#ffffff')
+        if hasattr(player, 'apply_theme'):
+            player.apply_theme(self.current_theme)
+
+    def _remove_child_window(self, window):
+        """Remove references to closed child windows."""
+        try:
+            self.child_windows.remove(window)
+        except ValueError:
+            pass
 
     def start(self):
         if not self.running:
