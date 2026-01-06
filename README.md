@@ -2,6 +2,11 @@
 
 This repository contains a simple Pomodoro desktop application written in Python using `tkinter`.
 
+## Version status
+
+- **Current version:** 0.3.0 Beta — latest update with the current feature set.
+- **Target version (upcoming):** 0.4.0 (UI Visual Update).
+
 ## Features
 
 - Customizable work and break durations
