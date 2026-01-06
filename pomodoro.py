@@ -15,11 +15,19 @@ from ui_utils import (
     style_stat_label,
     style_subtext,
     style_switch,
+    style_dropdown,
     GLASS_LIGHT_THEME,
     GLASS_DARK_THEME
 )
 
 DATA_FILE = 'pomodoro_data.json'
+SESSION_PRESETS = {
+    'Classic 25/5': {'work': 25, 'break': 5, 'long_break': 15, 'interval': 4},
+    'Quick 15/3': {'work': 15, 'break': 3, 'long_break': 10, 'interval': 4},
+    'Deep 50/10': {'work': 50, 'break': 10, 'long_break': 20, 'interval': 3},
+    'Gentle 20/5': {'work': 20, 'break': 5, 'long_break': 15, 'interval': 4},
+    'Custom': None
+}
 
 
 class CountdownWindow:
@@ -125,8 +133,13 @@ class PomodoroApp:
         self.running = False
         self.work_seconds = 25 * 60
         self.break_seconds = 5 * 60
+        self.long_break_seconds = 15 * 60
+        self.long_break_interval = 4
+        self.active_break_seconds = 0
         self.remaining_seconds = 0
         self.is_break = False
+        self.break_kind = 'short'
+        self.cycle_progress = 0
         self.timer_id = None
         self.data = self.load_data()
         self.child_windows = []
@@ -148,65 +161,127 @@ class PomodoroApp:
         self.title_label.grid(row=0, column=0, columnspan=3, sticky='w', pady=(8, 0))
         self.subtitle_label.grid(row=1, column=0, columnspan=3, sticky='w', pady=(0, 12))
 
+        # Presets
+        preset_names = list(SESSION_PRESETS.keys())
+        default_preset = preset_names[0]
+        self.preset_var = tk.StringVar(value=default_preset)
+        self.preset_label = tk.Label(self.card, text='Session preset')
+        self.preset_menu = tk.OptionMenu(self.card, self.preset_var, *preset_names, command=self.apply_preset)
+        self.preset_label.grid(row=2, column=0, sticky='w', pady=(0, 6))
+        self.preset_menu.grid(row=2, column=1, columnspan=2, sticky='ew', pady=(0, 6))
+
         # Inputs
         self.work_label = tk.Label(self.card, text='Work minutes')
         self.break_label = tk.Label(self.card, text='Break minutes')
-        self.work_var = tk.StringVar(value='25')
-        self.break_var = tk.StringVar(value='5')
+        self.long_break_label = tk.Label(self.card, text='Long break minutes')
+        self.interval_label = tk.Label(self.card, text='Long break every (sessions)')
+        self.work_var = tk.StringVar(value=str(self.work_seconds // 60))
+        self.break_var = tk.StringVar(value=str(self.break_seconds // 60))
+        self.long_break_var = tk.StringVar(value=str(self.long_break_seconds // 60))
+        self.long_break_interval_var = tk.StringVar(value=str(self.long_break_interval))
         self.work_entry = tk.Entry(self.card, textvariable=self.work_var, width=8)
         self.break_entry = tk.Entry(self.card, textvariable=self.break_var, width=8)
-        self.work_label.grid(row=2, column=0, sticky='w', pady=(0, 6))
-        self.work_entry.grid(row=2, column=1, sticky='ew', pady=(0, 6))
-        self.break_label.grid(row=3, column=0, sticky='w', pady=(0, 12))
-        self.break_entry.grid(row=3, column=1, sticky='ew', pady=(0, 12))
+        self.long_break_entry = tk.Entry(self.card, textvariable=self.long_break_var, width=8)
+        self.long_break_interval_entry = tk.Entry(self.card, textvariable=self.long_break_interval_var, width=8)
+        self.work_label.grid(row=3, column=0, sticky='w', pady=(0, 6))
+        self.work_entry.grid(row=3, column=1, sticky='ew', pady=(0, 6))
+        self.break_label.grid(row=4, column=0, sticky='w', pady=(0, 6))
+        self.break_entry.grid(row=4, column=1, sticky='ew', pady=(0, 6))
+        self.long_break_label.grid(row=5, column=0, sticky='w', pady=(0, 6))
+        self.long_break_entry.grid(row=5, column=1, sticky='ew', pady=(0, 6))
+        self.interval_label.grid(row=6, column=0, sticky='w', pady=(0, 12))
+        self.long_break_interval_entry.grid(row=6, column=1, sticky='ew', pady=(0, 12))
 
         # Time display
         self.time_label = tk.Label(self.card, text=self.format_time(self.work_seconds), font=('SF Pro Display', 32, 'bold'))
-        self.time_label.grid(row=4, column=0, columnspan=3, pady=(0, 12))
+        self.time_label.grid(row=7, column=0, columnspan=3, pady=(0, 12))
 
         # Action buttons
         self.start_button = tk.Button(self.card, text='Start', command=self.start)
         self.pause_button = tk.Button(self.card, text='Pause', command=self.pause, state='disabled')
         self.reset_button = tk.Button(self.card, text='Reset', command=self.reset, state='disabled')
-        self.start_button.grid(row=5, column=0, sticky='ew', padx=(0, 6))
-        self.pause_button.grid(row=5, column=1, sticky='ew', padx=6)
-        self.reset_button.grid(row=5, column=2, sticky='ew', padx=(6, 0))
+        self.start_button.grid(row=8, column=0, sticky='ew', padx=(0, 6))
+        self.pause_button.grid(row=8, column=1, sticky='ew', padx=6)
+        self.reset_button.grid(row=8, column=2, sticky='ew', padx=(6, 0))
 
         # Progress / info
         self.count_label = tk.Label(self.card, text=f'Today\'s pomodoros: {self.data["count"]}')
-        self.count_label.grid(row=6, column=0, columnspan=3, pady=(12, 4))
+        self.count_label.grid(row=9, column=0, columnspan=3, pady=(12, 4))
+        self.cycle_status_label = tk.Label(self.card, text='')
+        self.cycle_status_label.grid(row=10, column=0, columnspan=3, pady=(0, 10))
 
         # Toggles
+        self.toggles_frame = tk.Frame(self.card, bg=self.current_theme['card'])
         self.dark_mode_var = tk.BooleanVar()
-        self.dark_mode_check = tk.Checkbutton(self.card, text='Dark Mode',
+        self.sound_var = tk.BooleanVar(value=True)
+        self.dark_mode_check = tk.Checkbutton(self.toggles_frame, text='Dark Mode',
                                               variable=self.dark_mode_var,
                                               command=self.toggle_dark_mode)
-        self.dark_mode_check.grid(row=7, column=0, columnspan=3, pady=(0, 12))
+        self.sound_check = tk.Checkbutton(self.toggles_frame, text='Sound on completion',
+                                          variable=self.sound_var)
+        self.dark_mode_check.grid(row=0, column=0, padx=(0, 12), pady=(0, 12), sticky='w')
+        self.sound_check.grid(row=0, column=1, pady=(0, 12), sticky='w')
+        self.toggles_frame.grid(row=11, column=0, columnspan=3, sticky='w')
+
+        # Summary
+        self.summary_frame = tk.Frame(
+            self.card,
+            bg=self.current_theme['card'],
+            highlightthickness=1,
+            highlightbackground=self.current_theme['border'],
+            highlightcolor=self.current_theme['border']
+        )
+        self.summary_title = tk.Label(self.summary_frame, text='Productivity summary')
+        self.focus_time_label = tk.Label(self.summary_frame, text='Focus time')
+        self.focus_time_value = tk.Label(self.summary_frame, text='0m')
+        self.breaks_label = tk.Label(self.summary_frame, text='Breaks taken')
+        self.breaks_value = tk.Label(self.summary_frame, text='0 short / 0 long')
+        self.summary_frame.grid(row=12, column=0, columnspan=3, sticky='nsew', pady=(0, 10))
+        self.summary_frame.grid_columnconfigure(1, weight=1)
+        self.summary_title.grid(row=0, column=0, columnspan=2, sticky='w', pady=(0, 6))
+        self.focus_time_label.grid(row=1, column=0, sticky='w')
+        self.focus_time_value.grid(row=1, column=1, sticky='e')
+        self.breaks_label.grid(row=2, column=0, sticky='w', pady=(2, 0))
+        self.breaks_value.grid(row=2, column=1, sticky='e', pady=(2, 0))
 
         # Secondary actions
         self.countdown_button = tk.Button(self.card, text='Open Countdown',
                                           command=self.open_countdown)
-        self.countdown_button.grid(row=8, column=0, columnspan=3, pady=(4, 0), sticky='ew')
+        self.countdown_button.grid(row=13, column=0, columnspan=3, pady=(4, 0), sticky='ew')
 
         self.music_button = tk.Button(self.card, text='Open Music Player',
                                       command=self.open_music_player)
-        self.music_button.grid(row=9, column=0, columnspan=3, pady=(6, 12), sticky='ew')
+        self.music_button.grid(row=14, column=0, columnspan=3, pady=(6, 12), sticky='ew')
 
         self.apply_theme(self.current_theme)
+        self.apply_preset(default_preset)
+        for entry in [self.work_entry, self.break_entry, self.long_break_entry, self.long_break_interval_entry]:
+            entry.bind('<KeyRelease>', self.mark_custom_preset)
+        self.update_summary()
 
     def load_data(self):
         today = date.today().isoformat()
+        defaults = {
+            'date': today,
+            'count': 0,
+            'short_breaks': 0,
+            'long_breaks': 0,
+            'focus_seconds': 0,
+            'break_seconds': 0
+        }
         if os.path.exists(DATA_FILE):
             try:
                 with open(DATA_FILE, 'r') as f:
                     data = json.load(f)
             except Exception:
-                data = {'date': today, 'count': 0}
+                data = defaults.copy()
         else:
-            data = {'date': today, 'count': 0}
+            data = defaults.copy()
 
         if data.get('date') != today:
-            data = {'date': today, 'count': 0}
+            data = defaults.copy()
+        for key, value in defaults.items():
+            data.setdefault(key, value)
         return data
 
     def save_data(self):
@@ -229,13 +304,20 @@ class PomodoroApp:
         style_subtext(self.subtitle_label, theme)
         style_body(self.work_label, theme)
         style_body(self.break_label, theme)
+        style_body(self.long_break_label, theme)
+        style_body(self.interval_label, theme)
+        style_body(self.preset_label, theme)
+        style_dropdown(self.preset_menu, theme)
         self.time_label.configure(bg=theme['card'], fg=theme['text'])
         style_stat_label(self.count_label, theme)
         style_switch(self.dark_mode_check, theme)
+        style_switch(self.sound_check, theme)
         style_body(self.dark_mode_check, theme)
+        style_body(self.sound_check, theme)
+        style_body(self.cycle_status_label, theme)
 
         # Entry styling
-        for entry in [self.work_entry, self.break_entry]:
+        for entry in [self.work_entry, self.break_entry, self.long_break_entry, self.long_break_interval_entry]:
             style_entry(entry, theme)
 
         # Buttons
@@ -251,6 +333,14 @@ class PomodoroApp:
 
         # Window background outside card
         self.master.configure(bg=theme['window'])
+
+        # Frames and summary
+        self.toggles_frame.configure(bg=theme['card'])
+        for lbl in [self.summary_title, self.focus_time_label, self.breaks_label]:
+            style_body(lbl, theme)
+        for lbl in [self.focus_time_value, self.breaks_value]:
+            style_stat_label(lbl, theme)
+        self.summary_frame.configure(bg=theme['card'], highlightbackground=theme['border'], highlightcolor=theme['border'])
 
     def toggle_dark_mode(self):
         theme = GLASS_DARK_THEME if self.dark_mode_var.get() else GLASS_LIGHT_THEME
@@ -284,18 +374,99 @@ class PomodoroApp:
         for btn in [self.start_button, self.pause_button, self.reset_button,
                     self.countdown_button, self.music_button]:
             refresh_glass_button(btn, self.current_theme)
+        style_dropdown(self.preset_menu, self.current_theme)
+
+    def apply_preset(self, preset_name):
+        preset = SESSION_PRESETS.get(preset_name)
+        if not preset:
+            return
+        self.work_var.set(str(preset['work']))
+        self.break_var.set(str(preset['break']))
+        self.long_break_var.set(str(preset['long_break']))
+        self.long_break_interval_var.set(str(preset['interval']))
+        self.remaining_seconds = 0
+        self.is_break = False
+        self.break_kind = 'short'
+        self.active_break_seconds = 0
+        self.time_label.config(text=self.format_time(int(float(self.work_var.get()) * 60)))
+        self.update_summary()
+
+    def mark_custom_preset(self, *_):
+        if self.preset_var.get() != 'Custom':
+            self.preset_var.set('Custom')
+
+    def _parse_session_inputs(self):
+        try:
+            work = int(float(self.work_var.get()) * 60)
+            short_break = int(float(self.break_var.get()) * 60)
+            long_break = int(float(self.long_break_var.get()) * 60)
+            interval = int(float(self.long_break_interval_var.get()))
+        except ValueError:
+            messagebox.showerror('Error', 'Please enter valid numbers for minutes and interval')
+            return None
+        if work <= 0 or short_break <= 0 or long_break <= 0:
+            messagebox.showerror('Error', 'Durations must be greater than zero.')
+            return None
+        if interval <= 0:
+            messagebox.showerror('Error', 'Long break interval must be at least 1.')
+            return None
+        return work, short_break, long_break, interval
+
+    def _get_break_seconds(self):
+        return self.long_break_seconds if self.break_kind == 'long' else self.break_seconds
+
+    def _format_duration(self, seconds: int) -> str:
+        if seconds >= 3600:
+            hrs = seconds // 3600
+            mins = (seconds % 3600) // 60
+            return f'{hrs}h {mins}m'
+        if seconds >= 60:
+            mins = seconds // 60
+            secs = seconds % 60
+            return f'{mins}m {secs}s'
+        return f'{seconds}s'
+
+    def update_summary(self):
+        focus_text = self._format_duration(self.data.get('focus_seconds', 0))
+        self.focus_time_value.config(text=focus_text)
+        self.breaks_value.config(
+            text=f"{self.data.get('short_breaks', 0)} short / {self.data.get('long_breaks', 0)} long"
+        )
+        self.count_label.config(text=f"Today's pomodoros: {self.data.get('count', 0)}")
+        self._update_cycle_status()
+
+    def _update_cycle_status(self):
+        try:
+            interval = max(int(float(self.long_break_interval_var.get())), 1)
+        except ValueError:
+            interval = max(self.long_break_interval, 1)
+        remaining = max(interval - self.cycle_progress, 1)
+        if self.is_break:
+            if self.break_kind == 'long':
+                label = 'Enjoy your long break.'
+            else:
+                label = 'Short break in progress.'
+        else:
+            label = f'Long break in {remaining} work session(s).'
+        self.cycle_status_label.config(text=label)
+
+    def _maybe_play_sound(self):
+        if self.sound_var.get():
+            try:
+                self.master.bell()
+            except Exception:
+                pass
 
     def start(self):
         if not self.running:
             # Only calculate the durations when starting fresh
             if self.remaining_seconds <= 0:
-                try:
-                    self.work_seconds = int(float(self.work_var.get()) * 60)
-                    self.break_seconds = int(float(self.break_var.get()) * 60)
-                except ValueError:
-                    messagebox.showerror('Error', 'Please enter valid numbers for minutes')
+                parsed = self._parse_session_inputs()
+                if not parsed:
                     return
-                self.remaining_seconds = self.work_seconds if not self.is_break else self.break_seconds
+                self.work_seconds, self.break_seconds, self.long_break_seconds, self.long_break_interval = parsed
+                self.remaining_seconds = self.work_seconds if not self.is_break else self._get_break_seconds()
+                self.active_break_seconds = self._get_break_seconds() if self.is_break else 0
 
             # Start or resume the countdown without resetting remaining_seconds
             self.running = True
@@ -323,6 +494,8 @@ class PomodoroApp:
             self.timer_id = None
         self.running = False
         self.is_break = False
+        self.break_kind = 'short'
+        self.active_break_seconds = 0
         self.remaining_seconds = 0
         self.start_button.config(text='Start', state='normal')
         self.pause_button.config(state='disabled')
@@ -335,6 +508,7 @@ class PomodoroApp:
         self.time_label.config(text=self.format_time(work_seconds))
         self._stop_pulse()
         self._refresh_button_states()
+        self.update_summary()
 
     def countdown(self):
         self.time_label.config(text=self.format_time(self.remaining_seconds))
@@ -345,27 +519,56 @@ class PomodoroApp:
             self.running = False
             self.timer_id = None
             if not self.is_break:
-                self.data['count'] += 1
-                self.save_data()
-                self.count_label.config(text=f"Today's pomodoros: {self.data['count']}")
-                messagebox.showinfo('Time\'s up', 'Work session complete! Time for a break.')
-                self.is_break = True
-                self.remaining_seconds = self.break_seconds
-                self.start_button.config(text='Start Break', state='disabled')
-                self.pause_button.config(state='normal')
-                self.running = True
-                self._refresh_button_states()
-                self._start_pulse()
-                self.countdown()
+                self._handle_work_complete()
             else:
-                messagebox.showinfo('Break Over', 'Break over! Ready for another pomodoro.')
-                self.is_break = False
-                self.start_button.config(text='Start', state='normal')
-                self.pause_button.config(state='disabled')
-                self.reset_button.config(state='disabled')
-                self.time_label.config(text=self.format_time(int(float(self.work_var.get()) * 60)))
-                self._stop_pulse()
-                self._refresh_button_states()
+                self._handle_break_complete()
+
+    def _handle_work_complete(self):
+        self.data['count'] += 1
+        self.data['focus_seconds'] += self.work_seconds
+        self.cycle_progress += 1
+        self.save_data()
+        self.update_summary()
+        self._maybe_play_sound()
+        messagebox.showinfo('Time\'s up', 'Work session complete! Time for a break.')
+        self.is_break = True
+        if self.cycle_progress >= self.long_break_interval:
+            self.break_kind = 'long'
+            self.cycle_progress = 0
+            self.active_break_seconds = self.long_break_seconds
+            start_label = 'Start Long Break'
+        else:
+            self.break_kind = 'short'
+            self.active_break_seconds = self.break_seconds
+            start_label = 'Start Break'
+        self.remaining_seconds = self.active_break_seconds
+        self._update_cycle_status()
+        self.start_button.config(text=start_label, state='disabled')
+        self.pause_button.config(state='normal')
+        self.running = True
+        self._refresh_button_states()
+        self._start_pulse()
+        self.countdown()
+
+    def _handle_break_complete(self):
+        if self.break_kind == 'long':
+            self.data['long_breaks'] += 1
+        else:
+            self.data['short_breaks'] += 1
+        self.data['break_seconds'] += self.active_break_seconds
+        self.save_data()
+        self.update_summary()
+        self._maybe_play_sound()
+        messagebox.showinfo('Break Over', 'Break over! Ready for another pomodoro.')
+        self.is_break = False
+        self.break_kind = 'short'
+        self.start_button.config(text='Start', state='normal')
+        self.pause_button.config(state='disabled')
+        self.reset_button.config(state='disabled')
+        self.time_label.config(text=self.format_time(int(float(self.work_var.get()) * 60)))
+        self._stop_pulse()
+        self._refresh_button_states()
+        self._update_cycle_status()
 
     def _start_pulse(self):
         """Create a subtle breathing animation on the timer label."""

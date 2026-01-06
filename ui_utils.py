@@ -185,3 +185,27 @@ def _apply_glass_button_style(button: tk.Button):
         highlightthickness=0,
         disabledforeground=theme['disabled_text']
     )
+
+
+def style_dropdown(option_menu: tk.OptionMenu, theme: dict = None):
+    """Apply glass styling to OptionMenu widgets."""
+    theme = theme or GLASS_LIGHT_THEME
+    option_menu.configure(
+        bg=theme['entry_bg'],
+        fg=theme['text'],
+        activebackground=theme['border'],
+        activeforeground=theme['text'],
+        highlightthickness=1,
+        highlightbackground=theme['border'],
+        relief='flat',
+        bd=0,
+        font=('SF Pro Text', 12)
+    )
+    menu = option_menu['menu']
+    menu.configure(
+        bg=theme['entry_bg'],
+        fg=theme['text'],
+        activebackground=theme['border'],
+        activeforeground=theme['text'],
+        font=('SF Pro Text', 12)
+    )
