@@ -13,6 +13,7 @@ from ui_utils import (
     style_glass_button,
     style_heading,
     style_subtext,
+    style_card_frame,
     GLASS_LIGHT_THEME
 )
 
@@ -168,7 +169,8 @@ class MusicPlayerApp:
         """Apply background/foreground colors to widgets."""
         self.theme = theme or GLASS_LIGHT_THEME
         apply_glass_style(self.master, self.theme)
-        self.card.configure(bg=self.theme['card'], highlightbackground=self.theme['border'], highlightcolor=self.theme['border'])
+        style_card_frame(self.card, self.theme)
+        self.card.configure(bg=self.theme['card'])
 
         for widget in [self.header, self.subheader]:
             widget.configure(bg=self.theme['card'])

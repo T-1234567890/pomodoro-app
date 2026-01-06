@@ -4,41 +4,45 @@ import tkinter as tk
 SIMPLE_BG = '#f8f8f8'
 SIMPLE_FG = '#000000'
 
-# Apple-inspired glassmorphism palette
+# macOS 26 inspired liquid glass palette
 GLASS_LIGHT_THEME = {
-    'window': '#f4f6fb',
-    'card': '#e8ecf4',
-    'text': '#1e2430',
-    'muted_text': '#5c6675',
+    'window': '#eef2f8',
+    'card': '#f5f7fc',
+    'card_alt': '#ecf1f9',
+    'text': '#1f2633',
+    'muted_text': '#5c6678',
     'accent': '#0a84ff',
-    'accent_active': '#0066d1',
-    'entry_bg': '#f7f8fc',
-    'border': '#cfd7e6',
-    'disabled_bg': '#d9dfea',
+    'accent_active': '#0a6fd6',
+    'entry_bg': '#f2f5fb',
+    'border': '#d5ddee',
+    'border_subtle': '#cdd6e8',
+    'disabled_bg': '#e1e7f2',
     'disabled_text': '#8a93a6',
-    'shadow': '#cfd6e5',
-    'glow': '#5ea4ff',
-    'button_secondary': '#e0e5ef',
-    'button_secondary_active': '#ccd4e3',
-    'button_secondary_disabled': '#d4d9e4'
+    'shadow': '#c6d1e3',
+    'glow': '#6aa7ff',
+    'button_secondary': '#e4e9f3',
+    'button_secondary_active': '#d6deed',
+    'button_secondary_disabled': '#d9dfeb'
 }
 
 GLASS_DARK_THEME = {
-    'window': '#0d1117',
-    'card': '#151b24',
-    'text': '#f3f5ff',
-    'muted_text': '#b3bbcc',
-    'accent': '#0a84ff',
-    'accent_active': '#2b7bff',
-    'entry_bg': '#0f131b',
-    'border': '#263044',
-    'disabled_bg': '#1b202a',
-    'disabled_text': '#6f7890',
-    'shadow': '#06070a',
-    'glow': '#4da3ff',
-    'button_secondary': '#1c2330',
-    'button_secondary_active': '#222b3a',
-    'button_secondary_disabled': '#171d24'
+    'window': '#0f141c',
+    'card': '#151b26',
+    'card_alt': '#1a2130',
+    'text': '#dfe5f2',
+    'muted_text': '#9da7ba',
+    'accent': '#4c9dff',
+    'accent_active': '#6aadff',
+    'entry_bg': '#101723',
+    'border': '#202a3b',
+    'border_subtle': '#1c2535',
+    'disabled_bg': '#1c2330',
+    'disabled_text': '#7b85a0',
+    'shadow': '#07090d',
+    'glow': '#3a86ff',
+    'button_secondary': '#1b2331',
+    'button_secondary_active': '#222c3c',
+    'button_secondary_disabled': '#161c26'
 }
 
 
@@ -73,17 +77,34 @@ def apply_glass_style(win: tk.Misc, theme: dict = None):
         pass
 
 
+def style_card_frame(frame: tk.Frame, theme: dict = None, variant: str = 'base'):
+    """Apply frosted card styling to a frame."""
+    theme = theme or GLASS_LIGHT_THEME
+    surface = theme.get('card_alt', theme['card']) if variant == 'alt' else theme['card']
+    border_color = blend_colors(surface, theme.get('border_subtle', theme['border']), 0.3)
+    frame.configure(
+        bg=surface,
+        bd=0,
+        relief='flat',
+        highlightthickness=1,
+        highlightbackground=border_color,
+        highlightcolor=theme.get('border', theme['border'])
+    )
+
+
 def create_glass_card(parent: tk.Misc, theme: dict = None) -> tk.Frame:
     """Create a lightly frosted container for grouping controls."""
     theme = theme or GLASS_LIGHT_THEME
-    frame = tk.Frame(
-        parent,
-        bg=theme['card'],
-        bd=0,
-        highlightthickness=1,
-        highlightbackground=theme['border'],
-        highlightcolor=theme['border']
-    )
+    frame = tk.Frame(parent)
+    style_card_frame(frame, theme)
+    return frame
+
+
+def create_glass_tile(parent: tk.Misc, theme: dict = None) -> tk.Frame:
+    """Create a floating glass tile for key content (e.g., timers)."""
+    theme = theme or GLASS_LIGHT_THEME
+    frame = tk.Frame(parent)
+    style_card_frame(frame, theme, variant='alt')
     return frame
 
 
@@ -92,7 +113,7 @@ def style_heading(label: tk.Label, theme: dict = None):
     label.configure(
         bg=theme['card'],
         fg=theme['text'],
-        font=('SF Pro Display', 18, 'bold')
+        font=('SF Pro Display', 19, 'bold')
     )
 
 
@@ -101,7 +122,7 @@ def style_subtext(label: tk.Label, theme: dict = None):
     label.configure(
         bg=theme['card'],
         fg=theme['muted_text'],
-        font=('SF Pro Text', 11)
+        font=('SF Pro Text', 12)
     )
 
 
@@ -110,7 +131,7 @@ def style_stat_label(label: tk.Label, theme: dict = None):
     label.configure(
         bg=theme['card'],
         fg=theme['text'],
-        font=('SF Pro Display', 14, 'bold')
+        font=('SF Pro Display', 15, 'bold')
     )
 
 
@@ -123,6 +144,34 @@ def style_body(label: tk.Label, theme: dict = None):
     )
 
 
+def style_caption(label: tk.Label, theme: dict = None):
+    """Subtle helper text for validation or statuses."""
+    theme = theme or GLASS_LIGHT_THEME
+    label.configure(
+        bg=theme['card'],
+        fg=theme['muted_text'],
+        font=('SF Pro Text', 10)
+    )
+
+
+def style_timer_display(label: tk.Label, theme: dict = None):
+    """Display style for the main timer readout."""
+    theme = theme or GLASS_LIGHT_THEME
+    highlight = blend_colors(theme.get('border_subtle', theme['border']), theme.get('card_alt', theme['card']), 0.4)
+    label.configure(
+        bg=theme.get('card_alt', theme['card']),
+        fg=theme['text'],
+        font=('SF Pro Display', 36, 'bold'),
+        relief='flat',
+        bd=0,
+        highlightthickness=1,
+        highlightbackground=highlight,
+        highlightcolor=highlight,
+        padx=6,
+        pady=6
+    )
+
+
 def style_entry(entry: tk.Entry, theme: dict = None):
     theme = theme or GLASS_LIGHT_THEME
     entry.configure(
@@ -131,8 +180,8 @@ def style_entry(entry: tk.Entry, theme: dict = None):
         insertbackground=theme['text'],
         relief='flat',
         font=('SF Pro Text', 12),
-        highlightthickness=1,
-        highlightbackground=theme['border'],
+        highlightthickness=2,
+        highlightbackground=theme.get('border_subtle', theme['border']),
         highlightcolor=theme['accent'],
         bd=0
     )
@@ -220,3 +269,14 @@ def style_dropdown(option_menu: tk.OptionMenu, theme: dict = None):
         activeforeground=theme['text'],
         font=('SF Pro Text', 12)
     )
+
+
+def blend_colors(base_hex: str, overlay_hex: str, ratio: float = 0.5) -> str:
+    """Return a blended hex color between base and overlay."""
+    ratio = max(0.0, min(1.0, ratio))
+    base_hex = base_hex.lstrip('#')
+    overlay_hex = overlay_hex.lstrip('#')
+    base_rgb = tuple(int(base_hex[i:i+2], 16) for i in (0, 2, 4))
+    overlay_rgb = tuple(int(overlay_hex[i:i+2], 16) for i in (0, 2, 4))
+    mixed = tuple(int(b + (o - b) * ratio) for b, o in zip(base_rgb, overlay_rgb))
+    return '#{:02x}{:02x}{:02x}'.format(*mixed)
