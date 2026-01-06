@@ -160,37 +160,46 @@ class PomodoroApp:
         self.break_label.grid(row=3, column=0, sticky='w', pady=(0, 12))
         self.break_entry.grid(row=3, column=1, sticky='ew', pady=(0, 12))
 
+        # Validation messaging
+        self.validation_var = tk.StringVar(value='')
+        self.validation_label = tk.Label(self.card, textvariable=self.validation_var, anchor='w')
+        self.validation_label.grid(row=4, column=0, columnspan=3, sticky='w', pady=(0, 6))
+
         # Time display
         self.time_label = tk.Label(self.card, text=self.format_time(self.work_seconds), font=('SF Pro Display', 32, 'bold'))
-        self.time_label.grid(row=4, column=0, columnspan=3, pady=(0, 12))
+        self.time_label.grid(row=5, column=0, columnspan=3, pady=(0, 12))
 
         # Action buttons
         self.start_button = tk.Button(self.card, text='Start', command=self.start)
         self.pause_button = tk.Button(self.card, text='Pause', command=self.pause, state='disabled')
         self.reset_button = tk.Button(self.card, text='Reset', command=self.reset, state='disabled')
-        self.start_button.grid(row=5, column=0, sticky='ew', padx=(0, 6))
-        self.pause_button.grid(row=5, column=1, sticky='ew', padx=6)
-        self.reset_button.grid(row=5, column=2, sticky='ew', padx=(6, 0))
+        self.start_button.grid(row=6, column=0, sticky='ew', padx=(0, 6))
+        self.pause_button.grid(row=6, column=1, sticky='ew', padx=6)
+        self.reset_button.grid(row=6, column=2, sticky='ew', padx=(6, 0))
 
         # Progress / info
         self.count_label = tk.Label(self.card, text=f'Today\'s pomodoros: {self.data["count"]}')
-        self.count_label.grid(row=6, column=0, columnspan=3, pady=(12, 4))
+        self.count_label.grid(row=7, column=0, columnspan=3, pady=(12, 4))
 
         # Toggles
         self.dark_mode_var = tk.BooleanVar()
         self.dark_mode_check = tk.Checkbutton(self.card, text='Dark Mode',
                                               variable=self.dark_mode_var,
                                               command=self.toggle_dark_mode)
-        self.dark_mode_check.grid(row=7, column=0, columnspan=3, pady=(0, 12))
+        self.dark_mode_check.grid(row=8, column=0, columnspan=3, pady=(0, 12))
 
         # Secondary actions
         self.countdown_button = tk.Button(self.card, text='Open Countdown',
                                           command=self.open_countdown)
-        self.countdown_button.grid(row=8, column=0, columnspan=3, pady=(4, 0), sticky='ew')
+        self.countdown_button.grid(row=9, column=0, columnspan=3, pady=(4, 0), sticky='ew')
 
         self.music_button = tk.Button(self.card, text='Open Music Player',
                                       command=self.open_music_player)
-        self.music_button.grid(row=9, column=0, columnspan=3, pady=(6, 12), sticky='ew')
+        self.music_button.grid(row=10, column=0, columnspan=3, pady=(6, 12), sticky='ew')
+
+        # Live validation for inputs
+        self.work_var.trace_add('write', lambda *_: self._on_input_change())
+        self.break_var.trace_add('write', lambda *_: self._on_input_change())
 
         self.apply_theme(self.current_theme)
 
@@ -230,6 +239,8 @@ class PomodoroApp:
         style_body(self.work_label, theme)
         style_body(self.break_label, theme)
         self.time_label.configure(bg=theme['card'], fg=theme['text'])
+        style_subtext(self.validation_label, theme)
+        self.validation_label.configure(fg=theme['accent'])
         style_stat_label(self.count_label, theme)
         style_switch(self.dark_mode_check, theme)
         style_body(self.dark_mode_check, theme)
@@ -251,6 +262,7 @@ class PomodoroApp:
 
         # Window background outside card
         self.master.configure(bg=theme['window'])
+        self._update_start_state()
 
     def toggle_dark_mode(self):
         theme = GLASS_DARK_THEME if self.dark_mode_var.get() else GLASS_LIGHT_THEME
@@ -289,12 +301,11 @@ class PomodoroApp:
         if not self.running:
             # Only calculate the durations when starting fresh
             if self.remaining_seconds <= 0:
-                try:
-                    self.work_seconds = int(float(self.work_var.get()) * 60)
-                    self.break_seconds = int(float(self.break_var.get()) * 60)
-                except ValueError:
-                    messagebox.showerror('Error', 'Please enter valid numbers for minutes')
+                durations = self._get_durations(show_message=True)
+                if durations is None:
+                    self._update_start_state()
                     return
+                self.work_seconds, self.break_seconds = durations
                 self.remaining_seconds = self.work_seconds if not self.is_break else self.break_seconds
 
             # Start or resume the countdown without resetting remaining_seconds
@@ -302,6 +313,7 @@ class PomodoroApp:
             self.start_button.config(state='disabled')
             self.pause_button.config(state='normal')
             self.reset_button.config(state='normal')
+            self._cancel_timer()
             self._refresh_button_states()
             self._start_pulse()
             self.countdown()
@@ -310,31 +322,30 @@ class PomodoroApp:
         if self.running:
             self.running = False
             if self.timer_id:
-                self.master.after_cancel(self.timer_id)
-                self.timer_id = None
+                self._cancel_timer()
             self.start_button.config(text='Resume', state='normal')
             self.pause_button.config(state='disabled')
-            self._refresh_button_states()
+            self._update_start_state()
             self._stop_pulse()
 
     def reset(self):
         if self.timer_id:
-            self.master.after_cancel(self.timer_id)
-            self.timer_id = None
+            self._cancel_timer()
         self.running = False
         self.is_break = False
         self.remaining_seconds = 0
         self.start_button.config(text='Start', state='normal')
         self.pause_button.config(state='disabled')
         self.reset_button.config(state='disabled')
-        try:
-            work_seconds = int(float(self.work_var.get()) * 60)
-        except ValueError:
+        durations = self._get_durations()
+        if durations is None:
             work_seconds = self.work_seconds
-            messagebox.showwarning('Invalid input', 'Work minutes must be a number. Using the last valid value.')
+        else:
+            work_seconds, self.break_seconds = durations
+            self.work_seconds = work_seconds
         self.time_label.config(text=self.format_time(work_seconds))
         self._stop_pulse()
-        self._refresh_button_states()
+        self._update_start_state()
 
     def countdown(self):
         self.time_label.config(text=self.format_time(self.remaining_seconds))
@@ -363,9 +374,9 @@ class PomodoroApp:
                 self.start_button.config(text='Start', state='normal')
                 self.pause_button.config(state='disabled')
                 self.reset_button.config(state='disabled')
-                self.time_label.config(text=self.format_time(int(float(self.work_var.get()) * 60)))
+                self.time_label.config(text=self.format_time(self.work_seconds))
                 self._stop_pulse()
-                self._refresh_button_states()
+                self._update_start_state()
 
     def _start_pulse(self):
         """Create a subtle breathing animation on the timer label."""
@@ -389,6 +400,55 @@ class PomodoroApp:
             self.master.after_cancel(self.pulse_job)
             self.pulse_job = None
         self.time_label.configure(fg=self.current_theme['text'])
+
+    def _cancel_timer(self):
+        if self.timer_id:
+            try:
+                self.master.after_cancel(self.timer_id)
+            finally:
+                self.timer_id = None
+
+    def _inputs_valid(self, show_message: bool = False):
+        for value, label in (
+            (self.work_var.get().strip(), 'Work minutes'),
+            (self.break_var.get().strip(), 'Break minutes')
+        ):
+            try:
+                minutes = float(value)
+            except ValueError:
+                message = f'{label} must be a number.'
+                if show_message:
+                    messagebox.showerror('Invalid input', message)
+                return False, message
+            if minutes <= 0:
+                message = f'{label} must be greater than zero.'
+                if show_message:
+                    messagebox.showerror('Invalid input', message)
+                return False, message
+        return True, ''
+
+    def _get_durations(self, show_message: bool = False):
+        valid, message = self._inputs_valid(show_message=show_message)
+        self._set_validation_message(message)
+        if not valid:
+            return None
+        return int(float(self.work_var.get()) * 60), int(float(self.break_var.get()) * 60)
+
+    def _set_validation_message(self, message: str):
+        self.validation_var.set(message)
+        color = self.current_theme['accent'] if message else self.current_theme['muted_text']
+        self.validation_label.configure(fg=color)
+
+    def _on_input_change(self):
+        self._update_start_state()
+
+    def _update_start_state(self):
+        valid, message = self._inputs_valid()
+        self._set_validation_message(message)
+        if not self.running:
+            state = 'normal' if valid else 'disabled'
+            self.start_button.config(state=state)
+        self._refresh_button_states()
 
 if __name__ == '__main__':
     root = tk.Tk()
