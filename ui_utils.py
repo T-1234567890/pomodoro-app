@@ -6,33 +6,39 @@ SIMPLE_FG = '#000000'
 
 # Apple-inspired glassmorphism palette
 GLASS_LIGHT_THEME = {
-    'window': '#e5e9f2',
-    'card': '#f9fbff',
-    'text': '#1c2635',
-    'muted_text': '#546071',
-    'accent': '#4f7cff',
-    'accent_active': '#2f5ee8',
-    'entry_bg': '#eef2fb',
-    'border': '#d9e2f3',
-    'disabled_bg': '#e0e6f5',
-    'disabled_text': '#9caac7',
-    'shadow': '#c9d4ef',
-    'glow': '#8fa8ff'
+    'window': '#f4f6fb',
+    'card': '#e8ecf4',
+    'text': '#1e2430',
+    'muted_text': '#5c6675',
+    'accent': '#0a84ff',
+    'accent_active': '#0066d1',
+    'entry_bg': '#f7f8fc',
+    'border': '#cfd7e6',
+    'disabled_bg': '#d9dfea',
+    'disabled_text': '#8a93a6',
+    'shadow': '#cfd6e5',
+    'glow': '#5ea4ff',
+    'button_secondary': '#e0e5ef',
+    'button_secondary_active': '#ccd4e3',
+    'button_secondary_disabled': '#d4d9e4'
 }
 
 GLASS_DARK_THEME = {
-    'window': '#12151c',
-    'card': '#1b202c',
-    'text': '#f5f7ff',
-    'muted_text': '#c8cedd',
-    'accent': '#6c8dff',
-    'accent_active': '#4f74f5',
-    'entry_bg': '#12151c',
-    'border': '#2a3040',
-    'disabled_bg': '#1f2533',
-    'disabled_text': '#6e7990',
-    'shadow': '#0c0f16',
-    'glow': '#7ea3ff'
+    'window': '#0d1117',
+    'card': '#151b24',
+    'text': '#f3f5ff',
+    'muted_text': '#b3bbcc',
+    'accent': '#0a84ff',
+    'accent_active': '#2b7bff',
+    'entry_bg': '#0f131b',
+    'border': '#263044',
+    'disabled_bg': '#1b202a',
+    'disabled_text': '#6f7890',
+    'shadow': '#06070a',
+    'glow': '#4da3ff',
+    'button_secondary': '#1c2330',
+    'button_secondary_active': '#222b3a',
+    'button_secondary_disabled': '#171d24'
 }
 
 
@@ -162,11 +168,14 @@ def _apply_glass_button_style(button: tk.Button):
     theme = getattr(button, '_glass_theme', GLASS_LIGHT_THEME)
     primary = getattr(button, '_glass_primary', True)
     state = str(button.cget('state'))
-    base_bg = theme['accent'] if primary else theme['entry_bg']
+    secondary_bg = theme.get('button_secondary', theme['entry_bg'])
+    secondary_active = theme.get('button_secondary_active', theme['border'])
+    secondary_disabled = theme.get('button_secondary_disabled', theme['disabled_bg'])
+    base_bg = theme['accent'] if primary else secondary_bg
     base_fg = '#ffffff' if primary else theme['text']
-    active_bg = theme['accent_active'] if primary else theme['border']
+    active_bg = theme['accent_active'] if primary else secondary_active
     if state == 'disabled':
-        bg = theme['disabled_bg']
+        bg = theme['disabled_bg'] if primary else secondary_disabled
         fg = theme['disabled_text']
     else:
         bg = base_bg
@@ -178,10 +187,12 @@ def _apply_glass_button_style(button: tk.Button):
         activeforeground=base_fg,
         relief='flat',
         bd=0,
-        padx=12,
-        pady=8,
+        padx=14,
+        pady=9,
         font=('SF Pro Display', 11, 'bold'),
         cursor='hand2',
-        highlightthickness=0,
+        highlightthickness=1,
+        highlightbackground=theme['border'],
+        highlightcolor=theme['border'],
         disabledforeground=theme['disabled_text']
     )
