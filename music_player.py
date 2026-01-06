@@ -46,6 +46,9 @@ def play_audio(path):
     except FileNotFoundError:
         messagebox.showerror('Error', 'No suitable audio player found.')
         return None
+    except Exception:
+        messagebox.showerror('Error', 'Failed to start audio playback.')
+        return None
 
 
 def _run_osascript_lines(lines: Iterable[str]) -> str:
@@ -199,8 +202,14 @@ class MusicPlayerApp:
         if not self.filepath:
             messagebox.showwarning('No file', 'Please open a music file first.')
             return
+        if not os.path.exists(self.filepath):
+            messagebox.showerror('File missing', 'The selected file could not be found.')
+            return
         self.stop()
         self.process = play_audio(self.filepath)
+        if self.process is None and not sys.platform.startswith('win'):
+            # On Windows winsound is fire-and-forget; on others, None means failure.
+            self.external_status_var.set('Playback unavailable')
 
     def stop(self):
         if self.process is not None:
@@ -270,6 +279,7 @@ class MusicPlayerApp:
                     break
         if not handled:
             messagebox.showinfo('External control', 'No controllable external player found.')
+            self._set_external_controls_state(False)
 
     def _on_destroy(self, event):
         if event.widget is self.master and hasattr(self, 'update_id'):
