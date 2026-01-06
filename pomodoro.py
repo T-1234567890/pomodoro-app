@@ -318,6 +318,26 @@ class PomodoroApp:
                     self.preset_label]:
             style_body(lbl, theme)
 
+        for lbl in [self.count_label, self.cycle_status_label,
+                    self.summary_title, self.focus_time_label,
+                    self.focus_time_value, self.breaks_label,
+                    self.breaks_value, self.time_label, self.validation_label]:
+            style_body(lbl, theme)
+
+        style_heading(self.summary_title, theme)
+        style_stat_label(self.focus_time_value, theme)
+        style_stat_label(self.breaks_value, theme)
+        self.card.configure(bg=theme['card'], highlightbackground=theme['border'], highlightcolor=theme['border'])
+        self.summary_frame.configure(bg=theme['card'])
+        self.toggles_frame.configure(bg=theme['card'])
+        self.focus_time_label.configure(bg=theme['card'])
+        self.breaks_label.configure(bg=theme['card'])
+
+        for lbl in (self.title_label, self.subtitle_label, self.count_label, self.cycle_status_label, self.summary_title,
+                    self.focus_time_label, self.focus_time_value, self.breaks_label, self.breaks_value, self.time_label,
+                    self.validation_label):
+            lbl.configure(bg=theme['card'])
+
         style_dropdown(self.preset_menu, theme)
 
         for entry in [self.work_entry, self.break_entry,
@@ -333,6 +353,9 @@ class PomodoroApp:
         ]:
             style_glass_button(btn, theme, primary)
             refresh_glass_button(btn, theme)
+
+        style_switch(self.dark_mode_check, theme)
+        style_switch(self.sound_check, theme)
 
         self.master.configure(bg=theme['window'])
         self._refresh_button_states()
@@ -438,6 +461,64 @@ class PomodoroApp:
             self.running = False
             messagebox.showinfo("Time's up", "Work session complete!")
             self.reset()
+
+    # =============================
+    # UI Helpers & Child Windows
+    # =============================
+
+    def _refresh_button_states(self):
+        """Refresh glass styles for buttons after state changes."""
+        for btn in (
+            self.start_button,
+            self.pause_button,
+            self.reset_button,
+            self.countdown_button,
+            self.music_button
+        ):
+            refresh_glass_button(btn, self.current_theme)
+
+    def toggle_dark_mode(self):
+        """Switch between light and dark glass themes."""
+        theme = GLASS_DARK_THEME if self.dark_mode_var.get() else GLASS_LIGHT_THEME
+        self.apply_theme(theme)
+        for child in list(self.child_windows):
+            if hasattr(child, 'apply_theme'):
+                try:
+                    child.apply_theme(theme)
+                except Exception:
+                    pass
+
+    def open_countdown(self):
+        """Open a themed countdown timer window."""
+        window = CountdownWindow(self.master, theme=self.current_theme, on_close=self._remove_child_window)
+        self.child_windows.append(window)
+
+    def open_music_player(self):
+        """Open a themed music player window."""
+        top = tk.Toplevel(self.master)
+        player = MusicPlayerApp(top)
+        player.apply_theme(self.current_theme)
+        self.child_windows.append(player)
+
+        def _on_close():
+            self._remove_child_window(player)
+            top.destroy()
+
+        top.protocol('WM_DELETE_WINDOW', _on_close)
+
+    def _remove_child_window(self, child):
+        if child in self.child_windows:
+            self.child_windows.remove(child)
+
+    def update_summary(self):
+        """Update the productivity summary labels."""
+        focus_minutes = self.data.get('focus_seconds', 0) // 60
+        break_minutes = self.data.get('break_seconds', 0) // 60
+        short_breaks = self.data.get('short_breaks', 0)
+        long_breaks = self.data.get('long_breaks', 0)
+        self.count_label.config(text=f"Today's pomodoros: {self.data.get('count', 0)}")
+        self.focus_time_value.config(text=f'{focus_minutes}m focus / {break_minutes}m break')
+        self.breaks_value.config(text=f'{short_breaks} short / {long_breaks} long')
 
 # =============================
 
