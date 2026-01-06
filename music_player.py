@@ -5,6 +5,7 @@ import subprocess
 import tkinter as tk
 from tkinter import filedialog, messagebox
 import shutil
+from typing import Iterable
 from ui_utils import (
     apply_glass_style,
     create_glass_card,
@@ -47,6 +48,19 @@ def play_audio(path):
         return None
 
 
+def _run_osascript_lines(lines: Iterable[str]) -> str:
+    """Run an AppleScript composed of separate lines and return output or '' on failure."""
+    if not shutil.which('osascript'):
+        return ''
+    cmd = ['osascript']
+    for line in lines:
+        cmd.extend(['-e', line])
+    try:
+        return subprocess.check_output(cmd, text=True).strip()
+    except Exception:
+        return ''
+
+
 def get_external_playback():
     """Return (title, artist, status) from another music player if available."""
     if shutil.which('playerctl'):
@@ -66,30 +80,25 @@ def get_external_playback():
             pass
     if sys.platform == 'darwin':
         for app in ('Music', 'Spotify'):
-            script = (
-                'tell application "' + app + '"\n'
-                'if it is running then\n'
-                'try\n'
-                'set playerState to the player state\n'
-                'if playerState is playing or playerState is paused then\n'
-                'set t to the name of the current track\n'
-                'set a to the artist of the current track\n'
-                'return t & "|" & a & "|" & playerState\n'
-                'end if\n'
-                'end try\n'
-                'end if\n'
-                'end tell'
+            script_lines = (
+                f'tell application "{app}"',
+                'if it is running then',
+                'try',
+                'set playerState to (player state as text)',
+                'if playerState is "playing" or playerState is "paused" then',
+                'set t to the name of the current track',
+                'set a to the artist of the current track',
+                'return t & "|" & a & "|" & playerState',
+                'end if',
+                'end try',
+                'end if',
+                'end tell',
             )
-            try:
-                out = subprocess.check_output(
-                    ['osascript', '-e', script], text=True
-                ).strip()
-                if out.count('|') >= 2:
-                    t, a, s = out.split('|', 2)
-                    if t:
-                        return t, a, s.lower()
-            except Exception:
-                pass
+            out = _run_osascript_lines(script_lines)
+            if out.count('|') >= 2:
+                t, a, s = out.split('|', 2)
+                if t:
+                    return t.strip(), a.strip(), s.strip().lower()
     return '', '', ''
 
 
@@ -245,19 +254,20 @@ class MusicPlayerApp:
             ):
                 if command not in action:
                     continue
-                script = (
-                    f'tell application "{app}"\n'
-                    'if it is running then\n'
-                    f'try\n{action[command]}\nreturn "ok"\nend try\nend if\n'
-                    'end tell'
+                script_lines = (
+                    f'tell application "{app}"',
+                    'if it is running then',
+                    'try',
+                    action[command],
+                    'return "ok"',
+                    'end try',
+                    'end if',
+                    'end tell',
                 )
-                try:
-                    out = subprocess.check_output(['osascript', '-e', script], text=True).strip()
-                    if out == 'ok':
-                        handled = True
-                        break
-                except Exception:
-                    continue
+                out = _run_osascript_lines(script_lines)
+                if out == 'ok':
+                    handled = True
+                    break
         if not handled:
             messagebox.showinfo('External control', 'No controllable external player found.')
 
