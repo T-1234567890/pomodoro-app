@@ -1,6 +1,10 @@
 # Pomodoro Timer
 
-This repository contains a simple Pomodoro desktop application written in Python using `tkinter`.
+Pomodoro App — A modern, distraction-free Pomodoro & focus timer with session presets, long-break cycles, productivity statistics, and a minimal glass-style UI.
+
+This app is built with Python + Tkinter and designed as a calm, structured focus companion rather than a gamified timer. It includes configurable work / break durations, long-break intervals, daily tracking, and optional sound notifications — all wrapped in a lightweight desktop UI.
+
+The 0.4.x branch introduces a new glass-panel layout system with separate tiles for the timer, controls, and productivity summary, preparing the foundation for a more refined macOS-style “liquid glass” UI in future releases.
 
 ## Version status
 
@@ -26,6 +30,70 @@ This repository contains a simple Pomodoro desktop application written in Python
 - Displays remaining time
 - Works offline on macOS (Python and tkinter are usually included)
 - Optional dark mode for late-night sessions
+
+## Key Features
+
+- ✔️ Pomodoro work & break timer
+- ✔️ Configurable long-break intervals
+- ✔️ Built-in session presets (25/5, 50/10, etc.)
+- ✔️ Daily statistics (focus time, breaks taken, sessions completed)
+- ✔️ Optional sound notification on completion
+- ✔️ Countdown mini-timer window
+- ✔️ Simple built-in music player window
+- ✔️ Auto-saves daily progress
+- ✔️ Glass-panel UI layout (0.4.x series)
+
+## Current UI Direction
+
+The current UI uses a structured glass tile system to improve layout consistency and grouping of elements.
+
+Version 0.4.2-fix focuses on:
+
+- improving panel spacing & hierarchy
+- stabilizing the new layout engine
+- preparing for a future visual refinement pass
+
+The goal of upcoming versions is to transition toward a softer, macOS-inspired liquid glass look — with more subtle contrast, improved typography, and refined panel depth.
+
+## Project Status
+
+- Stable for daily use
+- Design iterations in progress
+- Codebase structured for UI refinement in upcoming versions
+
+## Roadmap
+
+Planned for future versions:
+
+- 🎨 macOS-style liquid glass theme refinements
+- 🌙 improved dark mode contrast & tone
+- ⏳ optional auto-start next session
+- 🪄 smoother button & timer animations
+- 🎧 better media player integration
+
+## Collaboration & Contributions
+
+Contributions, ideas, and feedback are welcome — this project is actively evolving through design and feature iterations.
+
+You’re welcome to help improve:
+
+- 🎨 UI & visual refinement (macOS-style liquid glass direction)
+- 🌓 Dark mode contrast & accessibility
+- 🧩 Session logic & customization options
+- 🧪 Bug fixes and stability improvements
+- 📝 Documentation & usability polish
+- ✅ Anything else
+
+## Discussions & Suggestions
+
+If you want to:
+
+- propose a feature
+- discuss UI / UX direction
+
+You can open a Discussion or Issue instead of a PR.
+
+Constructive feedback is especially welcome during the current 0.4.x UI refinement phase.
 
 ## Usage
 
