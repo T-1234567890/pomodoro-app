@@ -30,18 +30,15 @@ The 0.4.x branch introduces a new glass-panel layout system with separate tiles 
 - Displays remaining time
 - Works offline on macOS (Python and tkinter are usually included)
 - Optional dark mode for late-night sessions
-
-## Key Features
-
-- ✔️ Pomodoro work & break timer
-- ✔️ Configurable long-break intervals
-- ✔️ Built-in session presets (25/5, 50/10, etc.)
-- ✔️ Daily statistics (focus time, breaks taken, sessions completed)
-- ✔️ Optional sound notification on completion
-- ✔️ Countdown mini-timer window
-- ✔️ Simple built-in music player window
-- ✔️ Auto-saves daily progress
-- ✔️ Glass-panel UI layout (0.4.x series)
+- Pomodoro work & break timer
+- Configurable long-break intervals
+- Built-in session presets (25/5, 50/10, etc.)
+- Daily statistics (focus time, breaks taken, sessions completed)
+- Optional sound notification on completion
+- Countdown mini-timer window
+- Simple built-in music player window
+- Auto-saves daily progress
+- Glass-panel UI layout (0.4.x series)
 
 ## Current UI Direction
 
