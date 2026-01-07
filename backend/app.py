@@ -152,6 +152,16 @@ class PomodoroEngine:
             if self.state.remaining_seconds <= 0:
                 self._complete_session()
 
+    def _refresh_remaining_seconds(self) -> None:
+        if self.state.is_break:
+            self.state.remaining_seconds = (
+                self.state.long_break_seconds
+                if self.state.break_kind == "long"
+                else self.state.break_seconds
+            )
+        else:
+            self.state.remaining_seconds = self.state.work_seconds
+
     def _complete_session(self) -> None:
         if self.state.is_break:
             if self.state.break_kind == "long":
