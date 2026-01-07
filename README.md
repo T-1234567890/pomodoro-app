@@ -4,7 +4,7 @@ This repository contains a simple Pomodoro desktop application written in Python
 
 ## Version status
 
-- **Current version:** 0.4.1 beta — Liquid Glass UI redesign and contrast polish.
+- **Current version:** 0.4.2 fix — Liquid Glass UI redesign and contrast polish.
 - **Update history:** see `history_versions/` for archived notes.
 
 ## Changelog (short)
