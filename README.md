@@ -40,6 +40,45 @@ The 0.4.x branch introduces a new glass-panel layout system with separate tiles 
 - Auto-saves daily progress
 - Glass-panel UI layout (0.4.x series)
 
+## 🚀 Running the App (v0.5.0+ Migration Build)
+
+This version introduces a new architecture:
+
+- Python powers the Pomodoro engine (backend)
+- Tauri provides the desktop shell
+- Svelte is the frontend UI
+
+The Python backend is launched automatically by Tauri through an IPC bridge — no manual scripts are required.
+
+## ▶️ Start the App (Development Mode)
+
+Run these commands from the project root:
+
+```bash
+cd frontend
+npm install
+npm run tauri dev
+
+
+
+---
+
+### 🔧 Requirements
+
+Install the following:
+
+- Python 3.10+
+- Node.js 18+
+- Rust toolchain
+- Tauri CLI
+
+Install Tauri CLI:
+
+```bash
+npm install -g @tauri-apps/cli
+
+---
+
 ## Current UI Direction
 
 The current UI uses a structured glass tile system to improve layout consistency and grouping of elements.
