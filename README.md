@@ -2,7 +2,7 @@
 
 Pomodoro App — A modern, distraction-free Pomodoro & focus timer with session presets, long-break cycles, productivity statistics, and a minimal glass-style UI.
 
-This app is built with Python + Tkinter and designed as a calm, structured focus companion rather than a gamified timer. It includes configurable work / break durations, long-break intervals, daily tracking, and optional sound notifications — all wrapped in a lightweight desktop UI.
+This app is built with a Tauri frontend backed by a Python timer engine. It includes configurable work / break durations, long-break intervals, daily tracking, and optional sound notifications — all wrapped in a lightweight desktop UI.
 
 The 0.4.x branch introduces a new glass-panel layout system with separate tiles for the timer, controls, and productivity summary, preparing the foundation for a more refined macOS-style “liquid glass” UI in future releases.
 
@@ -94,13 +94,31 @@ Constructive feedback is especially welcome during the current 0.4.x UI refineme
 
 ## Usage
 
-Run the application with Python 3:
+### New Tauri UI (default)
+
+From the `frontend/` directory:
 
 ```bash
-python3 pomodoro.py
+npm install
+npm run tauri dev
 ```
 
-The first time a work session completes, the count for the current day increases. The count is stored in `pomodoro_data.json` in the same directory.
+The Tauri shell launches the Svelte UI and starts the Python backend in `backend/app.py` automatically.
+
+### Legacy Tkinter UI (manual fallback)
+
+The Tkinter interface is archived in `history/ui-tkinter-0.4.x` and no longer launches by default. If you need it:
+
+```bash
+python3 history/ui-tkinter-0.4.x/pomodoro.py
+```
+
+The stats file format remains the same (`backend/pomodoro_data.json`).
+
+### Migration note
+
+- The Svelte + Tauri frontend is now the primary UI, and the Python backend provides timer/state/stats over a JSON IPC bridge.
+- The Tkinter UI was preserved under `history/ui-tkinter-0.4.x` for rollback.
 
 ## Countdown Timer
 
