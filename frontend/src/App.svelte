@@ -10,6 +10,9 @@
     startPomodoro
   } from './lib/ipc';
 
+  //
+  // ---- Types ----
+  //
   type TimerState = {
     work_seconds: number;
     break_seconds: number;
@@ -32,6 +35,9 @@
     break_seconds: number;
   };
 
+  //
+  // ---- Default UI State ----
+  //
   let timerState: TimerState = {
     work_seconds: 25 * 60,
     break_seconds: 5 * 60,
@@ -60,6 +66,9 @@
   let longBreakMinutes = 15;
   let interval = 4;
 
+  //
+  // ---- Helpers ----
+  //
   const updateFromState = (state: TimerState) => {
     timerState = state;
     workMinutes = Math.round(state.work_seconds / 60);
@@ -72,6 +81,8 @@
     const response = await getState();
     if (response.ok && response.state) {
       updateFromState(response.state as TimerState);
+
+      // ensure preset dropdown stays valid
       presetChoice = timerState.presets.includes(presetChoice)
         ? presetChoice
         : timerState.presets[0] ?? presetChoice;
@@ -85,6 +96,9 @@
     }
   };
 
+  //
+  // ---- Actions ----
+  //
   const handleStart = async () => {
     const response = await startPomodoro({
       workMinutes,
@@ -120,10 +134,15 @@
     }
   };
 
+  //
+  // ---- Formatting ----
+  //
   const formatSeconds = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
-    return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+    return `${mins.toString().padStart(2, '0')}:${secs
+      .toString()
+      .padStart(2, '0')}`;
   };
 
   const formatMinutes = (seconds: number) => Math.floor(seconds / 60);
@@ -134,9 +153,13 @@
     return `Session ${current} of ${total}`;
   };
 
+  //
+  // ---- Poll Backend ----
+  //
   onMount(() => {
     refreshState();
     refreshStats();
+
     const intervalId = setInterval(() => {
       refreshState();
       if (!timerState.running) {
@@ -156,73 +179,98 @@
         <h1 class={styles.title}>Stay in flow</h1>
         <p class={styles.subtitle}>A calm space for focused sessions.</p>
       </div>
+
       <div class={styles.statusPill}>
         {timerState.running ? 'Live' : 'Ready'} · {timerState.mode}
       </div>
     </header>
 
+    <!-- TIMER CARD -->
     <section class={styles.timerCard}>
       <div class={styles.timerMeta}>
         <p class={styles.timerLabel}>{timerState.mode}</p>
         <p class={styles.timerCycle}>{cycleLabel()}</p>
       </div>
-      <div class={styles.timerValue}>{formatSeconds(timerState.remaining_seconds)}</div>
+
+      <div class={styles.timerValue}>
+        {formatSeconds(timerState.remaining_seconds)}
+      </div>
+
       <div class={styles.timerActions}>
         <button class={styles.primaryButton} type="button" on:click={handleStart}>
           {timerState.running ? 'Resume' : 'Start'}
         </button>
+
         <button class={styles.secondaryButton} type="button" on:click={handlePause}>
           Pause
         </button>
+
         <button class={styles.ghostButton} type="button" on:click={handleReset}>
           Reset
         </button>
       </div>
     </section>
 
+    <!-- SETTINGS + STATS GRID -->
     <section class={styles.grid}>
+
+      <!-- PRESETS CARD -->
       <div class={styles.glassCard}>
         <h2 class={styles.cardTitle}>Session presets</h2>
+
         <div class={styles.cardBody}>
           <label class={styles.formRow}>
             <span>Preset</span>
+
             <select
               class={styles.select}
               bind:value={presetChoice}
-              on:change={(event) => handlePreset((event.target as HTMLSelectElement).value)}
+              on:change={(event) => handlePreset(event.target.value)}
             >
-              {#each timerState.presets as preset}
+              {#each (timerState?.presets ?? []) as preset}
                 <option value={preset}>{preset}</option>
               {/each}
             </select>
           </label>
+
           <label class={styles.formRow}>
             <span>Work minutes</span>
             <input class={styles.input} type="number" min="1" bind:value={workMinutes} />
           </label>
+
           <label class={styles.formRow}>
             <span>Break minutes</span>
             <input class={styles.input} type="number" min="1" bind:value={breakMinutes} />
           </label>
+
           <label class={styles.formRow}>
             <span>Long break minutes</span>
             <input class={styles.input} type="number" min="1" bind:value={longBreakMinutes} />
           </label>
+
           <label class={styles.formRow}>
             <span>Long break every</span>
             <input class={styles.input} type="number" min="1" bind:value={interval} />
           </label>
         </div>
+
         <p class={styles.cardNote}>Changes sync with the Python backend.</p>
       </div>
+
+      <!-- STATS CARD -->
       <div class={styles.glassCard}>
         <h2 class={styles.cardTitle}>Productivity summary</h2>
+
         <div class={styles.cardBody}>
           <p>Focus sessions: {statsState.count}</p>
           <p>Focus time: {formatMinutes(statsState.focus_seconds)}m</p>
           <p>Break time: {formatMinutes(statsState.break_seconds)}m</p>
-          <p>Breaks: {statsState.short_breaks} short / {statsState.long_breaks} long</p>
+          <p>
+            Breaks: {statsState.short_breaks} short /
+            {statsState.long_breaks} long
+          </p>
         </div>
+
         <p class={styles.cardNote}>Stats update after each session.</p>
       </div>
     </section>

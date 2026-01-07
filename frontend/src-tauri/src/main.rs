@@ -110,20 +110,18 @@ fn locate_backend_script() -> Result<PathBuf, String> {
     }
 
     // fallback to bundled resource dir
-    if let Some(resource_dir) = tauri::api::path::resource_dir() {
-            let packaged = resource_dir.join("backend").join("app.py");
-            if packaged.exists() {
-                return Ok(packaged);
-            }
-    }
+
 
     Err("Unable to locate backend/app.py".to_string())
 }
 
 fn main() {
+    let context = tauri::generate_context!();
+
     tauri::Builder::default()
         .manage(BackendState::new().expect("Unable to start backend"))
         .invoke_handler(tauri::generate_handler![backend_request])
-        .run(tauri::generate_context!())
+        .run(context)
         .expect("error while running tauri application");
 }
+
