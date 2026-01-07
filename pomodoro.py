@@ -245,7 +245,7 @@ class PomodoroApp:
         self.reset_button.grid(row=6, column=2, sticky='ew', pady=(0, 6))
 
         # --- Progress / Status ---
-        self.count_label = tk.Label(self.controls_panel.content, text=f\"Today's pomodoros: {self.data['count']}\")
+        self.count_label = tk.Label(self.controls_panel.content, text=f"Today's pomodoros: {self.data['count']}")
         self.count_label.grid(row=7, column=0, columnspan=3, sticky='w', pady=(4, 4))
 
         # --- Toggles ---
