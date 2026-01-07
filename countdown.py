@@ -64,10 +64,11 @@ class CountdownApp:
 
         base_bg = theme['card']
         tile_bg = theme.get('card_alt', theme['card'])
-        for widget in (self.card.content, self.minutes_label, self.minutes_entry, self.title_label, self.subtitle_label):
+        self.card.content.configure(bg=base_bg)
+        self.timer_tile.content.configure(bg=tile_bg)
+        for widget in (self.minutes_label, self.minutes_entry, self.title_label, self.subtitle_label):
             widget.configure(bg=base_bg, fg=theme['text'])
-        for widget in (self.timer_tile.content, self.time_label):
-            widget.configure(bg=tile_bg, fg=theme['text'])
+        self.time_label.configure(bg=tile_bg, fg=theme['text'])
 
         style_heading(self.title_label, theme)
         style_subtext(self.subtitle_label, theme)
