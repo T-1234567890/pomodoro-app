@@ -123,7 +123,7 @@
 
 .grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
   gap: 18px;
 }
 
@@ -141,9 +141,27 @@
 
 .cardBody {
   display: grid;
-  gap: 6px;
+  gap: 12px;
   font-size: 14px;
   color: rgba(12, 27, 42, 0.72);
+}
+
+.formRow {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 13px;
+  color: rgba(12, 27, 42, 0.72);
+}
+
+.input,
+.select {
+  border-radius: 12px;
+  border: 1px solid rgba(12, 27, 42, 0.12);
+  padding: 8px 10px;
+  font-size: 14px;
+  background: rgba(255, 255, 255, 0.8);
+  color: #0c1b2a;
 }
 
 .cardNote {
