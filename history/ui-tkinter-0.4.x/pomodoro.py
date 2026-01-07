@@ -1,4 +1,6 @@
 # Pomodoro App — merged main + validation
+# Legacy UI launcher (run manually if needed):
+# python3 history/ui-tkinter-0.4.x/pomodoro.py
 import json
 import os
 import tkinter as tk
