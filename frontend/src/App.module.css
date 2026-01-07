@@ -1,0 +1,153 @@
+:root {
+  color-scheme: light;
+  font-family: 'SF Pro Display', 'Inter', system-ui, -apple-system, sans-serif;
+}
+
+.app {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  background: radial-gradient(circle at top left, #e7f0ff, #d0e1ff 45%, #b7cdfa);
+  color: #0c1b2a;
+}
+
+.window {
+  width: min(920px, 92vw);
+  padding: 32px;
+  border-radius: 28px;
+  background: rgba(255, 255, 255, 0.55);
+  box-shadow: 0 24px 80px rgba(15, 34, 66, 0.18);
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  backdrop-filter: blur(28px);
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+  margin-bottom: 28px;
+}
+
+.kicker {
+  text-transform: uppercase;
+  letter-spacing: 0.24em;
+  font-size: 12px;
+  color: rgba(12, 27, 42, 0.55);
+  margin: 0 0 6px;
+}
+
+.title {
+  margin: 0;
+  font-size: 36px;
+  font-weight: 600;
+}
+
+.subtitle {
+  margin: 8px 0 0;
+  color: rgba(12, 27, 42, 0.62);
+}
+
+.statusPill {
+  padding: 8px 16px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.8);
+  font-size: 13px;
+  color: rgba(12, 27, 42, 0.7);
+}
+
+.timerCard {
+  border-radius: 24px;
+  padding: 24px;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.75), rgba(255, 255, 255, 0.35));
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.6);
+  margin-bottom: 24px;
+}
+
+.timerMeta {
+  display: flex;
+  justify-content: space-between;
+  font-size: 14px;
+  color: rgba(12, 27, 42, 0.6);
+}
+
+.timerLabel,
+.timerCycle {
+  margin: 0;
+}
+
+.timerValue {
+  font-size: clamp(48px, 8vw, 96px);
+  font-weight: 600;
+  text-align: center;
+  margin: 16px 0 20px;
+  letter-spacing: 0.06em;
+}
+
+.timerActions {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.primaryButton,
+.secondaryButton,
+.ghostButton {
+  border-radius: 999px;
+  padding: 10px 22px;
+  font-size: 14px;
+  border: 1px solid transparent;
+  cursor: pointer;
+}
+
+.primaryButton {
+  background: rgba(30, 77, 179, 0.85);
+  color: #fff;
+  border-color: rgba(30, 77, 179, 0.65);
+}
+
+.secondaryButton {
+  background: rgba(255, 255, 255, 0.65);
+  color: #1a2b3a;
+  border-color: rgba(255, 255, 255, 0.8);
+}
+
+.ghostButton {
+  background: transparent;
+  color: rgba(12, 27, 42, 0.7);
+  border-color: rgba(12, 27, 42, 0.15);
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 18px;
+}
+
+.glassCard {
+  padding: 18px;
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.7);
+}
+
+.cardTitle {
+  margin: 0 0 8px;
+  font-size: 16px;
+}
+
+.cardBody {
+  display: grid;
+  gap: 6px;
+  font-size: 14px;
+  color: rgba(12, 27, 42, 0.72);
+}
+
+.cardNote {
+  margin: 12px 0 0;
+  font-size: 12px;
+  color: rgba(12, 27, 42, 0.5);
+}

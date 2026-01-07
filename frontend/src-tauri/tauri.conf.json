@@ -1,0 +1,32 @@
+{
+  "build": {
+    "beforeDevCommand": "npm run dev",
+    "beforeBuildCommand": "npm run build",
+    "devPath": "http://localhost:5173",
+    "distDir": "../dist"
+  },
+  "package": {
+    "productName": "Pomodoro",
+    "version": "0.1.0"
+  },
+  "tauri": {
+    "allowlist": {
+      "all": false
+    },
+    "bundle": {
+      "active": true,
+      "targets": "all",
+      "identifier": "com.pomodoro.app"
+    },
+    "windows": [
+      {
+        "title": "Pomodoro",
+        "width": 940,
+        "height": 720,
+        "resizable": true,
+        "transparent": true,
+        "decorations": true
+      }
+    ]
+  }
+}
