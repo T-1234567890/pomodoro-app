@@ -13,7 +13,7 @@ from ui_utils import (
     style_glass_button,
     style_heading,
     style_subtext,
-    style_card_frame,
+    style_glass_panel,
     GLASS_LIGHT_THEME
 )
 
@@ -128,29 +128,29 @@ class MusicPlayerApp:
         apply_glass_style(master, self.theme)
         self.card = create_glass_card(master, self.theme)
         self.card.grid(row=0, column=0, padx=18, pady=18)
-        self.card.grid_columnconfigure(1, weight=1)
+        self.card.content.grid_columnconfigure(1, weight=1)
 
-        self.header = tk.Label(self.card, text='Music Player')
-        self.subheader = tk.Label(self.card, text='Bring your own focus soundtrack.')
+        self.header = tk.Label(self.card.content, text='Music Player')
+        self.subheader = tk.Label(self.card.content, text='Bring your own focus soundtrack.')
         self.header.grid(row=0, column=0, columnspan=3, sticky='w', pady=(8, 0))
         self.subheader.grid(row=1, column=0, columnspan=3, sticky='w', pady=(0, 10))
 
-        tk.Button(self.card, text='Open', command=self.open_file).grid(row=2, column=0, sticky='ew', padx=(0, 6))
-        tk.Button(self.card, text='Play', command=self.play).grid(row=2, column=1, sticky='ew', padx=6)
-        tk.Button(self.card, text='Stop', command=self.stop).grid(row=2, column=2, sticky='ew', padx=(6, 0))
+        tk.Button(self.card.content, text='Open', command=self.open_file).grid(row=2, column=0, sticky='ew', padx=(0, 6))
+        tk.Button(self.card.content, text='Play', command=self.play).grid(row=2, column=1, sticky='ew', padx=6)
+        tk.Button(self.card.content, text='Stop', command=self.stop).grid(row=2, column=2, sticky='ew', padx=(6, 0))
 
-        tk.Label(self.card, text='Title').grid(row=3, column=0, sticky='w', pady=(10, 0))
-        tk.Label(self.card, textvariable=self.title_var, anchor='w').grid(row=3, column=1, columnspan=2, sticky='w', pady=(10, 0))
+        tk.Label(self.card.content, text='Title').grid(row=3, column=0, sticky='w', pady=(10, 0))
+        tk.Label(self.card.content, textvariable=self.title_var, anchor='w').grid(row=3, column=1, columnspan=2, sticky='w', pady=(10, 0))
 
-        tk.Label(self.card, text='Artist').grid(row=4, column=0, sticky='w')
-        tk.Label(self.card, textvariable=self.artist_var, anchor='w').grid(row=4, column=1, columnspan=2, sticky='w')
+        tk.Label(self.card.content, text='Artist').grid(row=4, column=0, sticky='w')
+        tk.Label(self.card.content, textvariable=self.artist_var, anchor='w').grid(row=4, column=1, columnspan=2, sticky='w')
 
-        tk.Label(self.card, text='Other Player').grid(row=5, column=0, sticky='w', pady=(6, 0))
-        tk.Label(self.card, textvariable=self.external_var, anchor='w').grid(row=5, column=1, columnspan=2, sticky='w', pady=(6, 0))
-        self.external_status_label = tk.Label(self.card, textvariable=self.external_status_var, anchor='w')
+        tk.Label(self.card.content, text='Other Player').grid(row=5, column=0, sticky='w', pady=(6, 0))
+        tk.Label(self.card.content, textvariable=self.external_var, anchor='w').grid(row=5, column=1, columnspan=2, sticky='w', pady=(6, 0))
+        self.external_status_label = tk.Label(self.card.content, textvariable=self.external_status_var, anchor='w')
         self.external_status_label.grid(row=6, column=1, sticky='w')
 
-        self.external_controls = tk.Frame(self.card, bg=self.theme['card'])
+        self.external_controls = tk.Frame(self.card.content, bg=self.theme['card'])
         self.external_controls.grid(row=6, column=0, sticky='w', pady=(6, 0))
         self.btn_ext_prev = tk.Button(self.external_controls, text='Prev', command=self.external_previous)
         self.btn_ext_playpause = tk.Button(self.external_controls, text='Play/Pause', command=self.external_play_pause)
@@ -169,16 +169,16 @@ class MusicPlayerApp:
         """Apply background/foreground colors to widgets."""
         self.theme = theme or GLASS_LIGHT_THEME
         apply_glass_style(self.master, self.theme)
-        style_card_frame(self.card, self.theme)
-        self.card.configure(bg=self.theme['card'])
+        style_glass_panel(self.card, self.theme)
+        self.card.content.configure(bg=self.theme['card'])
 
         for widget in [self.header, self.subheader]:
             widget.configure(bg=self.theme['card'])
         style_heading(self.header, self.theme)
         style_subtext(self.subheader, self.theme)
 
-        buttons = [child for child in self.card.winfo_children() if isinstance(child, tk.Button)]
-        labels = [child for child in self.card.winfo_children() if isinstance(child, tk.Label)]
+        buttons = [child for child in self.card.content.winfo_children() if isinstance(child, tk.Button)]
+        labels = [child for child in self.card.content.winfo_children() if isinstance(child, tk.Label)]
         buttons.extend([self.btn_ext_prev, self.btn_ext_playpause, self.btn_ext_next])
         labels.append(self.external_status_label)
 
@@ -188,6 +188,7 @@ class MusicPlayerApp:
             if lbl in (self.header, self.subheader):
                 continue
             style_body(lbl, self.theme)
+        self.external_controls.configure(bg=self.theme['card'])
         self.master.configure(bg=self.theme['window'])
 
     def open_file(self):
