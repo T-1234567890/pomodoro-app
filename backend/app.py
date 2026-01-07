@@ -68,8 +68,9 @@ class PomodoroEngine:
     ) -> None:
         with self._lock:
             self._apply_durations(work_minutes, break_minutes, long_break_minutes, interval)
-            if self.state.remaining_seconds <= 0:
-                self._refresh_remaining_seconds()
+            if self.state.remaining_seconds <= 0 or not self.state.running:
+                if not self.state.is_break:
+                    self.state.remaining_seconds = self.state.work_seconds
             self.state.running = True
             self._last_tick = time.monotonic()
 
