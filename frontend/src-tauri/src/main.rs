@@ -14,6 +14,7 @@ struct BackendProcess {
 impl BackendProcess {
     fn spawn() -> Result<Self, String> {
         let script_path = locate_backend_script()?;
+
         let mut child = Command::new("python3")
             .arg("-u")
             .arg(script_path)
@@ -22,14 +23,8 @@ impl BackendProcess {
             .spawn()
             .map_err(|err| format!("Failed to spawn backend: {err}"))?;
 
-        let stdin = child
-            .stdin
-            .take()
-            .ok_or("Failed to open backend stdin")?;
-        let stdout = child
-            .stdout
-            .take()
-            .ok_or("Failed to open backend stdout")?;
+        let stdin = child.stdin.take().ok_or("Failed to open backend stdin")?;
+        let stdout = child.stdout.take().ok_or("Failed to open backend stdout")?;
 
         Ok(Self {
             _child: child,
@@ -41,8 +36,10 @@ impl BackendProcess {
     fn send(&mut self, payload: serde_json::Value) -> Result<serde_json::Value, String> {
         let payload = serde_json::to_string(&payload)
             .map_err(|err| format!("Failed to serialize payload: {err}"))?;
+
         writeln!(self.stdin, "{payload}")
             .map_err(|err| format!("Failed to write to backend: {err}"))?;
+
         self.stdin
             .flush()
             .map_err(|err| format!("Failed to flush backend stdin: {err}"))?;
@@ -51,7 +48,8 @@ impl BackendProcess {
         let bytes = self
             .stdout
             .read_line(&mut response)
-            .map_err(|err| format!("Failed to read from backend: {err}"))?;
+            .map_err(|err| format!("Failed to read backend response: {err}"))?;
+
         if bytes == 0 {
             return Err("Backend closed stdout".to_string());
         }
@@ -84,17 +82,23 @@ fn backend_request(
         .map_err(|_| "Backend process lock poisoned".to_string())?;
 
     match process.send(payload.clone()) {
-        Ok(response) => Ok(response),
+        Ok(res) => Ok(res),
         Err(_) => {
+            // restart backend automatically
             *process = BackendProcess::spawn()?;
             process.send(payload)
         }
     }
 }
 
+/// Resolve backend/app.py path for:
+///  - dev mode
+///  - packaged builds
 fn locate_backend_script() -> Result<PathBuf, String> {
+    // try relative paths walking upward
     let mut current = std::env::current_dir()
         .map_err(|err| format!("Failed to resolve working directory: {err}"))?;
+
     loop {
         let candidate = current.join("backend").join("app.py");
         if candidate.exists() {
@@ -104,6 +108,15 @@ fn locate_backend_script() -> Result<PathBuf, String> {
             break;
         }
     }
+
+    // fallback to bundled resource dir
+    if let Some(resource_dir) = tauri::api::path::resource_dir() {
+            let packaged = resource_dir.join("backend").join("app.py");
+            if packaged.exists() {
+                return Ok(packaged);
+            }
+    }
+
     Err("Unable to locate backend/app.py".to_string())
 }
 
