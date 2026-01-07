@@ -148,7 +148,7 @@ class GlassPanel(tk.Frame):
         self.canvas.place(relwidth=1, relheight=1)
         self.content = tk.Frame(self, bg=self._surface_color())
         self.content.pack(padx=self.padding, pady=self.padding, fill='both', expand=True)
-        self.canvas.lower(self.content)
+        self.canvas.lower()
 
         self.bind('<Configure>', self._on_configure)
 
@@ -228,7 +228,7 @@ class GlassPanel(tk.Frame):
                 width=1
             )
 
-        self.canvas.lower(self.content)
+        self.canvas.lower()
 
 
 def style_card_frame(frame: tk.Frame, theme: dict = None, variant: str = 'base'):
