@@ -12,8 +12,8 @@ struct BackendProcess {
 }
 
 impl BackendProcess {
-    fn spawn() -> Result<Self, String> {
-        let script_path = locate_backend_script()?;
+    fn spawn(resource_dir: Option<PathBuf>) -> Result<Self, String> {
+        let script_path = locate_backend_script(resource_dir)?;
 
         let mut child = Command::new("python3")
             .arg("-u")
@@ -61,12 +61,14 @@ impl BackendProcess {
 
 struct BackendState {
     process: Mutex<BackendProcess>,
+    resource_dir: Option<PathBuf>,
 }
 
 impl BackendState {
-    fn new() -> Result<Self, String> {
+    fn new(resource_dir: Option<PathBuf>) -> Result<Self, String> {
         Ok(Self {
-            process: Mutex::new(BackendProcess::spawn()?),
+            process: Mutex::new(BackendProcess::spawn(resource_dir.clone())?),
+            resource_dir,
         })
     }
 }
@@ -85,7 +87,7 @@ fn backend_request(
         Ok(res) => Ok(res),
         Err(_) => {
             // restart backend automatically
-            *process = BackendProcess::spawn()?;
+            *process = BackendProcess::spawn(state.resource_dir.clone())?;
             process.send(payload)
         }
     }
@@ -94,7 +96,7 @@ fn backend_request(
 /// Resolve backend/app.py path for:
 ///  - dev mode
 ///  - packaged builds
-fn locate_backend_script() -> Result<PathBuf, String> {
+fn locate_backend_script(resource_dir: Option<PathBuf>) -> Result<PathBuf, String> {
     // try relative paths walking upward
     let mut current = std::env::current_dir()
         .map_err(|err| format!("Failed to resolve working directory: {err}"))?;
@@ -110,20 +112,24 @@ fn locate_backend_script() -> Result<PathBuf, String> {
     }
 
     // fallback to bundled resource dir
-    if let Some(resource_dir) = tauri::api::path::resource_dir() {
-            let packaged = resource_dir.join("backend").join("app.py");
-            if packaged.exists() {
-                return Ok(packaged);
-            }
+    if let Some(resource_dir) = resource_dir {
+        let packaged = resource_dir.join("backend").join("app.py");
+        if packaged.exists() {
+            return Ok(packaged);
+        }
     }
 
     Err("Unable to locate backend/app.py".to_string())
 }
 
 fn main() {
+    let context = tauri::generate_context!();
+    let resource_dir =
+        tauri::api::path::resource_dir(context.package_info(), context.env());
+
     tauri::Builder::default()
-        .manage(BackendState::new().expect("Unable to start backend"))
+        .manage(BackendState::new(resource_dir).expect("Unable to start backend"))
         .invoke_handler(tauri::generate_handler![backend_request])
-        .run(tauri::generate_context!())
+        .run(context)
         .expect("error while running tauri application");
 }
