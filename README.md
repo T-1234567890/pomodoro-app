@@ -130,9 +130,11 @@ If you have `playerctl` on Linux or AppleScript support on macOS, the player
 also displays the track currently playing in other music applications.
 
 
-## 免责声明
-本仓库全部内容由 ChatGPT Xcode 制作。该代码可能含有错误，使用前请自行验证。
+## ⚠️ 说明
+本项目仍在持续改进中，部分功能或界面可能会发生变化。
+如在使用过程中发现问题或有改进建议，欢迎提交 Issue 或 PR。
 
 
-## Disclaimer
-All content in this repository was produced by ChatGPT Xcode. The code may contain errors, so please verify it before use.
+## ⚠️ Notice
+This project is under active development and some features or UI elements may change over time.
+If you encounter issues or have suggestions, feel free to open an issue or pull request.
