@@ -568,8 +568,5 @@ class PomodoroApp:
         self.breaks_value.config(text=f'{short_breaks} short / {long_breaks} long')
 
 # =============================
-
-if __name__ == '__main__':
-    root = tk.Tk()
-    app = PomodoroApp(root)
-    root.mainloop()
+# NOTE: The Tkinter launcher has been archived. To run the legacy UI, use:
+# python3 history/ui-tkinter-0.4.x/pomodoro.py
