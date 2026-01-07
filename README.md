@@ -2,13 +2,11 @@
 
 Pomodoro App — A modern, distraction-free Pomodoro & focus timer with session presets, long-break cycles, productivity statistics, and a minimal glass-style UI.
 
-This app is built with a Tauri frontend backed by a Python timer engine. It includes configurable work / break durations, long-break intervals, daily tracking, and optional sound notifications — all wrapped in a lightweight desktop UI.
-
-The 0.4.x branch introduces a new glass-panel layout system with separate tiles for the timer, controls, and productivity summary, preparing the foundation for a more refined macOS-style “liquid glass” UI in future releases.
+The 0.5.x branch introduces a new glass-panel layout system with separate tiles for the timer, controls, and productivity summary, preparing the foundation for a more refined macOS-style “liquid glass” UI in future releases.
 
 ## Version status
 
-- **Current version:** 0.4.2 fix — Liquid Glass UI redesign and contrast polish.
+- **Current version:** 0.5.x major migration, tech stack change, brand new glass UI
 - **Update history:** see `history_versions/` for archived notes.
 
 ## Changelog (short)
@@ -58,8 +56,7 @@ Run these commands from the project root:
 cd frontend
 npm install
 npm run tauri dev
-
-
+```
 
 ---
 
@@ -76,6 +73,7 @@ Install Tauri CLI:
 
 ```bash
 npm install -g @tauri-apps/cli
+```
 
 ---
 
