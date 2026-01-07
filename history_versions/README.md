@@ -5,3 +5,6 @@
 
 ## 0.4.1 Beta
 - Liquid Glass UI redesign and contrast polish.
+  
+## 0.4.2 Fix
+- Bug fixing
