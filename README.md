@@ -11,6 +11,7 @@ Update history: see history_versions/ for archived notes.
 
 ### ✨ New Features
 - Secondary “More Functions” panel
+- Pop up reminder (when timer season ends)
 - Built-in Music Player (local audio playback)
 - Independent Countdown Timer
 - UI layout cleanup and consolidation
