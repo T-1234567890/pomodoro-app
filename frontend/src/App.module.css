@@ -349,3 +349,37 @@
   color: var(--card-body-text);
 }
 
+.reminderToast {
+  position: fixed;
+  left: 24px;
+  bottom: 24px;
+  z-index: 20;
+  display: grid;
+  gap: 12px;
+  max-width: min(320px, 90vw);
+  padding: 16px 18px;
+  border-radius: 20px;
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  box-shadow: var(--window-shadow);
+  backdrop-filter: blur(18px);
+}
+
+.reminderTitle {
+  margin: 0 0 4px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--app-text);
+}
+
+.reminderMessage {
+  margin: 0;
+  font-size: 13px;
+  color: var(--card-body-text);
+}
+
+.reminderActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}

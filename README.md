@@ -6,7 +6,7 @@ The 0.5.x branch introduces a new glass-panel layout system with separate tiles 
 
 ## Version status
 
-Current: Version 0.6.0-beta<br>
+Current: Version 0.6.1<br>
 Update history: see history_versions/ for archived notes.
 
 ### ✨ New Features
@@ -32,6 +32,11 @@ Update history: see history_versions/ for archived notes.
 
 ## Changelog (short)
 
+## 0.6.1
+- Added session-end pop-up reminder
+- Improved session completion feedback
+- No changes to existing timer behavior or settings
+
 - UI redesign with layered macOS 26-inspired glass tiles and a stronger hierarchy.
 - New glass theme engine with rounded panels, gradients, and depth layering.
 - Dark Mode contrast improved so text and disabled buttons remain readable.
@@ -42,6 +47,7 @@ Update history: see history_versions/ for archived notes.
 - Long-break interval support (configure duration and cadence)
 - Session presets for quickly switching routines
 - Start, pause/resume, and reset controls
+- Session-end pop-up reminder
 - Popup notification when a session finishes
 - Optional chime when sessions complete
 - Tracks how many Pomodoros you have completed today
