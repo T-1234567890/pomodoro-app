@@ -33,6 +33,82 @@
   let theme: Theme = 'light';
   let preferSystemTheme = true;
   let systemThemeMedia: MediaQueryList | null = null;
+  let fileInput: HTMLInputElement | null = null;
+  let audioElement: HTMLAudioElement | null = null;
+  let audioUrl: string | null = null;
+  let playbackStatus = 'No file selected';
+  let volume = 0.7;
+
+  const handleAudioPlay = () => {
+    playbackStatus = 'Playing';
+  };
+
+  const handleAudioPause = () => {
+    if (!audioElement) {
+      return;
+    }
+    playbackStatus = audioElement.currentTime === 0 || audioElement.ended ? 'Stopped' : 'Paused';
+  };
+
+  const handleAudioEnded = () => {
+    playbackStatus = 'Stopped';
+  };
+
+  const createAudioElement = () => {
+    if (audioElement) {
+      return;
+    }
+    audioElement = new Audio();
+    audioElement.volume = volume;
+    audioElement.addEventListener('play', handleAudioPlay);
+    audioElement.addEventListener('pause', handleAudioPause);
+    audioElement.addEventListener('ended', handleAudioEnded);
+  };
+
+  const clearAudioUrl = () => {
+    if (audioUrl) {
+      URL.revokeObjectURL(audioUrl);
+      audioUrl = null;
+    }
+  };
+
+  const selectAudioFile = () => {
+    fileInput?.click();
+  };
+
+  const handleAudioFileChange = (event: Event) => {
+    const target = event.currentTarget as HTMLInputElement;
+    const file = target.files?.[0];
+    if (!file) {
+      return;
+    }
+    createAudioElement();
+    clearAudioUrl();
+    audioUrl = URL.createObjectURL(file);
+    if (audioElement) {
+      audioElement.src = audioUrl;
+      audioElement.load();
+      audioElement.volume = volume;
+    }
+    playbackStatus = 'Stopped';
+  };
+
+  const playAudio = () => {
+    audioElement?.play();
+  };
+
+  const pauseAudio = () => {
+    audioElement?.pause();
+  };
+
+  const stopAudio = () => {
+    if (!audioElement) {
+      return;
+    }
+    audioElement.pause();
+    audioElement.currentTime = 0;
+    playbackStatus = 'Stopped';
+  };
   let cycleWorkSessions = 0;
   let totalWorkSessions = 0;
   let totalSessionsCompleted = 0;
@@ -220,8 +296,20 @@
     return () => {
       pauseTimer();
       systemThemeMedia?.removeEventListener('change', handleSystemThemeChange);
+      if (audioElement) {
+        audioElement.pause();
+        audioElement.removeEventListener('play', handleAudioPlay);
+        audioElement.removeEventListener('pause', handleAudioPause);
+        audioElement.removeEventListener('ended', handleAudioEnded);
+        audioElement.src = '';
+      }
+      clearAudioUrl();
     };
   });
+
+  $: if (audioElement) {
+    audioElement.volume = volume;
+  }
 </script>
 
 <main class={styles.app}>
@@ -347,6 +435,56 @@
         </div>
 
         <p class={styles.cardNote}>Timer updates every second while running.</p>
+      </div>
+
+      <div class={styles.glassCard}>
+        <h2 class={styles.cardTitle}>More Functions</h2>
+
+        <details class={styles.moreFunctionsPanel} open>
+          <summary class={styles.moreFunctionsSummary}>Music player</summary>
+
+          <div class={styles.cardBody}>
+            <input
+              class={styles.fileInput}
+              type="file"
+              accept="audio/*"
+              bind:this={fileInput}
+              on:change={handleAudioFileChange}
+            />
+
+            <div class={styles.audioControls}>
+              <button class={styles.secondaryButton} type="button" on:click={selectAudioFile}>
+                Select Audio File
+              </button>
+
+              <div class={styles.audioButtonRow}>
+                <button class={styles.primaryButton} type="button" on:click={playAudio}>
+                  Play
+                </button>
+                <button class={styles.secondaryButton} type="button" on:click={pauseAudio}>
+                  Pause
+                </button>
+                <button class={styles.ghostButton} type="button" on:click={stopAudio}>
+                  Stop
+                </button>
+              </div>
+
+              <label class={styles.formRow}>
+                <span>Volume ({volume.toFixed(2)})</span>
+                <input
+                  class={styles.input}
+                  type="range"
+                  min="0"
+                  max="1"
+                  step="0.01"
+                  bind:value={volume}
+                />
+              </label>
+
+              <p class={styles.playbackStatus}>Status: {playbackStatus}</p>
+            </div>
+          </div>
+        </details>
       </div>
     </section>
 
