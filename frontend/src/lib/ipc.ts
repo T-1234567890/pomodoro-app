@@ -38,6 +38,21 @@ export async function startPomodoro(payload: {
   });
 }
 
+export async function updateDurations(payload: {
+  workMinutes?: number;
+  breakMinutes?: number;
+  longBreakMinutes?: number;
+  interval?: number;
+}): Promise<BackendResponse> {
+  return send({
+    action: 'update_durations',
+    work_minutes: payload.workMinutes,
+    break_minutes: payload.breakMinutes,
+    long_break: payload.longBreakMinutes,
+    interval: payload.interval
+  });
+}
+
 export async function pausePomodoro(): Promise<BackendResponse> {
   return send({ action: 'pause_pomodoro' });
 }

@@ -7,7 +7,8 @@
     pausePomodoro,
     resetPomodoro,
     setPreset,
-    startPomodoro
+    startPomodoro,
+    updateDurations
   } from './lib/ipc';
 
   //
@@ -65,16 +66,19 @@
   let breakMinutes = 5;
   let longBreakMinutes = 15;
   let interval = 4;
+  let isEditingDurations = false;
 
   //
   // ---- Helpers ----
   //
-  const updateFromState = (state: TimerState) => {
+  const updateFromState = (state: TimerState, syncInputs = !isEditingDurations) => {
     timerState = state;
-    workMinutes = Math.round(state.work_seconds / 60);
-    breakMinutes = Math.round(state.break_seconds / 60);
-    longBreakMinutes = Math.round(state.long_break_seconds / 60);
-    interval = state.long_break_interval;
+    if (syncInputs) {
+      workMinutes = Math.round(state.work_seconds / 60);
+      breakMinutes = Math.round(state.break_seconds / 60);
+      longBreakMinutes = Math.round(state.long_break_seconds / 60);
+      interval = state.long_break_interval;
+    }
   };
 
   const refreshState = async () => {
@@ -100,6 +104,7 @@
   // ---- Actions ----
   //
   const handleStart = async () => {
+    isEditingDurations = false;
     const response = await startPomodoro({
       workMinutes,
       breakMinutes,
@@ -107,31 +112,57 @@
       interval
     });
     if (response.ok && response.state) {
-      updateFromState(response.state as TimerState);
+      updateFromState(response.state as TimerState, true);
     }
   };
 
   const handlePause = async () => {
     const response = await pausePomodoro();
     if (response.ok && response.state) {
-      updateFromState(response.state as TimerState);
+      updateFromState(response.state as TimerState, true);
     }
   };
 
   const handleReset = async () => {
     const response = await resetPomodoro();
     if (response.ok && response.state) {
-      updateFromState(response.state as TimerState);
+      updateFromState(response.state as TimerState, true);
     }
     await refreshStats();
   };
 
   const handlePreset = async (value: string) => {
+    isEditingDurations = false;
     presetChoice = value;
     const response = await setPreset(value);
     if (response.ok && response.state) {
-      updateFromState(response.state as TimerState);
+      updateFromState(response.state as TimerState, true);
     }
+  };
+
+  const commitDurations = async () => {
+    if (!workMinutes || !breakMinutes || !longBreakMinutes || !interval) {
+      return;
+    }
+    presetChoice = 'Custom';
+    const response = await updateDurations({
+      workMinutes,
+      breakMinutes,
+      longBreakMinutes,
+      interval
+    });
+    if (response.ok && response.state) {
+      updateFromState(response.state as TimerState, true);
+    }
+  };
+
+  const handleDurationFocus = () => {
+    isEditingDurations = true;
+  };
+
+  const handleDurationBlur = async () => {
+    await commitDurations();
+    isEditingDurations = false;
   };
 
   //
@@ -235,22 +266,50 @@
 
           <label class={styles.formRow}>
             <span>Work minutes</span>
-            <input class={styles.input} type="number" min="1" bind:value={workMinutes} />
+            <input
+              class={styles.input}
+              type="number"
+              min="1"
+              bind:value={workMinutes}
+              on:focus={handleDurationFocus}
+              on:blur={handleDurationBlur}
+            />
           </label>
 
           <label class={styles.formRow}>
             <span>Break minutes</span>
-            <input class={styles.input} type="number" min="1" bind:value={breakMinutes} />
+            <input
+              class={styles.input}
+              type="number"
+              min="1"
+              bind:value={breakMinutes}
+              on:focus={handleDurationFocus}
+              on:blur={handleDurationBlur}
+            />
           </label>
 
           <label class={styles.formRow}>
             <span>Long break minutes</span>
-            <input class={styles.input} type="number" min="1" bind:value={longBreakMinutes} />
+            <input
+              class={styles.input}
+              type="number"
+              min="1"
+              bind:value={longBreakMinutes}
+              on:focus={handleDurationFocus}
+              on:blur={handleDurationBlur}
+            />
           </label>
 
           <label class={styles.formRow}>
             <span>Long break every</span>
-            <input class={styles.input} type="number" min="1" bind:value={interval} />
+            <input
+              class={styles.input}
+              type="number"
+              min="1"
+              bind:value={interval}
+              on:focus={handleDurationFocus}
+              on:blur={handleDurationBlur}
+            />
           </label>
         </div>
 
