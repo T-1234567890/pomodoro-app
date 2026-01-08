@@ -157,17 +157,10 @@ The stats file format remains the same (`backend/pomodoro_data.json`).
 - The Svelte + Tauri frontend is now the primary UI, and the Python backend provides timer/state/stats over a JSON IPC bridge.
 - The Tkinter UI was preserved under `history/ui-tkinter-0.4.x` for rollback.
 
-## Countdown Timer
-
-
-The repository also includes a countdown timer and a minimal music player.
+## 🏗️ Working on...
 
 ### Countdown Timer
 Run the simple timer or open it from the Pomodoro app with the "Open Countdown" button:
-
-```bash
-python3 countdown.py
-```
 
 ### Music Player
 You can open the player from the Pomodoro window using the "Open Music Player"
