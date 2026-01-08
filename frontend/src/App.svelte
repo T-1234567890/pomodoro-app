@@ -130,7 +130,6 @@
     }
     return settings.longBreakMinutes;
   };
-  let showMoreFunctions = false;
 
   const formatSeconds = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
@@ -443,55 +442,6 @@
         <p class={styles.cardNote}>Timer updates every second while running.</p>
       </div>
 
-      <div class={styles.glassCard}>
-        <h2 class={styles.cardTitle}>More Functions</h2>
-
-        <details class={styles.moreFunctionsPanel} open>
-          <summary class={styles.moreFunctionsSummary}>Music player</summary>
-
-          <div class={styles.cardBody}>
-            <input
-              class={styles.fileInput}
-              type="file"
-              accept="audio/*"
-              bind:this={fileInput}
-              on:change={handleAudioFileChange}
-            />
-
-            <div class={styles.audioControls}>
-              <button class={styles.secondaryButton} type="button" on:click={selectAudioFile}>
-                Select Audio File
-              </button>
-
-              <div class={styles.audioButtonRow}>
-                <button class={styles.primaryButton} type="button" on:click={playAudio}>
-                  Play
-                </button>
-                <button class={styles.secondaryButton} type="button" on:click={pauseAudio}>
-                  Pause
-                </button>
-                <button class={styles.ghostButton} type="button" on:click={stopAudio}>
-                  Stop
-                </button>
-              </div>
-
-              <label class={styles.formRow}>
-                <span>Volume ({volume.toFixed(2)})</span>
-                <input
-                  class={styles.input}
-                  type="range"
-                  min="0"
-                  max="1"
-                  step="0.01"
-                  bind:value={volume}
-                />
-              </label>
-
-              <p class={styles.playbackStatus}>Status: {playbackStatus}</p>
-            </div>
-          </div>
-        </details>
-      </div>
     </section>
 
     <section class={styles.moreFunctions}>
@@ -499,8 +449,9 @@
         class={styles.moreFunctionsToggle}
         type="button"
         on:click={toggleMoreFunctions}
+        aria-expanded={moreFunctionsOpen}
       >
-        {moreFunctionsOpen ? 'Hide More Functions' : 'More Functions'}
+        More Functions
       </button>
 
       {#if moreFunctionsOpen}
@@ -508,6 +459,55 @@
           <div class={styles.glassCard}>
             <h2 class={styles.cardTitle}>More Functions</h2>
             <div class={styles.cardBody}>
+              <div class={styles.moreFunctionsItem}>
+                <div>
+                  <p class={styles.moreFunctionsLabel}>Music player</p>
+                  <p class={styles.moreFunctionsNote}>
+                    Pick a local track to play while you focus.
+                  </p>
+                </div>
+                <div>
+                  <input
+                    class={styles.fileInput}
+                    type="file"
+                    accept="audio/*"
+                    bind:this={fileInput}
+                    on:change={handleAudioFileChange}
+                  />
+
+                  <div class={styles.audioControls}>
+                    <button class={styles.secondaryButton} type="button" on:click={selectAudioFile}>
+                      Select Audio File
+                    </button>
+
+                    <div class={styles.audioButtonRow}>
+                      <button class={styles.primaryButton} type="button" on:click={playAudio}>
+                        Play
+                      </button>
+                      <button class={styles.secondaryButton} type="button" on:click={pauseAudio}>
+                        Pause
+                      </button>
+                      <button class={styles.ghostButton} type="button" on:click={stopAudio}>
+                        Stop
+                      </button>
+                    </div>
+
+                    <label class={styles.formRow}>
+                      <span>Volume ({volume.toFixed(2)})</span>
+                      <input
+                        class={styles.input}
+                        type="range"
+                        min="0"
+                        max="1"
+                        step="0.01"
+                        bind:value={volume}
+                      />
+                    </label>
+
+                    <p class={styles.playbackStatus}>Status: {playbackStatus}</p>
+                  </div>
+                </div>
+              </div>
               <div class={styles.moreFunctionsItem}>
                 <div>
                   <p class={styles.moreFunctionsLabel}>Countdown timer</p>
@@ -522,43 +522,5 @@
         </div>
       {/if}
     </section>
-    <div class={styles.moreFunctionsSection}>
-      <button
-        class={styles.moreFunctionsButton}
-        type="button"
-        aria-expanded={showMoreFunctions}
-        aria-controls="more-functions-panel"
-        on:click={() => (showMoreFunctions = true)}
-      >
-        More Functions
-      </button>
-    </div>
-
-    {#if showMoreFunctions}
-      <section
-        id="more-functions-panel"
-        class={`${styles.glassCard} ${styles.moreFunctionsPanel}`}
-      >
-        <div class={styles.moreFunctionsHeader}>
-          <div>
-            <h2 class={styles.cardTitle}>More functions</h2>
-            <p class={styles.moreFunctionsSubtitle}>
-              Future tools like music, analytics, and shortcuts will appear here.
-            </p>
-          </div>
-          <button
-            class={styles.moreFunctionsClose}
-            type="button"
-            on:click={() => (showMoreFunctions = false)}
-          >
-            Close
-          </button>
-        </div>
-
-        <div class={styles.cardBody}>
-          <p>Placeholder panel ready for upcoming features.</p>
-        </div>
-      </section>
-    {/if}
   </section>
 </main>
