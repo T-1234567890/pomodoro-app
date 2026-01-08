@@ -3,12 +3,18 @@
   import styles from './App.module.css';
 
   const DEFAULT_MINUTES = 25;
+  const THEME_STORAGE_KEY = 'theme';
+
+  type Theme = 'light' | 'dark';
 
   let durationMinutes = DEFAULT_MINUTES;
   let totalSeconds = DEFAULT_MINUTES * 60;
   let remainingSeconds = totalSeconds;
   let running = false;
   let intervalId: ReturnType<typeof setInterval> | null = null;
+  let theme: Theme = 'light';
+  let preferSystemTheme = true;
+  let systemThemeMedia: MediaQueryList | null = null;
 
   const formatSeconds = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
@@ -62,8 +68,47 @@
     remainingSeconds = totalSeconds;
   };
 
+  const applyTheme = (value: Theme) => {
+    theme = value;
+    document.documentElement.dataset.theme = value;
+  };
+
+  const setTheme = (value: Theme, persist = false) => {
+    applyTheme(value);
+    if (persist) {
+      localStorage.setItem(THEME_STORAGE_KEY, value);
+    }
+  };
+
+  const toggleTheme = () => {
+    preferSystemTheme = false;
+    const nextTheme = theme === 'dark' ? 'light' : 'dark';
+    setTheme(nextTheme, true);
+  };
+
   onMount(() => {
-    return () => pauseTimer();
+    const storedTheme = localStorage.getItem(THEME_STORAGE_KEY);
+    systemThemeMedia = window.matchMedia('(prefers-color-scheme: dark)');
+
+    if (storedTheme === 'light' || storedTheme === 'dark') {
+      preferSystemTheme = false;
+      applyTheme(storedTheme);
+    } else {
+      applyTheme(systemThemeMedia.matches ? 'dark' : 'light');
+    }
+
+    const handleSystemThemeChange = (event: MediaQueryListEvent) => {
+      if (preferSystemTheme) {
+        applyTheme(event.matches ? 'dark' : 'light');
+      }
+    };
+
+    systemThemeMedia.addEventListener('change', handleSystemThemeChange);
+
+    return () => {
+      pauseTimer();
+      systemThemeMedia?.removeEventListener('change', handleSystemThemeChange);
+    };
   });
 </script>
 
@@ -76,8 +121,13 @@
         <p class={styles.subtitle}>A calm space for focused sessions.</p>
       </div>
 
-      <div class={styles.statusPill}>
-        {running ? 'Live' : 'Ready'} · Pomodoro
+      <div class={styles.headerActions}>
+        <div class={styles.statusPill}>
+          {running ? 'Live' : 'Ready'} · Pomodoro
+        </div>
+        <button class={styles.themeToggle} type="button" on:click={toggleTheme}>
+          {theme === 'dark' ? 'Light mode' : 'Dark mode'}
+        </button>
       </div>
     </header>
 
