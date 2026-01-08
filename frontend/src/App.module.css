@@ -285,7 +285,7 @@
   margin-top: 24px;
   display: grid;
   gap: 16px;
-  justify-items: end;
+  justify-items: stretch;
 }
 
 .moreFunctionsToggle {
@@ -296,12 +296,14 @@
   background: var(--toggle-bg);
   color: var(--toggle-text);
   cursor: pointer;
+  justify-self: end;
 }
 
 .moreFunctionsPanel {
   display: grid;
   gap: 12px;
   margin-top: 16px;
+  width: 100%;
 }
 
 .moreFunctionsItem {
