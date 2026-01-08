@@ -11,13 +11,6 @@ The 0.5.x branch introduces a new glass-panel layout system with separate tiles 
 Current: Version 0.6.1<br>
 Update history: see history_versions/ for archived notes.
 
-### ✨ New Features
-- Secondary “More Functions” panel
-- Pop up reminder (when timer season ends)
-- Built-in Music Player (local audio playback)
-- Independent Countdown Timer
-- UI layout cleanup and consolidation
-
 ### 🔄 Ongoing Work
 - Feature iteration and refinement
 - Code cleanup after 0.5.x migration
