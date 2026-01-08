@@ -4,6 +4,8 @@ Pomodoro App — A modern, distraction-free Pomodoro & focus timer with session 
 
 The 0.5.x branch introduces a new glass-panel layout system with separate tiles for the timer, controls, and productivity summary, preparing the foundation for a more refined macOS-style “liquid glass” UI in future releases.
 
+<img width="320" height="320" alt="Firefly_Gemini Flash_Make it in to normal white background 328819" src="https://github.com/user-attachments/assets/629e345e-5540-4439-8e47-30f3db8c6cad" />
+
 ## Version status
 
 Current: Version 0.6.1<br>
