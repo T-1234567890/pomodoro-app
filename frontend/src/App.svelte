@@ -1,5 +1,6 @@
 <script lang="ts">
   import { onMount } from 'svelte';
+  import CountdownTimer from './lib/CountdownTimer.svelte';
   import styles from './App.module.css';
 
   const DEFAULT_MINUTES = 25;
@@ -15,6 +16,7 @@
   let theme: Theme = 'light';
   let preferSystemTheme = true;
   let systemThemeMedia: MediaQueryList | null = null;
+  let moreFunctionsOpen = false;
 
   const formatSeconds = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
@@ -84,6 +86,10 @@
     preferSystemTheme = false;
     const nextTheme = theme === 'dark' ? 'light' : 'dark';
     setTheme(nextTheme, true);
+  };
+
+  const toggleMoreFunctions = () => {
+    moreFunctionsOpen = !moreFunctionsOpen;
   };
 
   onMount(() => {
@@ -191,6 +197,35 @@
 
         <p class={styles.cardNote}>Timer updates every second while running.</p>
       </div>
+    </section>
+
+    <section class={styles.moreFunctions}>
+      <button
+        class={styles.moreFunctionsToggle}
+        type="button"
+        on:click={toggleMoreFunctions}
+      >
+        {moreFunctionsOpen ? 'Hide More Functions' : 'More Functions'}
+      </button>
+
+      {#if moreFunctionsOpen}
+        <div class={styles.moreFunctionsPanel}>
+          <div class={styles.glassCard}>
+            <h2 class={styles.cardTitle}>More Functions</h2>
+            <div class={styles.cardBody}>
+              <div class={styles.moreFunctionsItem}>
+                <div>
+                  <p class={styles.moreFunctionsLabel}>Countdown timer</p>
+                  <p class={styles.moreFunctionsNote}>
+                    An optional countdown that runs independently from your Pomodoro session.
+                  </p>
+                </div>
+                <CountdownTimer />
+              </div>
+            </div>
+          </div>
+        </div>
+      {/if}
     </section>
   </section>
 </main>
