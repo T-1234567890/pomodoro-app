@@ -107,13 +107,12 @@ npm install -g @tauri-apps/cli
 
 ## Current UI Direction
 
-The current UI uses a structured glass tile system to improve layout consistency and grouping of elements.
+The current UI uses a structured glass tile system inspired by macOS 26 (liquid glass).
 
-Version 0.4.2-fix focuses on:
+Version 0.6.x focuses on:
 
-- improving panel spacing & hierarchy
-- stabilizing the new layout engine
-- preparing for a future visual refinement pass
+- improving animations
+- improving the new UI
 
 The goal of upcoming versions is to transition toward a softer, macOS-inspired liquid glass look — with more subtle contrast, improved typography, and refined panel depth.
 
@@ -121,7 +120,7 @@ The goal of upcoming versions is to transition toward a softer, macOS-inspired l
 
 - Stable for daily use
 - Design iterations in progress
-- Codebase structured for UI refinement in upcoming versions
+- New features in upcoming versions
 
 ## 🗺️ Roadmap (Post-0.6.0)
 
@@ -162,15 +161,6 @@ You can open a Discussion or Issue instead of a PR.
 Constructive feedback is especially welcome during the current 0.4.x UI refinement phase.
 
 ## Usage
-
-### New Tauri UI (default)
-
-From the `frontend/` directory:
-
-```bash
-npm install
-npm run tauri dev
-```
 
 The Tauri shell launches the Svelte UI and starts the Python backend in `backend/app.py` automatically.
 
