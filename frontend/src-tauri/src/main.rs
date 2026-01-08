@@ -5,6 +5,8 @@ use std::path::PathBuf;
 use std::process::{Child, ChildStdin, ChildStdout, Command, Stdio};
 use std::sync::Mutex;
 
+use tauri::Env;
+
 struct BackendProcess {
     _child: Child,
     stdin: ChildStdin,
