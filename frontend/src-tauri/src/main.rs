@@ -124,8 +124,13 @@ fn locate_backend_script(resource_dir: Option<PathBuf>) -> Result<PathBuf, Strin
 
 fn main() {
     let context = tauri::generate_context!();
-    let resource_dir =
-        tauri::api::path::resource_dir(context.package_info(), context.env());
+
+    // Tauri 1.x: Env is NOT stored in Context
+    let env = Env::default();
+    let resource_dir = tauri::api::path::resource_dir(
+        context.package_info(),
+        &env,
+    );
 
     tauri::Builder::default()
         .manage(BackendState::new(resource_dir).expect("Unable to start backend"))
