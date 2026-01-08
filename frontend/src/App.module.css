@@ -274,3 +274,51 @@
   font-size: 12px;
   color: var(--card-note-text);
 }
+
+.moreFunctionsPanel {
+  border-radius: 16px;
+  border: 1px solid var(--glass-border);
+  padding: 12px;
+  background: rgba(255, 255, 255, 0.35);
+}
+
+.moreFunctionsSummary {
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--card-body-text);
+  list-style: none;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.moreFunctionsSummary::-webkit-details-marker {
+  display: none;
+}
+
+.fileInput {
+  display: none;
+}
+
+.audioControls {
+  display: grid;
+  gap: 12px;
+  margin-top: 12px;
+}
+
+.audioButtonRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.playbackStatus {
+  margin: 0;
+  font-size: 13px;
+  color: var(--card-body-text);
+}
+
+:global(html[data-theme='dark']) .moreFunctionsPanel {
+  background: rgba(12, 18, 30, 0.6);
+}
