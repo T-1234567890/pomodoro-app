@@ -285,10 +285,10 @@
   margin-top: 24px;
   display: grid;
   gap: 16px;
+  justify-items: end;
 }
 
 .moreFunctionsToggle {
-  align-self: flex-start;
   border-radius: 999px;
   padding: 10px 20px;
   font-size: 14px;
@@ -296,10 +296,6 @@
   background: var(--toggle-bg);
   color: var(--toggle-text);
   cursor: pointer;
-  position: fixed;
-  right: 24px;
-  bottom: 24px;
-  z-index: 10;
 }
 
 .moreFunctionsPanel {
@@ -348,4 +344,3 @@
   font-size: 13px;
   color: var(--card-body-text);
 }
-
