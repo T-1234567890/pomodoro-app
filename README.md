@@ -6,8 +6,29 @@ The 0.5.x branch introduces a new glass-panel layout system with separate tiles 
 
 ## Version status
 
-- **Current version:** 0.5.x major migration, tech stack change, brand new glass UI
-- **Update history:** see `history_versions/` for archived notes.
+Current: Version 0.6.0-beta<br>
+Update history: see history_versions/ for archived notes.
+
+### ✨ New Features
+- Secondary “More Functions” panel
+- Built-in Music Player (local audio playback)
+- Independent Countdown Timer
+- UI layout cleanup and consolidation
+
+### 🔄 Ongoing Work
+- Feature iteration and refinement
+- Code cleanup after 0.5.x migration
+- Stability and performance improvements
+
+### ⚠️ Beta Notes
+- UI/UX is still evolving
+- If there is any bugs, please add a issue
+
+### 📌 Update Policy
+- 0.6.0-beta will receive more updates
+- Changes may occur without notice
+- Feedback, PR, and issue reports are welcome
+
 
 ## Changelog (short)
 
@@ -102,27 +123,30 @@ The goal of upcoming versions is to transition toward a softer, macOS-inspired l
 - Design iterations in progress
 - Codebase structured for UI refinement in upcoming versions
 
-## Roadmap
+## 🗺️ Roadmap (Post-0.6.0)
 
-Planned for future versions:
+Planned for future versions beyond the 0.6.x beta cycle:
 
-- 🎨 macOS-style liquid glass theme refinements
-- 🌙 improved dark mode contrast & tone
-- ⏳ optional auto-start next session
-- 🪄 smoother button & timer animations
-- 🎧 better media player integration
+- 🎨 more macOS-style liquid glass theme refinements
+- 🪄 Smoother button & timer animations
+- 💡 better logic
+- 🔔 Advanced reminder scheduling & customization
+- 🛎️ issue requirements
 
-## Collaboration & Contributions
+---
 
-Contributions, ideas, and feedback are welcome — this project is actively evolving through design and feature iterations.
+## 🤝 Collaboration & Contributions
+
+Contributions, ideas, and feedback are welcome — this project is actively evolving
+through design and feature iteration during the 0.6.0 beta phase.
 
 You’re welcome to help improve:
 
 - 🎨 UI & visual refinement (macOS-style liquid glass direction)
-- 🌓 Dark mode contrast & accessibility
 - 🧩 Session logic & customization options
+- 🔔 In-app reminder & notification
 - 🧪 Bug fixes and stability improvements
-- 📝 Documentation & usability polish
+- 📝 Documentation
 - ✅ Anything else
 
 ## Discussions & Suggestions
@@ -131,6 +155,7 @@ If you want to:
 
 - propose a feature
 - discuss UI / UX direction
+- any other things about this project
 
 You can open a Discussion or Issue instead of a PR.
 
@@ -164,25 +189,40 @@ The stats file format remains the same (`backend/pomodoro_data.json`).
 - The Svelte + Tauri frontend is now the primary UI, and the Python backend provides timer/state/stats over a JSON IPC bridge.
 - The Tkinter UI was preserved under `history/ui-tkinter-0.4.x` for rollback.
 
-## 🏗️ Working on...
+## 🏗️ Working on (0.6.0-beta)
 
-### Countdown Timer
-Run the simple timer or open it from the Pomodoro app with the "Open Countdown" button:
+### 🎧 Music Player (Improving)
+A lightweight in-app music player designed for focus sessions using local audio.
 
-### Music Player
-You can open the player from the Pomodoro window using the "Open Music Player"
-button, or run it standalone. The script lets you open a local audio file,
-view its basic ID3v1 metadata, and play it using the operating system's default
-utilities. Launch it with:
+Current functionality:
+- Opened from the **More Functions** panel
+- Select and play local audio files
+- Basic playback controls (play / pause / stop)
+- Volume adjustment and playback status display
 
-```bash
-python3 music_player.py
-```
+Planned improvements:
+- UI and layout refinements
+- Better integration with system media state (where supported)
+- Clearer playback feedback and status indicators
+- Improved handling of file selection and edge cases
 
-Only basic playback commands (play/stop) are provided and the script falls back
-on commands like `afplay` or `aplay` depending on your platform.
-If you have `playerctl` on Linux or AppleScript support on macOS, the player
-also displays the track currently playing in other music applications.
+The music player will continue to evolve during the 0.6.x beta or later future cycle.
+
+---
+
+### 🔔 Reminders (In-App Feature — In Progress)
+An upcoming in-app reminder system designed to gently notify users of important
+events without breaking focus.
+
+Current direction:
+- Reminders
+- Optional time-based reminders
+- Native system notifications (if supported)
+- Subtle, non-intrusive behavior by default
+- Fully optional and configurable
+
+The reminder system is intended to complement the Pomodoro workflow,
+not replace it or become distracting.
 
 
 ## ⚠️ 说明
