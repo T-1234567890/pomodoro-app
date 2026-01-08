@@ -15,6 +15,7 @@
     longBreakMinutes: number;
     sessionsBeforeLongBreak: number;
     autoLongBreak: boolean;
+    enableSessionReminder: boolean;
   };
 
   const defaultSettings: PomodoroSettings = {
@@ -22,7 +23,8 @@
     shortBreakMinutes: 5,
     longBreakMinutes: 15,
     sessionsBeforeLongBreak: 4,
-    autoLongBreak: true
+    autoLongBreak: true,
+    enableSessionReminder: true
   };
 
   let settings: PomodoroSettings = { ...defaultSettings };
@@ -40,6 +42,9 @@
   let audioUrl: string | null = null;
   let playbackStatus = 'No file selected';
   let volume = 0.7;
+  let reminderOpen = false;
+  let reminderTitle = '';
+  let reminderMessage = '';
 
   const handleAudioPlay = () => {
     playbackStatus = 'Playing';
@@ -121,6 +126,12 @@
     long_break: 'Long break'
   };
 
+  const reminderMessages: Record<SessionMode, string> = {
+    work: 'Session complete. Time to take a break.',
+    short_break: 'Break finished. Ready to focus again?',
+    long_break: 'Break finished. Ready to focus again?'
+  };
+
   const getDurationForMode = (targetMode: SessionMode) => {
     if (targetMode === 'work') {
       return settings.workMinutes;
@@ -166,6 +177,10 @@
     }
   };
 
+  const closeReminder = () => {
+    reminderOpen = false;
+  };
+
   const updateSettings = () => {
     settings = {
       ...settings,
@@ -181,10 +196,15 @@
       sessionsBeforeLongBreak: sanitizeSessionCount(
         settings.sessionsBeforeLongBreak,
         defaultSettings.sessionsBeforeLongBreak
-      )
+      ),
+      enableSessionReminder:
+        settings.enableSessionReminder ?? defaultSettings.enableSessionReminder
     };
     persistSettings();
     applyCurrentSessionDuration();
+    if (!settings.enableSessionReminder) {
+      closeReminder();
+    }
   };
 
   const setMode = (nextMode: SessionMode) => {
@@ -192,7 +212,37 @@
     applyCurrentSessionDuration();
   };
 
+  const showReminder = (completedMode: SessionMode) => {
+    if (!settings.enableSessionReminder) {
+      return;
+    }
+    reminderTitle = modeLabels[completedMode];
+    reminderMessage = reminderMessages[completedMode];
+    reminderOpen = true;
+
+    if (!('Notification' in window)) {
+      return;
+    }
+
+    const sendNotification = () => {
+      new Notification(reminderTitle, {
+        body: reminderMessage
+      });
+    };
+
+    if (Notification.permission === 'granted') {
+      sendNotification();
+    } else if (Notification.permission === 'default') {
+      Notification.requestPermission().then((permission) => {
+        if (permission === 'granted') {
+          sendNotification();
+        }
+      });
+    }
+  };
+
   const handleSessionComplete = () => {
+    const completedMode = mode;
     totalSessionsCompleted += 1;
     if (mode === 'work') {
       totalWorkSessions += 1;
@@ -207,6 +257,7 @@
       }
       setMode('work');
     }
+    showReminder(completedMode);
   };
 
   const tick = () => {
@@ -221,6 +272,7 @@
     if (running) {
       return;
     }
+    closeReminder();
     if (remainingSeconds === 0) {
       remainingSeconds = totalSeconds;
     }
@@ -239,6 +291,10 @@
   const resetTimer = () => {
     pauseTimer();
     applyCurrentSessionDuration();
+  };
+
+  const startNextSession = () => {
+    startTimer();
   };
 
   const applyTheme = (value: Theme) => {
@@ -419,6 +475,15 @@
               on:change={updateSettings}
             />
           </label>
+          <label class={styles.formRow}>
+            <span>Enable session-end pop-up reminder</span>
+            <input
+              class={styles.checkbox}
+              type="checkbox"
+              bind:checked={settings.enableSessionReminder}
+              on:change={updateSettings}
+            />
+          </label>
         </div>
 
         <p class={styles.cardNote}>
@@ -524,3 +589,20 @@
     </section>
   </section>
 </main>
+
+{#if reminderOpen}
+  <section class={styles.reminderToast} aria-live="polite">
+    <div>
+      <p class={styles.reminderTitle}>{reminderTitle}</p>
+      <p class={styles.reminderMessage}>{reminderMessage}</p>
+    </div>
+    <div class={styles.reminderActions}>
+      <button class={styles.primaryButton} type="button" on:click={startNextSession}>
+        Start Next Session
+      </button>
+      <button class={styles.ghostButton} type="button" on:click={closeReminder}>
+        Dismiss
+      </button>
+    </div>
+  </section>
+{/if}
