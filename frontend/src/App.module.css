@@ -358,10 +358,8 @@
   font-weight: 600;
 }
 
-.moreFunctionsNote {
-  margin: 6px 0 0;
-  font-size: 12px;
-  color: var(--card-note-text);
+/* More Functions – shared panel styles */
+
 .moreFunctionsPanel {
   border-radius: 16px;
   border: 1px solid var(--glass-border);
@@ -379,6 +377,41 @@
   align-items: center;
   gap: 8px;
 }
+
+.moreFunctionsSummary::-webkit-details-marker {
+  display: none;
+}
+
+/* Music player */
+
+.fileInput {
+  display: none;
+}
+
+.audioControls {
+  display: grid;
+  gap: 12px;
+  margin-top: 12px;
+}
+
+.audioButtonRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.playbackStatus {
+  margin: 0;
+  font-size: 13px;
+  color: var(--card-body-text);
+}
+
+/* Dark mode */
+
+:global(html[data-theme='dark']) .moreFunctionsPanel {
+  background: rgba(12, 18, 30, 0.6);
+}
+
 
 .moreFunctionsSummary::-webkit-details-marker {
   display: none;
