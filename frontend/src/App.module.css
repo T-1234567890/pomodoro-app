@@ -232,6 +232,50 @@
   gap: 18px;
 }
 
+.moreFunctionsSection {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 18px;
+}
+
+.moreFunctionsButton {
+  border-radius: 999px;
+  padding: 8px 18px;
+  font-size: 13px;
+  border: 1px solid var(--secondary-border);
+  background: var(--secondary-bg);
+  color: var(--secondary-text);
+  cursor: pointer;
+}
+
+.moreFunctionsPanel {
+  margin-top: 16px;
+}
+
+.moreFunctionsHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.moreFunctionsSubtitle {
+  margin: 6px 0 0;
+  font-size: 13px;
+  color: var(--card-note-text);
+}
+
+.moreFunctionsClose {
+  border-radius: 999px;
+  padding: 6px 14px;
+  font-size: 12px;
+  border: 1px solid var(--ghost-border);
+  background: var(--ghost-bg);
+  color: var(--ghost-text);
+  cursor: pointer;
+}
+
 .glassCard {
   padding: 18px;
   border-radius: 20px;
@@ -267,6 +311,12 @@
   font-size: 14px;
   background: var(--input-bg);
   color: var(--input-text);
+}
+
+.checkbox {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--primary-bg);
 }
 
 .cardNote {
