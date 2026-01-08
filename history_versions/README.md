@@ -8,3 +8,6 @@
   
 ## 0.4.2 Fix
 - Bug fixing
+
+## 0.5.x Beta & 0.5.x
+- Major tech stack migration, new glass UI
