@@ -15,6 +15,7 @@
   let theme: Theme = 'light';
   let preferSystemTheme = true;
   let systemThemeMedia: MediaQueryList | null = null;
+  let showMoreFunctions = false;
 
   const formatSeconds = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
@@ -192,5 +193,44 @@
         <p class={styles.cardNote}>Timer updates every second while running.</p>
       </div>
     </section>
+
+    <div class={styles.moreFunctionsSection}>
+      <button
+        class={styles.moreFunctionsButton}
+        type="button"
+        aria-expanded={showMoreFunctions}
+        aria-controls="more-functions-panel"
+        on:click={() => (showMoreFunctions = true)}
+      >
+        More Functions
+      </button>
+    </div>
+
+    {#if showMoreFunctions}
+      <section
+        id="more-functions-panel"
+        class={`${styles.glassCard} ${styles.moreFunctionsPanel}`}
+      >
+        <div class={styles.moreFunctionsHeader}>
+          <div>
+            <h2 class={styles.cardTitle}>More functions</h2>
+            <p class={styles.moreFunctionsSubtitle}>
+              Future tools like music, analytics, and shortcuts will appear here.
+            </p>
+          </div>
+          <button
+            class={styles.moreFunctionsClose}
+            type="button"
+            on:click={() => (showMoreFunctions = false)}
+          >
+            Close
+          </button>
+        </div>
+
+        <div class={styles.cardBody}>
+          <p>Placeholder panel ready for upcoming features.</p>
+        </div>
+      </section>
+    {/if}
   </section>
 </main>
