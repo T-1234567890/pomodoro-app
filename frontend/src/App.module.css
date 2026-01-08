@@ -325,6 +325,43 @@
   color: var(--card-note-text);
 }
 
+.moreFunctions {
+  margin-top: 24px;
+  display: grid;
+  gap: 16px;
+}
+
+.moreFunctionsToggle {
+  align-self: flex-start;
+  border-radius: 999px;
+  padding: 10px 20px;
+  font-size: 14px;
+  border: 1px solid var(--toggle-border);
+  background: var(--toggle-bg);
+  color: var(--toggle-text);
+  cursor: pointer;
+}
+
+.moreFunctionsPanel {
+  display: grid;
+  gap: 12px;
+}
+
+.moreFunctionsItem {
+  display: grid;
+  gap: 12px;
+}
+
+.moreFunctionsLabel {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.moreFunctionsNote {
+  margin: 6px 0 0;
+  font-size: 12px;
+  color: var(--card-note-text);
 .moreFunctionsPanel {
   border-radius: 16px;
   border: 1px solid var(--glass-border);
