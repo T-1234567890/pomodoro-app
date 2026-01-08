@@ -48,13 +48,20 @@ This version introduces a new architecture:
 
 The Python backend is launched automatically by Tauri through an IPC bridge — no manual scripts are required.
 
-## ▶️ Start the App (Development Mode)
+## ▶️ Start the App (Development Mode: Packaged app working on future generations)
 
 Run these commands from the project root:
 
 ```bash
 cd frontend
 npm install
+npm run tauri dev
+```
+
+or (If npm installed)
+
+```bash
+cd frontend
 npm run tauri dev
 ```
 
