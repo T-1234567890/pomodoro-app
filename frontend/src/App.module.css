@@ -251,6 +251,12 @@
   color: var(--card-body-text);
 }
 
+.mediaControls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
 .formRow {
   display: flex;
   flex-direction: column;

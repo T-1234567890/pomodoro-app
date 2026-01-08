@@ -12,6 +12,8 @@
   let remainingSeconds = totalSeconds;
   let running = false;
   let intervalId: ReturnType<typeof setInterval> | null = null;
+  let audioRef: HTMLAudioElement | null = null;
+  let audioVolume = 0.6;
   let theme: Theme = 'light';
   let preferSystemTheme = true;
   let systemThemeMedia: MediaQueryList | null = null;
@@ -68,6 +70,34 @@
     remainingSeconds = totalSeconds;
   };
 
+  const playAudio = () => {
+    audioRef?.play();
+  };
+
+  const pauseAudio = () => {
+    audioRef?.pause();
+  };
+
+  const stopAudio = () => {
+    if (!audioRef) {
+      return;
+    }
+    audioRef.pause();
+    audioRef.currentTime = 0;
+  };
+
+  const updateAudioVolume = (value: number) => {
+    audioVolume = value;
+    if (audioRef) {
+      audioRef.volume = value;
+    }
+  };
+
+  const handleVolumeInput = (event: Event) => {
+    const target = event.currentTarget as HTMLInputElement;
+    updateAudioVolume(parseFloat(target.value));
+  };
+
   const applyTheme = (value: Theme) => {
     theme = value;
     document.documentElement.dataset.theme = value;
@@ -104,6 +134,8 @@
     };
 
     systemThemeMedia.addEventListener('change', handleSystemThemeChange);
+    updateAudioVolume(audioVolume);
+    startTimer();
 
     return () => {
       pauseTimer();
@@ -157,6 +189,43 @@
 
     <!-- SETTINGS + STATS GRID -->
     <section class={styles.grid}>
+
+      <!-- MUSIC PLAYER CARD -->
+      <div class={styles.glassCard}>
+        <h2 class={styles.cardTitle}>Focus music</h2>
+
+        <div class={styles.cardBody}>
+          <p>Play a background track to stay in the zone.</p>
+
+          <div class={styles.mediaControls}>
+            <button class={styles.primaryButton} type="button" on:click={playAudio}>
+              Play
+            </button>
+            <button class={styles.secondaryButton} type="button" on:click={pauseAudio}>
+              Pause
+            </button>
+            <button class={styles.ghostButton} type="button" on:click={stopAudio}>
+              Stop
+            </button>
+          </div>
+
+          <label class={styles.formRow}>
+            <span>Volume</span>
+            <input
+              class={styles.input}
+              type="range"
+              min="0"
+              max="1"
+              step="0.01"
+              value={audioVolume}
+              on:input={handleVolumeInput}
+            />
+          </label>
+        </div>
+
+        <p class={styles.cardNote}>Audio source: /assets/sounds/focus.mp3</p>
+        <audio bind:this={audioRef} src="/assets/sounds/focus.mp3" />
+      </div>
 
       <!-- PRESETS CARD -->
       <div class={styles.glassCard}>
