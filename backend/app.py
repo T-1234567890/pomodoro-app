@@ -102,6 +102,18 @@ class PomodoroEngine:
             self.state.break_kind = "short"
             self.state.cycle_progress = 0
 
+    def update_durations(
+        self,
+        work_minutes: int | None = None,
+        break_minutes: int | None = None,
+        long_break_minutes: int | None = None,
+        interval: int | None = None,
+    ) -> None:
+        with self._lock:
+            self._apply_durations(work_minutes, break_minutes, long_break_minutes, interval)
+            if not self.state.running:
+                self._refresh_remaining_seconds()
+
     def get_state(self) -> Dict[str, Any]:
         with self._lock:
             return self._state_payload()
@@ -249,6 +261,14 @@ class PomodoroBackend:
             return {"ok": True, "state": self.engine.get_state()}
         if action == "set_preset":
             self.engine.set_preset(str(payload.get("preset", "")))
+            return {"ok": True, "state": self.engine.get_state()}
+        if action == "update_durations":
+            self.engine.update_durations(
+                work_minutes=_maybe_int(payload.get("work_minutes")),
+                break_minutes=_maybe_int(payload.get("break_minutes")),
+                long_break_minutes=_maybe_int(payload.get("long_break")),
+                interval=_maybe_int(payload.get("interval")),
+            )
             return {"ok": True, "state": self.engine.get_state()}
         if action in {"get_current_state", "get_state"}:
             return {"ok": True, "state": self.engine.get_state()}
