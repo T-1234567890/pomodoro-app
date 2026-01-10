@@ -1,5 +1,6 @@
 <script lang="ts">
   import { onMount } from 'svelte';
+  import { appWindow } from '@tauri-apps/api/window';
   import CountdownTimer from './lib/CountdownTimer.svelte';
   import { controlSystemMedia, getSystemMediaState, type SystemMediaState } from './lib/systemMedia';
   import styles from './App.module.css';
@@ -83,6 +84,18 @@
     focusSound: false,
     localAudio: false,
     systemAudio: false
+  };
+  const closeWindow = () => {
+    appWindow.close();
+  };
+
+  const minimizeWindow = () => {
+    appWindow.minimize();
+  };
+
+  const toggleFullscreen = async () => {
+    const isFullscreen = await appWindow.isFullscreen();
+    await appWindow.setFullscreen(!isFullscreen);
   };
   type AppTab = 'music' | 'pomodoro' | 'countdown';
   const tabs: { id: AppTab; label: string; icon: string; description: string }[] = [
@@ -793,6 +806,31 @@
 
 <main class={styles.app}>
   <section class={styles.window}>
+    <header class={styles.titleBar} data-tauri-drag-region>
+      <div class={styles.trafficLights}>
+        <button
+          class={`${styles.trafficLight} ${styles.trafficLightClose}`}
+          type="button"
+          on:click={closeWindow}
+          aria-label="Close window"
+          data-tauri-drag-region="false"
+        />
+        <button
+          class={`${styles.trafficLight} ${styles.trafficLightMinimize}`}
+          type="button"
+          on:click={minimizeWindow}
+          aria-label="Minimize window"
+          data-tauri-drag-region="false"
+        />
+        <button
+          class={`${styles.trafficLight} ${styles.trafficLightFullscreen}`}
+          type="button"
+          on:click={toggleFullscreen}
+          aria-label="Toggle fullscreen"
+          data-tauri-drag-region="false"
+        />
+      </div>
+    </header>
     <header class={styles.header}>
       <div>
         <p class={styles.kicker}>Pomodoro</p>

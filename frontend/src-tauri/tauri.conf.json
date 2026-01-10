@@ -13,6 +13,9 @@
     "allowlist": {
       "shell": {
         "all": true
+      },
+      "window": {
+        "all": true
       }
     },
     "bundle": {
@@ -27,7 +30,7 @@
         "height": 720,
         "resizable": true,
         "transparent": true,
-        "decorations": true
+        "decorations": false
       }
     ]
   }
