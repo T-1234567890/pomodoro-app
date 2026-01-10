@@ -46,6 +46,12 @@
   let remainingSeconds = totalSeconds;
   let running = false;
   let intervalId: ReturnType<typeof setInterval> | null = null;
+  const AUTO_START_DELAY_SECONDS = 5;
+  let autoStartTimeout: ReturnType<typeof setTimeout> | null = null;
+  let autoStartInterval: ReturnType<typeof setInterval> | null = null;
+  let autoStartRemaining = 0;
+  let autoStartActive = false;
+  let awaitingNextSession = false;
   let theme: Theme = 'light';
   let preferSystemTheme = true;
   let systemThemeMedia: MediaQueryList | null = null;
@@ -97,7 +103,7 @@
   type AppTab = 'music' | 'pomodoro' | 'countdown';
   const tabs: { id: AppTab; label: string; icon: string; description: string }[] = [
     { id: 'music', label: 'Music', icon: '🎧', description: 'Focus sounds and music' },
-    { id: 'pomodoro', label: 'Pomodoro', icon: '⏱', description: 'Focus timer' },
+    { id: 'pomodoro', label: 'Pomodoro', icon: '🍅', description: 'Focus timer' },
     { id: 'countdown', label: 'Countdown', icon: '⏳', description: 'Independent countdown' }
   ];
   let activeTab: AppTab = 'pomodoro';
@@ -533,15 +539,54 @@
 
   const applyCurrentSessionDuration = () => {
     totalSeconds = getDurationForMode(mode) * 60;
-    if (!running) {
+    if (!running && !awaitingNextSession) {
       remainingSeconds = totalSeconds;
     } else if (remainingSeconds > totalSeconds) {
       remainingSeconds = totalSeconds;
     }
   };
 
+  const cancelAutoStart = () => {
+    if (autoStartTimeout) {
+      clearTimeout(autoStartTimeout);
+      autoStartTimeout = null;
+    }
+    if (autoStartInterval) {
+      clearInterval(autoStartInterval);
+      autoStartInterval = null;
+    }
+    autoStartRemaining = 0;
+    autoStartActive = false;
+  };
+
+  const scheduleAutoStart = () => {
+    cancelAutoStart();
+    autoStartRemaining = AUTO_START_DELAY_SECONDS;
+    autoStartActive = true;
+    autoStartInterval = setInterval(() => {
+      autoStartRemaining = Math.max(0, autoStartRemaining - 1);
+      if (autoStartRemaining === 0 && autoStartInterval) {
+        clearInterval(autoStartInterval);
+        autoStartInterval = null;
+      }
+    }, 1000);
+    autoStartTimeout = setTimeout(() => {
+      if (!autoStartActive) {
+        return;
+      }
+      autoStartActive = false;
+      if (autoStartInterval) {
+        clearInterval(autoStartInterval);
+        autoStartInterval = null;
+      }
+      autoStartTimeout = null;
+      startTimer();
+    }, AUTO_START_DELAY_SECONDS * 1000);
+  };
+
   const closeReminder = () => {
     reminderOpen = false;
+    cancelAutoStart();
   };
 
   const updateSettings = () => {
@@ -636,7 +681,9 @@
     remainingSeconds = Math.max(0, remainingSeconds - 1);
     if (remainingSeconds === 0) {
       pauseTimer();
+      awaitingNextSession = true;
       handleSessionComplete();
+      scheduleAutoStart();
     }
   };
 
@@ -644,7 +691,9 @@
     if (running) {
       return;
     }
+    cancelAutoStart();
     closeReminder();
+    awaitingNextSession = false;
     if (remainingSeconds === 0) {
       remainingSeconds = totalSeconds;
     }
@@ -653,6 +702,7 @@
   };
 
   const pauseTimer = () => {
+    cancelAutoStart();
     if (intervalId) {
       clearInterval(intervalId);
       intervalId = null;
@@ -662,6 +712,8 @@
 
   const resetTimer = () => {
     pauseTimer();
+    cancelAutoStart();
+    awaitingNextSession = false;
     applyCurrentSessionDuration();
   };
 
@@ -856,6 +908,7 @@
 
     return () => {
       pauseTimer();
+      cancelAutoStart();
       systemThemeMedia?.removeEventListener('change', handleSystemThemeChange);
       if (systemMediaPollId) {
         clearInterval(systemMediaPollId);
@@ -1351,6 +1404,11 @@
     <div>
       <p class={styles.reminderTitle}>{reminderTitle}</p>
       <p class={styles.reminderMessage}>{reminderMessage}</p>
+      {#if autoStartActive}
+        <p class={styles.reminderCountdown}>
+          Next session starting in {autoStartRemaining} seconds…
+        </p>
+      {/if}
     </div>
     <div class={styles.reminderActions}>
       <button class={styles.primaryButton} type="button" on:click={startNextSession}>
