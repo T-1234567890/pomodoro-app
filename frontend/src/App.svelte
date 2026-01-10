@@ -72,14 +72,79 @@
     localAudio: false,
     systemAudio: false
   };
-  type AppTab = 'pomodoro' | 'music' | 'countdown' | 'settings';
+  type AppTab = 'music' | 'pomodoro' | 'countdown';
   const tabs: { id: AppTab; label: string; icon: string; description: string }[] = [
-    { id: 'pomodoro', label: 'Pomodoro', icon: '⏱', description: 'Focus timer' },
     { id: 'music', label: 'Music', icon: '🎧', description: 'Focus sounds and music' },
-    { id: 'countdown', label: 'Countdown', icon: '⏳', description: 'Independent countdown' },
-    { id: 'settings', label: 'More', icon: '⚙️', description: 'Settings and preferences' }
+    { id: 'pomodoro', label: 'Pomodoro', icon: '⏱', description: 'Focus timer' },
+    { id: 'countdown', label: 'Countdown', icon: '⏳', description: 'Independent countdown' }
   ];
   let activeTab: AppTab = 'pomodoro';
+  type PomodoroTemplate = {
+    id: string;
+    label: string;
+    description: string;
+    settings: Pick<
+      PomodoroSettings,
+      'workMinutes' | 'shortBreakMinutes' | 'longBreakMinutes' | 'sessionsBeforeLongBreak'
+    >;
+  };
+  const pomodoroTemplates: PomodoroTemplate[] = [
+    {
+      id: 'classic',
+      label: 'Classic Focus',
+      description: '25 / 5 with a longer break every 4 sessions.',
+      settings: {
+        workMinutes: 25,
+        shortBreakMinutes: 5,
+        longBreakMinutes: 15,
+        sessionsBeforeLongBreak: 4
+      }
+    },
+    {
+      id: 'deep-work',
+      label: 'Deep Work',
+      description: '50 / 10 with a longer break every 2 sessions.',
+      settings: {
+        workMinutes: 50,
+        shortBreakMinutes: 10,
+        longBreakMinutes: 20,
+        sessionsBeforeLongBreak: 2
+      }
+    },
+    {
+      id: 'sprint',
+      label: 'Sprint',
+      description: '90 / 20 with a longer reset every session.',
+      settings: {
+        workMinutes: 90,
+        shortBreakMinutes: 20,
+        longBreakMinutes: 30,
+        sessionsBeforeLongBreak: 1
+      }
+    },
+    {
+      id: 'flow',
+      label: 'Flow',
+      description: '40 / 8 with a longer break every 3 sessions.',
+      settings: {
+        workMinutes: 40,
+        shortBreakMinutes: 8,
+        longBreakMinutes: 20,
+        sessionsBeforeLongBreak: 3
+      }
+    },
+    {
+      id: 'steady',
+      label: 'Steady',
+      description: '60 / 15 with a longer break every 2 sessions.',
+      settings: {
+        workMinutes: 60,
+        shortBreakMinutes: 15,
+        longBreakMinutes: 30,
+        sessionsBeforeLongBreak: 2
+      }
+    }
+  ];
 
   const handleAudioPlay = () => {
     playbackStatus = 'Playing';
@@ -340,6 +405,14 @@
     if (!settings.enableSessionReminder) {
       closeReminder();
     }
+  };
+
+  const applyTemplate = (template: PomodoroTemplate) => {
+    settings = {
+      ...settings,
+      ...template.settings
+    };
+    updateSettings();
   };
 
   const setMode = (nextMode: SessionMode) => {
@@ -664,6 +737,111 @@
 
         <section class={styles.grid}>
           <div class={styles.glassCard}>
+            <h2 class={styles.cardTitle}>Timer settings</h2>
+
+            <div class={styles.cardBody}>
+              <label class={styles.formRow}>
+                <span>Work duration (minutes)</span>
+                <input
+                  class={styles.input}
+                  type="number"
+                  min="1"
+                  bind:value={settings.workMinutes}
+                  on:input={updateSettings}
+                />
+              </label>
+              <label class={styles.formRow}>
+                <span>Short break duration (minutes)</span>
+                <input
+                  class={styles.input}
+                  type="number"
+                  min="1"
+                  bind:value={settings.shortBreakMinutes}
+                  on:input={updateSettings}
+                />
+              </label>
+              <label class={styles.formRow}>
+                <span>Long break duration (minutes)</span>
+                <input
+                  class={styles.input}
+                  type="number"
+                  min="1"
+                  bind:value={settings.longBreakMinutes}
+                  on:input={updateSettings}
+                />
+              </label>
+              <label class={styles.formRow}>
+                <span>Sessions before long break</span>
+                <input
+                  class={styles.input}
+                  type="number"
+                  min="1"
+                  bind:value={settings.sessionsBeforeLongBreak}
+                  on:input={updateSettings}
+                />
+              </label>
+              <label class={styles.formRow}>
+                <span>Automatic long break trigger</span>
+                <input
+                  class={styles.checkbox}
+                  type="checkbox"
+                  bind:checked={settings.autoLongBreak}
+                  on:change={updateSettings}
+                />
+              </label>
+              <label class={styles.formRow}>
+                <span>Enable session-end pop-up reminder</span>
+                <input
+                  class={styles.checkbox}
+                  type="checkbox"
+                  bind:checked={settings.enableSessionReminder}
+                  on:change={updateSettings}
+                />
+              </label>
+            </div>
+
+            <p class={styles.cardNote}>
+              Settings persist locally and only update the active timer if needed.
+            </p>
+            <div class={styles.templateChips} aria-label="Timer templates">
+              {#each pomodoroTemplates as template}
+                <button
+                  class={styles.templateChip}
+                  type="button"
+                  on:click={() => applyTemplate(template)}
+                >
+                  {template.label}
+                </button>
+              {/each}
+            </div>
+          </div>
+
+          <div class={styles.glassCard}>
+            <h2 class={styles.cardTitle}>Timer templates</h2>
+            <p class={styles.cardNote}>
+              Quick starting points for different focus styles. Apply anytime without stopping the
+              timer.
+            </p>
+            <div class={styles.templateList}>
+              {#each pomodoroTemplates as template}
+                <button
+                  class={styles.templateButton}
+                  type="button"
+                  on:click={() => applyTemplate(template)}
+                >
+                  <div>
+                    <p class={styles.templateLabel}>{template.label}</p>
+                    <p class={styles.templateMeta}>{template.description}</p>
+                  </div>
+                  <span class={styles.templateTime}>
+                    {template.settings.workMinutes} / {template.settings.shortBreakMinutes}
+                  </span>
+                </button>
+              {/each}
+            </div>
+          </div>
+
+          <div class={styles.glassCard}>
             <h2 class={styles.cardTitle}>Session details</h2>
 
             <div class={styles.cardBody}>
@@ -823,82 +1001,6 @@
         </div>
       </section>
 
-      <section
-        class={`${styles.view} ${activeTab === 'settings' ? styles.viewActive : ''}`}
-        id="view-settings"
-        aria-hidden={activeTab !== 'settings'}
-      >
-        <section class={styles.grid}>
-          <div class={styles.glassCard}>
-            <h2 class={styles.cardTitle}>Timer settings</h2>
-
-            <div class={styles.cardBody}>
-              <label class={styles.formRow}>
-                <span>Work duration (minutes)</span>
-                <input
-                  class={styles.input}
-                  type="number"
-                  min="1"
-                  bind:value={settings.workMinutes}
-                  on:input={updateSettings}
-                />
-              </label>
-              <label class={styles.formRow}>
-                <span>Short break duration (minutes)</span>
-                <input
-                  class={styles.input}
-                  type="number"
-                  min="1"
-                  bind:value={settings.shortBreakMinutes}
-                  on:input={updateSettings}
-                />
-              </label>
-              <label class={styles.formRow}>
-                <span>Long break duration (minutes)</span>
-                <input
-                  class={styles.input}
-                  type="number"
-                  min="1"
-                  bind:value={settings.longBreakMinutes}
-                  on:input={updateSettings}
-                />
-              </label>
-              <label class={styles.formRow}>
-                <span>Sessions before long break</span>
-                <input
-                  class={styles.input}
-                  type="number"
-                  min="1"
-                  bind:value={settings.sessionsBeforeLongBreak}
-                  on:input={updateSettings}
-                />
-              </label>
-              <label class={styles.formRow}>
-                <span>Automatic long break trigger</span>
-                <input
-                  class={styles.checkbox}
-                  type="checkbox"
-                  bind:checked={settings.autoLongBreak}
-                  on:change={updateSettings}
-                />
-              </label>
-              <label class={styles.formRow}>
-                <span>Enable session-end pop-up reminder</span>
-                <input
-                  class={styles.checkbox}
-                  type="checkbox"
-                  bind:checked={settings.enableSessionReminder}
-                  on:change={updateSettings}
-                />
-              </label>
-            </div>
-
-            <p class={styles.cardNote}>
-              Settings persist locally and only update the active timer if needed.
-            </p>
-          </div>
-        </section>
-      </section>
     </div>
 
     <nav class={styles.bottomNav} aria-label="Primary">
