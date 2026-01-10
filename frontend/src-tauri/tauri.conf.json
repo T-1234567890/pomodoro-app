@@ -20,6 +20,9 @@
       "targets": "all",
       "identifier": "com.pomodoro.app"
     },
+    "systemTray": {
+      "iconPath": "icons/icon.png"
+    },
     "windows": [
       {
         "title": "Pomodoro",
