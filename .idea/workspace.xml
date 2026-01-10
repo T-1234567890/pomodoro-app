@@ -4,9 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="2909c215-f590-49b8-8f9e-264ead6228fc" name="Changes" comment="Bug fix">
-      <change beforePath="$PROJECT_DIR$/frontend/src-tauri/icons/icon.png" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src-tauri/icons/icon.png" afterDir="false" />
-    </list>
+    <list default="true" id="2909c215-f590-49b8-8f9e-264ead6228fc" name="Changes" comment="Bug fix" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
