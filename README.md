@@ -9,34 +9,26 @@ The 0.5.x branch introduces a new glass-panel layout system with separate tiles 
 ## Version status
 
 Current Version: <br>
-🧪 0.6.3 Beta
+🧪 0.7.0 Beta
 
 Update history: see history_versions/ for archived notes.
-
-### 🔄 Ongoing Work
-- Feature iteration and refinement
-- Code cleanup after 0.5.x migration
-- Stability and performance improvements
 
 ### ⚠️ Beta Notes
 - UI/UX is still evolving
 - If there is any bugs, please add a issue
 
 ### 📌 Update Policy
-- 0.6.0-beta will receive more updates
+- Will receive more updates
 - Changes may occur without notice
 - Feedback, PR, and issue reports are welcome
 
 
 ## Changelog (short)
 
-## 0.6.3
-- Added session-end pop-up reminder and clearer completion feedback
-- Added white noise playback alongside the in-app music player
-- Refined timer visuals and readability across glass tiles
-- Improved Dark Mode contrast for text, disabled buttons, and dividers
-- Expanded glass theme depth with layered panels, gradients, and softer shadows
-- No changes to timer logic or settings behavior in this update
+## 0.7.x
+- General UI improvements
+- New navigation bar
+- New pop up reminders when timer season ends
 
 ## Features
 
@@ -102,10 +94,10 @@ npm install -g @tauri-apps/cli
 
 The current UI uses a structured glass tile system inspired by macOS 26 (liquid glass).
 
-Version 0.6.x focuses on:
+Version 0.7.x focuses on:
 
-- improving animations
-- improving the new UI
+- Clean up UI
+- General UI improvements
 
 The goal of upcoming versions is to transition toward a softer, macOS-inspired liquid glass look — with more subtle contrast, improved typography, and refined panel depth.
 
@@ -117,13 +109,14 @@ The goal of upcoming versions is to transition toward a softer, macOS-inspired l
 
 ## 🗺️ Roadmap (Post-0.6.0)
 
-Planned for future versions beyond the 0.6.x beta cycle:
+Planned for future versions:
 
-- 🎨 more macOS-style liquid glass theme refinements
+- 🎨 More macOS-style liquid glass theme refinements
 - 🪄 Smoother button & timer animations
-- 💡 better logic
+- 💡 Better logic
 - 🔔 Advanced reminder scheduling & customization
-- 🛎️ issue requirements
+- 🖥️ Mac menu bar support
+- 🛎️ Issue requirements
 
 ---
 
@@ -172,24 +165,10 @@ The stats file format remains the same (`backend/pomodoro_data.json`).
 - The Svelte + Tauri frontend is now the primary UI, and the Python backend provides timer/state/stats over a JSON IPC bridge.
 - The Tkinter UI was preserved under `history/ui-tkinter-0.4.x` for rollback.
 
-## 🏗️ Working on (0.6.0-beta)
+## 🏗️ Working on
 
-### 🎧 Music Player (Improving)
-A lightweight in-app music player designed for focus sessions using local audio.
-
-Current functionality:
-- Opened from the **More Functions** panel
-- Select and play local audio files
-- Basic playback controls (play / pause / stop)
-- Volume adjustment and playback status display
-
-Planned improvements:
-- UI and layout refinements
-- Better integration with system media state (where supported)
-- Clearer playback feedback and status indicators
-- Improved handling of file selection and edge cases
-
-The music player will continue to evolve during the 0.6.x beta or later future cycle.
+### 🖥️ Menu Bar support (In Progress)
+Showing the real time main timer on mac menu bar.
 
 ---
 
