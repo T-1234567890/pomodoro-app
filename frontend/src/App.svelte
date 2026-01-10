@@ -1,6 +1,16 @@
 <script lang="ts">
   import { onMount } from 'svelte';
+  import { listen } from '@tauri-apps/api/event';
+  import { invoke } from '@tauri-apps/api/tauri';
   import CountdownTimer from './lib/CountdownTimer.svelte';
+  import {
+    countdownState,
+    getCountdownSnapshot,
+    initializeCountdown,
+    pauseCountdown,
+    resetCountdown,
+    startCountdown
+  } from './lib/countdownStore';
   import { controlSystemMedia, getSystemMediaState, type SystemMediaState } from './lib/systemMedia';
   import styles from './App.module.css';
 
@@ -47,8 +57,8 @@
   let reminderOpen = false;
   let reminderTitle = '';
   let reminderMessage = '';
-  type FocusSoundType = 'white' | 'rain' | 'brown';
-  let focusSoundSelection: FocusSoundType = 'white';
+  type FocusSoundType = 'off' | 'white' | 'rain' | 'brown';
+  let focusSoundSelection: FocusSoundType = 'off';
   let focusAudioContext: AudioContext | null = null;
   let focusNoiseSource: AudioBufferSourceNode | null = null;
   let focusGainNode: GainNode | null = null;
@@ -91,6 +101,10 @@
     { id: 'countdown', label: 'Countdown', icon: '⏳', description: 'Independent countdown' }
   ];
   let activeTab: AppTab = 'pomodoro';
+  let countdownSnapshot = getCountdownSnapshot();
+  let countdownUnsubscribe: (() => void) | null = null;
+  let menuSyncId: ReturnType<typeof setInterval> | null = null;
+  let menuListenerCleanup: (() => void) | null = null;
   type PomodoroTemplate = {
     id: string;
     label: string;
@@ -249,7 +263,7 @@
     }
   };
 
-  const createNoiseBuffer = (context: AudioContext, mode: FocusSoundType) => {
+  const createNoiseBuffer = (context: AudioContext, mode: Exclude<FocusSoundType, 'off'>) => {
     const durationSeconds = 2;
     const frameCount = context.sampleRate * durationSeconds;
     const buffer = context.createBuffer(1, frameCount, context.sampleRate);
@@ -271,6 +285,9 @@
   };
 
   const startFocusSound = async (mode: FocusSoundType) => {
+    if (mode === 'off') {
+      return;
+    }
     ensureFocusAudio();
     stopAudio();
     await pauseSystemMediaIfPlaying();
@@ -305,6 +322,10 @@
   const handleFocusSoundChange = async (event: Event) => {
     const target = event.currentTarget as HTMLSelectElement;
     focusSoundSelection = target.value as FocusSoundType;
+    if (focusSoundSelection === 'off') {
+      stopFocusSound();
+      return;
+    }
     if (activeAudioSource === 'focus' && focusSoundPlaying) {
       await startFocusSound(focusSoundSelection);
     }
@@ -355,6 +376,9 @@
       }
       return;
     }
+    if (focusSoundSelection === 'off') {
+      focusSoundSelection = 'white';
+    }
     if (focusSoundPlaying) {
       pauseFocusSound();
     } else {
@@ -380,6 +404,80 @@
         console.error('Failed to control system media', error);
       }
     }
+  };
+
+  const syncMenuState = async () => {
+    const pomodoroActive = running || remainingSeconds < totalSeconds;
+    const countdownTotalSeconds = countdownSnapshot.durationMinutes * 60;
+    const countdownActive =
+      countdownSnapshot.running || countdownSnapshot.remainingSeconds < countdownTotalSeconds;
+    const audioIsPlaying =
+      activeAudioSource === 'system'
+        ? systemMediaState.isPlaying
+        : activeAudioSource === 'local'
+          ? localAudioPlaying
+          : focusSoundPlaying;
+    const nextEnabled =
+      activeAudioSource === 'system' &&
+      systemMediaState.available &&
+      systemMediaState.supportsNext;
+
+    try {
+      await invoke('sync_menu_state', {
+        payload: {
+          pomodoro: {
+            running,
+            active: pomodoroActive,
+            mode,
+            remainingSeconds,
+            totalSeconds
+          },
+          countdown: {
+            running: countdownSnapshot.running,
+            active: countdownActive,
+            remainingSeconds: countdownSnapshot.remainingSeconds,
+            totalSeconds: countdownTotalSeconds
+          },
+          audio: {
+            activeSource: activeAudioSource,
+            isPlaying: audioIsPlaying,
+            playPauseEnabled: !playPauseDisabled,
+            previousEnabled: !previousDisabled,
+            nextEnabled,
+            focusSound: focusSoundSelection
+          }
+        }
+      });
+    } catch (error) {
+      console.error('Failed to sync menu state', error);
+    }
+  };
+
+  const startPomodoroFromMenu = () => {
+    setMode('work');
+    startTimer();
+  };
+
+  const startBreakFromMenu = () => {
+    setMode('short_break');
+    startTimer();
+  };
+
+  const skipBreakFromMenu = () => {
+    setMode('work');
+    startTimer();
+  };
+
+  const handleFocusSoundMenuSelection = async (selection: FocusSoundType) => {
+    focusSoundSelection = selection;
+    if (selection === 'off') {
+      stopFocusSound();
+      return;
+    }
+    if (activeAudioSource !== 'focus') {
+      await setActiveAudioSource('focus');
+    }
+    await startFocusSound(selection);
   };
   let cycleWorkSessions = 0;
   let totalWorkSessions = 0;
@@ -662,6 +760,11 @@
     systemThemeMedia = window.matchMedia('(prefers-color-scheme: dark)');
     lastMode = mode;
 
+    initializeCountdown(25);
+    countdownUnsubscribe = countdownState.subscribe((state) => {
+      countdownSnapshot = state;
+    });
+
     if (storedTheme === 'light' || storedTheme === 'dark') {
       preferSystemTheme = false;
       applyTheme(storedTheme);
@@ -685,6 +788,63 @@
     updateSettings();
     void updateSystemMediaState();
     systemMediaPollId = setInterval(updateSystemMediaState, 4000);
+    menuSyncId = setInterval(syncMenuState, 1000);
+    void syncMenuState();
+
+    void (async () => {
+      const unlistenTray = await listen('tray-action', async (event) => {
+        const payload = event.payload as { action: string; value?: string };
+        switch (payload.action) {
+          case 'pomodoro_start':
+            startPomodoroFromMenu();
+            break;
+          case 'pomodoro_pause':
+            pauseTimer();
+            break;
+          case 'pomodoro_reset':
+            resetTimer();
+            break;
+          case 'break_start':
+            startBreakFromMenu();
+            break;
+          case 'break_skip':
+            skipBreakFromMenu();
+            break;
+          case 'countdown_start':
+            startCountdown();
+            break;
+          case 'countdown_pause':
+            pauseCountdown();
+            break;
+          case 'countdown_reset':
+            resetCountdown();
+            break;
+          case 'music_play_pause':
+            await handlePlayPause();
+            break;
+          case 'music_previous':
+            await controlSystemMedia('previous');
+            break;
+          case 'music_next':
+            await controlSystemMedia('next');
+            break;
+          case 'focus_sound':
+            await handleFocusSoundMenuSelection(payload.value as FocusSoundType);
+            break;
+          default:
+            break;
+        }
+      });
+
+      const unlistenTab = await listen('select-tab', (event) => {
+        activeTab = event.payload as AppTab;
+      });
+
+      menuListenerCleanup = () => {
+        unlistenTray();
+        unlistenTab();
+      };
+    })();
 
     const handleSystemThemeChange = (event: MediaQueryListEvent) => {
       if (preferSystemTheme) {
@@ -699,6 +859,15 @@
       systemThemeMedia?.removeEventListener('change', handleSystemThemeChange);
       if (systemMediaPollId) {
         clearInterval(systemMediaPollId);
+      }
+      if (menuSyncId) {
+        clearInterval(menuSyncId);
+      }
+      if (menuListenerCleanup) {
+        menuListenerCleanup();
+      }
+      if (countdownUnsubscribe) {
+        countdownUnsubscribe();
       }
       if (audioElement) {
         audioElement.pause();
@@ -1068,6 +1237,7 @@
                       bind:value={focusSoundSelection}
                       on:change={handleFocusSoundChange}
                     >
+                      <option value="off">Off</option>
                       <option value="white">White noise</option>
                       <option value="rain">Rain</option>
                       <option value="brown">Brown noise</option>
