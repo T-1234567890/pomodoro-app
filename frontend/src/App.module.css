@@ -238,10 +238,12 @@
 .content {
   display: grid;
   gap: 24px;
+  min-height: 560px;
 }
 
 .view {
   display: none;
+  min-height: 560px;
 }
 
 .viewActive {
@@ -343,6 +345,80 @@
   color: var(--card-body-text);
 }
 
+.templateList {
+  display: grid;
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.templateButton {
+  border-radius: 16px;
+  border: 1px solid var(--glass-border);
+  background: var(--glass-bg);
+  padding: 12px 14px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  text-align: left;
+  color: var(--card-body-text);
+  cursor: pointer;
+}
+
+.templateButton:hover {
+  border-color: var(--secondary-border);
+}
+
+.templateButton:focus-visible {
+  outline: 2px solid rgba(120, 160, 255, 0.6);
+  outline-offset: 2px;
+}
+
+.templateLabel {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--app-text);
+}
+
+.templateMeta {
+  margin: 4px 0 0;
+  font-size: 12px;
+  color: var(--card-note-text);
+}
+
+.templateTime {
+  font-size: 12px;
+  color: var(--card-note-text);
+  white-space: nowrap;
+}
+
+.templateChips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.templateChip {
+  border-radius: 999px;
+  border: 1px solid var(--glass-border);
+  background: var(--glass-bg);
+  padding: 6px 12px;
+  font-size: 12px;
+  color: var(--card-body-text);
+  cursor: pointer;
+}
+
+.templateChip:hover {
+  border-color: var(--secondary-border);
+}
+
+.templateChip:focus-visible {
+  outline: 2px solid rgba(120, 160, 255, 0.6);
+  outline-offset: 2px;
+}
+
 .bottomNav {
   margin-top: auto;
   border-radius: 18px 18px 22px 22px;
@@ -355,7 +431,7 @@
 
 .navRow {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 8px;
 }
 
