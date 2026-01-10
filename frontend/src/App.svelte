@@ -971,10 +971,12 @@
         aria-hidden={activeTab !== 'music'}
       >
         <div class={styles.glassCard}>
-          <h2 class={styles.cardTitle}>Music player</h2>
-          <p class={styles.cardNote}>
-            Pick a local track or focus sound to stay in the zone.
-          </p>
+          <div class={styles.musicHeader}>
+            <h2 class={styles.cardTitle}>Music player</h2>
+            <p class={styles.cardNote}>
+              Pick a local track or focus sound to stay in the zone.
+            </p>
+          </div>
           <div class={styles.cardBody}>
             <input
               class={styles.fileInput}

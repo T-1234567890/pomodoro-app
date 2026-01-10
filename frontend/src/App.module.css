@@ -356,6 +356,10 @@
 
 /* Music player */
 
+.musicHeader {
+  text-align: center;
+}
+
 .fileInput {
   display: none;
 }
