@@ -1139,13 +1139,16 @@
         id="view-countdown"
         aria-hidden={activeTab !== 'countdown'}
       >
-        <div class={styles.glassCard}>
-          <h2 class={styles.cardTitle}>Countdown timer</h2>
-          <p class={styles.cardNote}>
-            An optional countdown that runs independently from your Pomodoro session.
-          </p>
+        <section class={styles.countdownView}>
+          <header class={styles.countdownHeader}>
+            <p class={styles.countdownKicker}>Independent timer</p>
+            <h2 class={styles.countdownTitle}>Countdown</h2>
+            <p class={styles.countdownNote}>
+              A lightweight timer for quick focus blocks and short reminders.
+            </p>
+          </header>
           <CountdownTimer />
-        </div>
+        </section>
       </section>
 
     </div>
