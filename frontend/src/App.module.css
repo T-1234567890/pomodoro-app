@@ -599,6 +599,12 @@
   color: var(--card-body-text);
 }
 
+.reminderCountdown {
+  margin: 8px 0 0;
+  font-size: 12px;
+  color: var(--card-body-text);
+}
+
 .reminderActions {
   display: flex;
   flex-wrap: wrap;
