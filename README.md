@@ -9,7 +9,7 @@ The 0.5.x branch introduces a new glass-panel layout system with separate tiles 
 ## Version status
 
 Current Version: <br>
-🧪 0.6.1 Beta
+🧪 0.6.2 Beta
 
 Update history: see history_versions/ for archived notes.
 
@@ -30,10 +30,11 @@ Update history: see history_versions/ for archived notes.
 
 ## Changelog (short)
 
-## 0.6.1
+## 0.6.2
 - Added session-end pop-up reminder
 - Improved session completion feedback
 - No changes to existing timer behavior or settings
+- Improved timer
 
 - UI redesign with layered macOS 26-inspired glass tiles and a stronger hierarchy.
 - New glass theme engine with rounded panels, gradients, and depth layering.
