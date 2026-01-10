@@ -335,6 +335,15 @@
   margin-top: 12px;
 }
 
+.audioSection {
+  display: grid;
+  gap: 8px;
+  padding: 12px;
+  border-radius: 16px;
+  border: 1px solid var(--glass-border);
+  background: var(--glass-bg);
+}
+
 .audioButtonRow {
   display: flex;
   flex-wrap: wrap;
