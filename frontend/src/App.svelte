@@ -48,7 +48,7 @@
   let reminderOpen = false;
   let reminderTitle = '';
   let reminderMessage = '';
-  let focusSoundMode: 'off' | 'white' = 'off';
+  let focusSoundMode: 'off' | 'white' | 'rain' | 'brown' = 'off';
   let focusAudioContext: AudioContext | null = null;
   let focusNoiseSource: AudioBufferSourceNode | null = null;
   let focusGainNode: GainNode | null = null;
@@ -163,20 +163,33 @@
     }
   };
 
-  const createWhiteNoiseBuffer = (context: AudioContext) => {
+  const createNoiseBuffer = (
+    context: AudioContext,
+    mode: Exclude<typeof focusSoundMode, 'off'>
+  ) => {
     const durationSeconds = 2;
     const frameCount = context.sampleRate * durationSeconds;
     const buffer = context.createBuffer(1, frameCount, context.sampleRate);
     const channelData = buffer.getChannelData(0);
+    let lastValue = 0;
     for (let index = 0; index < frameCount; index += 1) {
-      channelData[index] = Math.random() * 2 - 1;
+      const whiteSample = Math.random() * 2 - 1;
+      if (mode === 'brown') {
+        lastValue = (lastValue + whiteSample * 0.02) / 1.02;
+        channelData[index] = lastValue * 3.5;
+      } else if (mode === 'rain') {
+        lastValue = lastValue + (whiteSample - lastValue) * 0.08;
+        channelData[index] = lastValue;
+      } else {
+        channelData[index] = whiteSample;
+      }
     }
     return buffer;
   };
 
-  const startFocusSound = async () => {
+  const startFocusSound = async (mode: Exclude<typeof focusSoundMode, 'off'>) => {
     ensureFocusAudio();
-    focusSoundMode = 'white';
+    focusSoundMode = mode;
     stopAudio();
     await pauseSystemMediaIfPlaying();
     if (!focusAudioContext || !focusGainNode) {
@@ -188,7 +201,7 @@
     focusNoiseSource?.stop();
     focusNoiseSource?.disconnect();
     focusNoiseSource = focusAudioContext.createBufferSource();
-    focusNoiseSource.buffer = createWhiteNoiseBuffer(focusAudioContext);
+    focusNoiseSource.buffer = createNoiseBuffer(focusAudioContext, mode);
     focusNoiseSource.loop = true;
     focusNoiseSource.connect(focusGainNode);
     focusNoiseSource.start();
@@ -208,9 +221,9 @@
     focusSoundMode = 'off';
   };
 
-  const toggleFocusSound = async (mode: 'off' | 'white') => {
-    if (mode === 'white') {
-      await startFocusSound();
+  const toggleFocusSound = async (mode: typeof focusSoundMode) => {
+    if (mode !== 'off') {
+      await startFocusSound(mode);
       return;
     }
     stopFocusSound();
@@ -218,7 +231,7 @@
 
   const handleFocusSoundChange = (event: Event) => {
     const target = event.currentTarget as HTMLSelectElement;
-    void toggleFocusSound(target.value as 'off' | 'white');
+    void toggleFocusSound(target.value as typeof focusSoundMode);
   };
 
   const pauseSystemMediaIfPlaying = async () => {
@@ -466,7 +479,7 @@
 
     if (isBreak && !wasBreak) {
       resumeAudioState = {
-        focusSound: focusSoundPlaying || focusSoundMode === 'white',
+        focusSound: focusSoundPlaying || focusSoundMode !== 'off',
         localAudio: localAudioPlaying,
         systemAudio: systemMediaState.isPlaying
       };
@@ -482,8 +495,8 @@
     }
 
     if (!isBreak && wasBreak) {
-      if (resumeAudioState.focusSound) {
-        await startFocusSound();
+      if (resumeAudioState.focusSound && focusSoundMode !== 'off') {
+        await startFocusSound(focusSoundMode);
       } else if (resumeAudioState.localAudio) {
         await playAudio();
       } else if (resumeAudioState.systemAudio) {
@@ -801,7 +814,7 @@
                       <div>
                         <p class={styles.moreFunctionsLabel}>Focus sounds</p>
                         <p class={styles.moreFunctionsNote}>
-                          Built-in white noise that stays inside the app.
+                          Built-in focus soundscapes (white, rain, brown) that stay inside the app.
                         </p>
                       </div>
                       <label class={styles.formRow}>
@@ -813,6 +826,8 @@
                         >
                           <option value="off">Off</option>
                           <option value="white">White noise</option>
+                          <option value="rain">Rain</option>
+                          <option value="brown">Brown noise</option>
                         </select>
                       </label>
                     </div>
