@@ -814,7 +814,7 @@
                       <div>
                         <p class={styles.moreFunctionsLabel}>Focus sounds</p>
                         <p class={styles.moreFunctionsNote}>
-                          Built-in focus soundscapes that stay inside the app.
+                          Built-in focus soundscapes (white, rain, brown) that stay inside the app.
                         </p>
                       </div>
                       <label class={styles.formRow}>
