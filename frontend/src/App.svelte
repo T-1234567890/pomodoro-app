@@ -26,7 +26,6 @@
     longBreakMinutes: number;
     sessionsBeforeLongBreak: number;
     autoLongBreak: boolean;
-    enableSessionReminder: boolean;
     pauseMusicOnBreak: boolean;
   };
 
@@ -36,7 +35,6 @@
     longBreakMinutes: 15,
     sessionsBeforeLongBreak: 4,
     autoLongBreak: true,
-    enableSessionReminder: true,
     pauseMusicOnBreak: false
   };
 
@@ -60,9 +58,6 @@
   let audioUrl: string | null = null;
   let localAudioStatus = 'No file selected';
   let volume = 0.7;
-  let reminderOpen = false;
-  let reminderTitle = '';
-  let reminderMessage = '';
   type FocusSoundType = 'off' | 'white' | 'rain' | 'brown';
   let focusSoundSelection: FocusSoundType = 'off';
   let focusAudioContext: AudioContext | null = null;
@@ -495,10 +490,13 @@
     long_break: 'Long break'
   };
 
-  const reminderMessages: Record<SessionMode, string> = {
-    work: 'Session complete. Time to take a break.',
-    short_break: 'Break finished. Ready to focus again?',
-    long_break: 'Break finished. Ready to focus again?'
+  const notifySessionComplete = async (completedMode: SessionMode) => {
+    const modeLabel = completedMode === 'work' ? 'work' : 'break';
+    try {
+      await invoke('notify_session_complete', { mode: modeLabel });
+    } catch (error) {
+      console.warn('Unable to send session notification', error);
+    }
   };
 
   const getDurationForMode = (targetMode: SessionMode) => {
@@ -584,11 +582,6 @@
     }, AUTO_START_DELAY_SECONDS * 1000);
   };
 
-  const closeReminder = () => {
-    reminderOpen = false;
-    cancelAutoStart();
-  };
-
   const updateSettings = () => {
     settings = {
       ...settings,
@@ -605,15 +598,10 @@
         settings.sessionsBeforeLongBreak,
         defaultSettings.sessionsBeforeLongBreak
       ),
-      enableSessionReminder:
-        settings.enableSessionReminder ?? defaultSettings.enableSessionReminder,
       pauseMusicOnBreak: settings.pauseMusicOnBreak ?? defaultSettings.pauseMusicOnBreak
     };
     persistSettings();
     applyCurrentSessionDuration();
-    if (!settings.enableSessionReminder) {
-      closeReminder();
-    }
   };
 
   const applyTemplate = (template: PomodoroTemplate) => {
@@ -627,35 +615,6 @@
   const setMode = (nextMode: SessionMode) => {
     mode = nextMode;
     applyCurrentSessionDuration();
-  };
-
-  const showReminder = (completedMode: SessionMode) => {
-    if (!settings.enableSessionReminder) {
-      return;
-    }
-    reminderTitle = modeLabels[completedMode];
-    reminderMessage = reminderMessages[completedMode];
-    reminderOpen = true;
-
-    if (!('Notification' in window)) {
-      return;
-    }
-
-    const sendNotification = () => {
-      new Notification(reminderTitle, {
-        body: reminderMessage
-      });
-    };
-
-    if (Notification.permission === 'granted') {
-      sendNotification();
-    } else if (Notification.permission === 'default') {
-      Notification.requestPermission().then((permission) => {
-        if (permission === 'granted') {
-          sendNotification();
-        }
-      });
-    }
   };
 
   const handleSessionComplete = () => {
@@ -674,7 +633,7 @@
       }
       setMode('work');
     }
-    showReminder(completedMode);
+    notifySessionComplete(completedMode);
   };
 
   const tick = () => {
@@ -692,7 +651,6 @@
       return;
     }
     cancelAutoStart();
-    closeReminder();
     awaitingNextSession = false;
     if (remainingSeconds === 0) {
       remainingSeconds = totalSeconds;
@@ -715,10 +673,6 @@
     cancelAutoStart();
     awaitingNextSession = false;
     applyCurrentSessionDuration();
-  };
-
-  const startNextSession = () => {
-    startTimer();
   };
 
   const applyTheme = (value: Theme) => {
@@ -1117,15 +1071,6 @@
                   on:change={updateSettings}
                 />
               </label>
-              <label class={styles.formRow}>
-                <span>Enable session-end pop-up reminder</span>
-                <input
-                  class={styles.checkbox}
-                  type="checkbox"
-                  bind:checked={settings.enableSessionReminder}
-                  on:change={updateSettings}
-                />
-              </label>
             </div>
 
             <p class={styles.cardNote}>
@@ -1398,25 +1343,3 @@
     </nav>
   </section>
 </main>
-
-{#if reminderOpen}
-  <section class={styles.reminderToast} aria-live="polite">
-    <div>
-      <p class={styles.reminderTitle}>{reminderTitle}</p>
-      <p class={styles.reminderMessage}>{reminderMessage}</p>
-      {#if autoStartActive}
-        <p class={styles.reminderCountdown}>
-          Next session starting in {autoStartRemaining} seconds…
-        </p>
-      {/if}
-    </div>
-    <div class={styles.reminderActions}>
-      <button class={styles.primaryButton} type="button" on:click={startNextSession}>
-        Start Next Session
-      </button>
-      <button class={styles.ghostButton} type="button" on:click={closeReminder}>
-        Dismiss
-      </button>
-    </div>
-  </section>
-{/if}
