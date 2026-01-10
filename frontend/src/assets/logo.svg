@@ -1,0 +1,27 @@
+<svg width="256" height="256" viewBox="0 0 256 256" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="topGradient" x1="40" y1="40" x2="216" y2="216" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#cfe3ff" />
+      <stop offset="0.55" stop-color="#a7c7f4" />
+      <stop offset="1" stop-color="#7ea4e8" />
+    </linearGradient>
+    <linearGradient id="middleGradient" x1="32" y1="64" x2="212" y2="236" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#d7e4f5" />
+      <stop offset="0.6" stop-color="#9fb3d6" />
+      <stop offset="1" stop-color="#7f8fb5" />
+    </linearGradient>
+    <linearGradient id="bottomGradient" x1="24" y1="88" x2="220" y2="248" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#c9f1f1" />
+      <stop offset="0.55" stop-color="#90d3dd" />
+      <stop offset="1" stop-color="#61b7cc" />
+    </linearGradient>
+    <filter id="softShadow" x="0" y="0" width="256" height="256" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+      <feDropShadow dx="0" dy="8" stdDeviation="12" flood-color="#6d89b6" flood-opacity="0.2" />
+    </filter>
+  </defs>
+  <rect x="28" y="28" width="200" height="200" rx="36" transform="rotate(45 128 128)" fill="url(#bottomGradient)" opacity="0.9" />
+  <rect x="36" y="16" width="200" height="200" rx="36" transform="rotate(45 128 128)" fill="url(#middleGradient)" opacity="0.85" />
+  <g filter="url(#softShadow)">
+    <rect x="44" y="4" width="200" height="200" rx="38" transform="rotate(45 128 128)" fill="url(#topGradient)" />
+  </g>
+</svg>

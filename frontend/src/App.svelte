@@ -2,6 +2,7 @@
   import { onMount } from 'svelte';
   import CountdownTimer from './lib/CountdownTimer.svelte';
   import { controlSystemMedia, getSystemMediaState, type SystemMediaState } from './lib/systemMedia';
+  import logo from './assets/logo.svg';
   import styles from './App.module.css';
 
   const SETTINGS_STORAGE_KEY = 'pomodoro_settings';
@@ -796,7 +797,7 @@
     <header class={styles.header}>
       <div>
         <p class={styles.kicker}>Pomodoro</p>
-        <h1 class={styles.title}>Stay in flow</h1>
+        <img class={styles.logo} src={logo} alt="Pomodoro logo" />
         <p class={styles.subtitle}>A calm space for focused sessions.</p>
       </div>
 

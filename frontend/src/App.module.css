@@ -135,10 +135,11 @@
   margin: 0 0 6px;
 }
 
-.title {
-  margin: 0;
-  font-size: 36px;
-  font-weight: 600;
+.logo {
+  width: 120px;
+  height: auto;
+  margin: 4px 0;
+  display: block;
 }
 
 .subtitle {
