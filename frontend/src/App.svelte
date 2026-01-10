@@ -1,6 +1,7 @@
 <script lang="ts">
   import { onMount } from 'svelte';
   import CountdownTimer from './lib/CountdownTimer.svelte';
+  import { controlSystemMedia, getSystemMediaState, type SystemMediaState } from './lib/systemMedia';
   import styles from './App.module.css';
 
   const SETTINGS_STORAGE_KEY = 'pomodoro_settings';
@@ -16,6 +17,7 @@
     sessionsBeforeLongBreak: number;
     autoLongBreak: boolean;
     enableSessionReminder: boolean;
+    pauseMusicOnBreak: boolean;
   };
 
   const defaultSettings: PomodoroSettings = {
@@ -24,7 +26,8 @@
     longBreakMinutes: 15,
     sessionsBeforeLongBreak: 4,
     autoLongBreak: true,
-    enableSessionReminder: true
+    enableSessionReminder: true,
+    pauseMusicOnBreak: false
   };
 
   let settings: PomodoroSettings = { ...defaultSettings };
@@ -45,9 +48,35 @@
   let reminderOpen = false;
   let reminderTitle = '';
   let reminderMessage = '';
+  let focusSoundMode: 'off' | 'white' = 'off';
+  let focusAudioContext: AudioContext | null = null;
+  let focusNoiseSource: AudioBufferSourceNode | null = null;
+  let focusGainNode: GainNode | null = null;
+  let focusSoundPlaying = false;
+  let localAudioPlaying = false;
+  let systemMediaState: SystemMediaState = {
+    available: false,
+    title: '',
+    artist: null,
+    source: '',
+    isPlaying: false,
+    supportsPlayPause: false,
+    supportsNext: false,
+    supportsPrevious: false
+  };
+  let currentAudioSource = 'None';
+  let systemMediaDescription = 'No system media detected';
+  let systemMediaPollId: ReturnType<typeof setInterval> | null = null;
+  let lastMode: SessionMode | null = null;
+  let resumeAudioState = {
+    focusSound: false,
+    localAudio: false,
+    systemAudio: false
+  };
 
   const handleAudioPlay = () => {
     playbackStatus = 'Playing';
+    localAudioPlaying = true;
   };
 
   const handleAudioPause = () => {
@@ -55,10 +84,12 @@
       return;
     }
     playbackStatus = audioElement.currentTime === 0 || audioElement.ended ? 'Stopped' : 'Paused';
+    localAudioPlaying = false;
   };
 
   const handleAudioEnded = () => {
     playbackStatus = 'Stopped';
+    localAudioPlaying = false;
   };
 
   const createAudioElement = () => {
@@ -100,8 +131,13 @@
     playbackStatus = 'Stopped';
   };
 
-  const playAudio = () => {
-    audioElement?.play();
+  const playAudio = async () => {
+    if (!audioElement) {
+      return;
+    }
+    stopFocusSound();
+    await pauseSystemMediaIfPlaying();
+    await audioElement.play();
   };
 
   const pauseAudio = () => {
@@ -115,6 +151,84 @@
     audioElement.pause();
     audioElement.currentTime = 0;
     playbackStatus = 'Stopped';
+    localAudioPlaying = false;
+  };
+
+  const ensureFocusAudio = () => {
+    if (!focusAudioContext) {
+      focusAudioContext = new AudioContext();
+      focusGainNode = focusAudioContext.createGain();
+      focusGainNode.gain.value = volume;
+      focusGainNode.connect(focusAudioContext.destination);
+    }
+  };
+
+  const createWhiteNoiseBuffer = (context: AudioContext) => {
+    const durationSeconds = 2;
+    const frameCount = context.sampleRate * durationSeconds;
+    const buffer = context.createBuffer(1, frameCount, context.sampleRate);
+    const channelData = buffer.getChannelData(0);
+    for (let index = 0; index < frameCount; index += 1) {
+      channelData[index] = Math.random() * 2 - 1;
+    }
+    return buffer;
+  };
+
+  const startFocusSound = async () => {
+    ensureFocusAudio();
+    focusSoundMode = 'white';
+    stopAudio();
+    await pauseSystemMediaIfPlaying();
+    if (!focusAudioContext || !focusGainNode) {
+      return;
+    }
+    if (focusAudioContext.state === 'suspended') {
+      await focusAudioContext.resume();
+    }
+    focusNoiseSource?.stop();
+    focusNoiseSource?.disconnect();
+    focusNoiseSource = focusAudioContext.createBufferSource();
+    focusNoiseSource.buffer = createWhiteNoiseBuffer(focusAudioContext);
+    focusNoiseSource.loop = true;
+    focusNoiseSource.connect(focusGainNode);
+    focusNoiseSource.start();
+    focusSoundPlaying = true;
+  };
+
+  const pauseFocusSound = () => {
+    focusNoiseSource?.stop();
+    focusNoiseSource?.disconnect();
+    focusNoiseSource = null;
+    focusAudioContext?.suspend().catch(() => null);
+    focusSoundPlaying = false;
+  };
+
+  const stopFocusSound = () => {
+    pauseFocusSound();
+    focusSoundMode = 'off';
+  };
+
+  const toggleFocusSound = async (mode: 'off' | 'white') => {
+    if (mode === 'white') {
+      await startFocusSound();
+      return;
+    }
+    stopFocusSound();
+  };
+
+  const handleFocusSoundChange = (event: Event) => {
+    const target = event.currentTarget as HTMLSelectElement;
+    void toggleFocusSound(target.value as 'off' | 'white');
+  };
+
+  const pauseSystemMediaIfPlaying = async () => {
+    if (systemMediaState.isPlaying && systemMediaState.supportsPlayPause) {
+      try {
+        await controlSystemMedia('play_pause');
+      } catch (error) {
+        console.error('Failed to control system media', error);
+      }
+    }
   };
   let cycleWorkSessions = 0;
   let totalWorkSessions = 0;
@@ -198,7 +312,8 @@
         defaultSettings.sessionsBeforeLongBreak
       ),
       enableSessionReminder:
-        settings.enableSessionReminder ?? defaultSettings.enableSessionReminder
+        settings.enableSessionReminder ?? defaultSettings.enableSessionReminder,
+      pauseMusicOnBreak: settings.pauseMusicOnBreak ?? defaultSettings.pauseMusicOnBreak
     };
     persistSettings();
     applyCurrentSessionDuration();
@@ -319,10 +434,78 @@
     moreFunctionsOpen = !moreFunctionsOpen;
   };
 
+  const updateSystemMediaState = async () => {
+    try {
+      const state = await getSystemMediaState();
+      systemMediaState = state;
+      if ((focusSoundPlaying || localAudioPlaying) && state.isPlaying) {
+        await pauseSystemMediaIfPlaying();
+      }
+    } catch (error) {
+      console.error('Failed to read system media state', error);
+      systemMediaState = {
+        available: false,
+        title: '',
+        artist: null,
+        source: '',
+        isPlaying: false,
+        supportsPlayPause: false,
+        supportsNext: false,
+        supportsPrevious: false
+      };
+    }
+  };
+
+  const handleModeTransition = async (previous: SessionMode, next: SessionMode) => {
+    if (!settings.pauseMusicOnBreak) {
+      return;
+    }
+
+    const isBreak = next === 'short_break' || next === 'long_break';
+    const wasBreak = previous === 'short_break' || previous === 'long_break';
+
+    if (isBreak && !wasBreak) {
+      resumeAudioState = {
+        focusSound: focusSoundPlaying || focusSoundMode === 'white',
+        localAudio: localAudioPlaying,
+        systemAudio: systemMediaState.isPlaying
+      };
+      if (focusSoundPlaying) {
+        pauseFocusSound();
+      }
+      if (localAudioPlaying) {
+        audioElement?.pause();
+      }
+      if (systemMediaState.isPlaying) {
+        await pauseSystemMediaIfPlaying();
+      }
+    }
+
+    if (!isBreak && wasBreak) {
+      if (resumeAudioState.focusSound) {
+        await startFocusSound();
+      } else if (resumeAudioState.localAudio) {
+        await playAudio();
+      } else if (resumeAudioState.systemAudio) {
+        try {
+          await controlSystemMedia('play_pause');
+        } catch (error) {
+          console.error('Failed to resume system media', error);
+        }
+      }
+      resumeAudioState = {
+        focusSound: false,
+        localAudio: false,
+        systemAudio: false
+      };
+    }
+  };
+
   onMount(() => {
     const storedTheme = localStorage.getItem(THEME_STORAGE_KEY);
     const storedSettings = localStorage.getItem(SETTINGS_STORAGE_KEY);
     systemThemeMedia = window.matchMedia('(prefers-color-scheme: dark)');
+    lastMode = mode;
 
     if (storedTheme === 'light' || storedTheme === 'dark') {
       preferSystemTheme = false;
@@ -345,6 +528,8 @@
     }
 
     updateSettings();
+    void updateSystemMediaState();
+    systemMediaPollId = setInterval(updateSystemMediaState, 4000);
 
     const handleSystemThemeChange = (event: MediaQueryListEvent) => {
       if (preferSystemTheme) {
@@ -357,6 +542,9 @@
     return () => {
       pauseTimer();
       systemThemeMedia?.removeEventListener('change', handleSystemThemeChange);
+      if (systemMediaPollId) {
+        clearInterval(systemMediaPollId);
+      }
       if (audioElement) {
         audioElement.pause();
         audioElement.removeEventListener('play', handleAudioPlay);
@@ -364,12 +552,47 @@
         audioElement.removeEventListener('ended', handleAudioEnded);
         audioElement.src = '';
       }
+      focusNoiseSource?.stop();
+      focusNoiseSource?.disconnect();
+      focusNoiseSource = null;
+      focusGainNode?.disconnect();
+      focusGainNode = null;
+      if (focusAudioContext) {
+        focusAudioContext.close().catch(() => null);
+        focusAudioContext = null;
+      }
       clearAudioUrl();
     };
   });
 
   $: if (audioElement) {
     audioElement.volume = volume;
+  }
+
+  $: if (focusGainNode) {
+    focusGainNode.gain.value = volume;
+  }
+
+  $: currentAudioSource =
+    focusSoundPlaying
+      ? 'Focus Sound'
+      : localAudioPlaying
+        ? 'Local File'
+        : systemMediaState.isPlaying
+          ? 'System Audio'
+          : 'None';
+
+  $: systemMediaDescription = systemMediaState.available
+    ? `${systemMediaState.isPlaying ? 'Now playing from system' : 'System media paused'}: ${
+        systemMediaState.title
+      }${systemMediaState.artist ? ` — ${systemMediaState.artist}` : ''} (${
+        systemMediaState.source
+      })`
+    : 'No system media detected';
+
+  $: if (lastMode && mode !== lastMode) {
+    void handleModeTransition(lastMode, mode);
+    lastMode = mode;
   }
 </script>
 
@@ -528,7 +751,7 @@
                 <div>
                   <p class={styles.moreFunctionsLabel}>Music player</p>
                   <p class={styles.moreFunctionsNote}>
-                    Pick a local track to play while you focus.
+                    Pick a local track or focus sound to stay in the zone.
                   </p>
                 </div>
                 <div>
@@ -541,20 +764,81 @@
                   />
 
                   <div class={styles.audioControls}>
-                    <button class={styles.secondaryButton} type="button" on:click={selectAudioFile}>
-                      Select Audio File
-                    </button>
+                    <div class={styles.audioSection}>
+                      <div>
+                        <p class={styles.moreFunctionsLabel}>System media</p>
+                        <p class={styles.moreFunctionsNote}>{systemMediaDescription}</p>
+                      </div>
+                      <div class={styles.audioButtonRow}>
+                        <button
+                          class={styles.ghostButton}
+                          type="button"
+                          disabled={!systemMediaState.supportsPrevious}
+                          on:click={() => void controlSystemMedia('previous')}
+                        >
+                          Previous
+                        </button>
+                        <button
+                          class={styles.secondaryButton}
+                          type="button"
+                          disabled={!systemMediaState.supportsPlayPause}
+                          on:click={() => void controlSystemMedia('play_pause')}
+                        >
+                          {systemMediaState.isPlaying ? 'Pause' : 'Play'}
+                        </button>
+                        <button
+                          class={styles.ghostButton}
+                          type="button"
+                          disabled={!systemMediaState.supportsNext}
+                          on:click={() => void controlSystemMedia('next')}
+                        >
+                          Next
+                        </button>
+                      </div>
+                    </div>
 
-                    <div class={styles.audioButtonRow}>
-                      <button class={styles.primaryButton} type="button" on:click={playAudio}>
-                        Play
+                    <div class={styles.audioSection}>
+                      <div>
+                        <p class={styles.moreFunctionsLabel}>Focus sounds</p>
+                        <p class={styles.moreFunctionsNote}>
+                          Built-in white noise that stays inside the app.
+                        </p>
+                      </div>
+                      <label class={styles.formRow}>
+                        <span>Focus sound</span>
+                        <select
+                          class={styles.input}
+                          bind:value={focusSoundMode}
+                          on:change={handleFocusSoundChange}
+                        >
+                          <option value="off">Off</option>
+                          <option value="white">White noise</option>
+                        </select>
+                      </label>
+                    </div>
+
+                    <div class={styles.audioSection}>
+                      <div>
+                        <p class={styles.moreFunctionsLabel}>Local audio file</p>
+                        <p class={styles.moreFunctionsNote}>
+                          Select a file to play alongside your focus session.
+                        </p>
+                      </div>
+                      <button class={styles.secondaryButton} type="button" on:click={selectAudioFile}>
+                        Select Audio File
                       </button>
-                      <button class={styles.secondaryButton} type="button" on:click={pauseAudio}>
-                        Pause
-                      </button>
-                      <button class={styles.ghostButton} type="button" on:click={stopAudio}>
-                        Stop
-                      </button>
+
+                      <div class={styles.audioButtonRow}>
+                        <button class={styles.primaryButton} type="button" on:click={playAudio}>
+                          Play
+                        </button>
+                        <button class={styles.secondaryButton} type="button" on:click={pauseAudio}>
+                          Pause
+                        </button>
+                        <button class={styles.ghostButton} type="button" on:click={stopAudio}>
+                          Stop
+                        </button>
+                      </div>
                     </div>
 
                     <label class={styles.formRow}>
@@ -569,7 +853,18 @@
                       />
                     </label>
 
+                    <label class={styles.formRow}>
+                      <span>Pause music on break</span>
+                      <input
+                        class={styles.checkbox}
+                        type="checkbox"
+                        bind:checked={settings.pauseMusicOnBreak}
+                        on:change={updateSettings}
+                      />
+                    </label>
+
                     <p class={styles.playbackStatus}>Status: {playbackStatus}</p>
+                    <p class={styles.playbackStatus}>Active source: {currentAudioSource}</p>
                   </div>
                 </div>
               </div>

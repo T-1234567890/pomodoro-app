@@ -7,6 +7,223 @@ use std::sync::Mutex;
 
 use tauri::Env;
 
+#[derive(serde::Serialize)]
+#[serde(rename_all = "camelCase")]
+struct SystemMediaState {
+    available: bool,
+    title: String,
+    artist: Option<String>,
+    source: String,
+    is_playing: bool,
+    supports_play_pause: bool,
+    supports_next: bool,
+    supports_previous: bool,
+}
+
+#[cfg(target_os = "macos")]
+fn run_applescript(script: &str) -> Result<String, String> {
+    let output = Command::new("osascript")
+        .arg("-e")
+        .arg(script)
+        .output()
+        .map_err(|err| format!("Failed to run AppleScript: {err}"))?;
+
+    if !output.status.success() {
+        return Err(String::from_utf8_lossy(&output.stderr).to_string());
+    }
+
+    Ok(String::from_utf8_lossy(&output.stdout).trim().to_string())
+}
+
+#[cfg(not(target_os = "macos"))]
+fn run_applescript(_script: &str) -> Result<String, String> {
+    Ok(String::new())
+}
+
+#[tauri::command]
+fn get_system_media_state() -> Result<SystemMediaState, String> {
+    #[cfg(not(target_os = "macos"))]
+    {
+        return Ok(SystemMediaState {
+            available: false,
+            title: String::new(),
+            artist: None,
+            source: String::new(),
+            is_playing: false,
+            supports_play_pause: false,
+            supports_next: false,
+            supports_previous: false,
+        });
+    }
+
+    #[cfg(target_os = "macos")]
+    {
+        let script = r#"
+set output to ""
+if application "Spotify" is running then
+  tell application "Spotify"
+    if player state is playing or player state is paused then
+      set trackName to name of current track
+      set artistName to artist of current track
+      set stateName to player state as string
+      set output to trackName & "||" & artistName & "||Spotify||" & stateName & "||true||true"
+    end if
+  end tell
+end if
+
+if output is "" then
+  if application "Music" is running then
+    tell application "Music"
+      if player state is playing or player state is paused then
+        set trackName to name of current track
+        set artistName to artist of current track
+        set stateName to player state as string
+        set output to trackName & "||" & artistName & "||Music||" & stateName & "||true||true"
+      end if
+    end tell
+  end if
+end if
+
+if output is "" then
+  try
+    if application "Safari" is running then
+      tell application "Safari"
+        set frontTab to current tab of front window
+        set tabName to name of frontTab
+        set isAudible to false
+        try
+          set isAudible to audible of frontTab
+        end try
+        if isAudible is true then
+          set output to tabName & "||" & "" & "||Safari||playing||false||false"
+        end if
+      end tell
+    end if
+  end try
+end if
+
+return output
+"#;
+
+        let response = run_applescript(script)?;
+        if response.is_empty() {
+            return Ok(SystemMediaState {
+                available: false,
+                title: String::new(),
+                artist: None,
+                source: String::new(),
+                is_playing: false,
+                supports_play_pause: false,
+                supports_next: false,
+                supports_previous: false,
+            });
+        }
+
+        let parts: Vec<&str> = response.split("||").collect();
+        let title = parts.get(0).unwrap_or(&"").to_string();
+        let artist = parts.get(1).map(|value| value.to_string()).filter(|value| !value.is_empty());
+        let source = parts.get(2).unwrap_or(&"").to_string();
+        let state = parts.get(3).unwrap_or(&"").to_string();
+        let supports_next = parts.get(4).unwrap_or(&"false") == &"true";
+        let supports_previous = parts.get(5).unwrap_or(&"false") == &"true";
+        let is_playing = state == "playing";
+        let supports_play_pause = source != "Safari";
+
+        Ok(SystemMediaState {
+            available: true,
+            title,
+            artist,
+            source,
+            is_playing,
+            supports_play_pause,
+            supports_next,
+            supports_previous,
+        })
+    }
+}
+
+#[tauri::command]
+fn control_system_media(action: String) -> Result<(), String> {
+    #[cfg(not(target_os = "macos"))]
+    {
+        let _ = action;
+        return Ok(());
+    }
+
+    #[cfg(target_os = "macos")]
+    {
+        let script = match action.as_str() {
+            "play_pause" => r#"
+if application "Spotify" is running then
+  tell application "Spotify"
+    if player state is playing or player state is paused then
+      playpause
+      return ""
+    end if
+  end tell
+end if
+
+if application "Music" is running then
+  tell application "Music"
+    if player state is playing or player state is paused then
+      playpause
+      return ""
+    end if
+  end tell
+end if
+
+return ""
+"#,
+            "next" => r#"
+if application "Spotify" is running then
+  tell application "Spotify"
+    if player state is playing or player state is paused then
+      next track
+      return ""
+    end if
+  end tell
+end if
+
+if application "Music" is running then
+  tell application "Music"
+    if player state is playing or player state is paused then
+      next track
+      return ""
+    end if
+  end tell
+end if
+
+return ""
+"#,
+            "previous" => r#"
+if application "Spotify" is running then
+  tell application "Spotify"
+    if player state is playing or player state is paused then
+      previous track
+      return ""
+    end if
+  end tell
+end if
+
+if application "Music" is running then
+  tell application "Music"
+    if player state is playing or player state is paused then
+      previous track
+      return ""
+    end if
+  end tell
+end if
+
+return ""
+"#,
+            _ => return Err("Unsupported action".to_string()),
+        };
+
+        run_applescript(script)?;
+        Ok(())
+    }
+}
+
 struct BackendProcess {
     _child: Child,
     stdin: ChildStdin,
@@ -136,7 +353,11 @@ fn main() {
 
     tauri::Builder::default()
         .manage(BackendState::new(resource_dir).expect("Unable to start backend"))
-        .invoke_handler(tauri::generate_handler![backend_request])
+        .invoke_handler(tauri::generate_handler![
+            backend_request,
+            get_system_media_state,
+            control_system_media
+        ])
         .run(context)
         .expect("error while running tauri application");
 }
