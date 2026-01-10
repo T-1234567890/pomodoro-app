@@ -11,3 +11,9 @@
 
 ## 0.5.x Beta & 0.5.x
 - Major tech stack migration, new glass UI
+
+## 0.6.0-2
+- Added session-end pop-up reminder
+- Improved session completion feedback
+- No changes to existing timer behavior or settings
+- Improved timer
