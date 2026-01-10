@@ -5,7 +5,10 @@ use std::path::PathBuf;
 use std::process::{Child, ChildStdin, ChildStdout, Command, Stdio};
 use std::sync::Mutex;
 
-use tauri::Env;
+use tauri::{
+    AppHandle, CustomMenuItem, Env, GlobalWindowEvent, Icon, Manager, State, SystemTray,
+    SystemTrayEvent, SystemTrayMenu, SystemTrayMenuItem, SystemTraySubmenu, WindowEvent,
+};
 
 #[derive(serde::Serialize)]
 #[serde(rename_all = "camelCase")]
@@ -18,6 +21,75 @@ struct SystemMediaState {
     supports_play_pause: bool,
     supports_next: bool,
     supports_previous: bool,
+}
+
+#[derive(Debug, Clone, serde::Deserialize)]
+#[serde(rename_all = "camelCase")]
+struct PomodoroSnapshot {
+    running: bool,
+    active: bool,
+    mode: String,
+    remaining_seconds: u64,
+    total_seconds: u64,
+}
+
+#[derive(Debug, Clone, serde::Deserialize)]
+#[serde(rename_all = "camelCase")]
+struct CountdownSnapshot {
+    running: bool,
+    active: bool,
+    remaining_seconds: u64,
+    total_seconds: u64,
+}
+
+#[derive(Debug, Clone, serde::Deserialize)]
+#[serde(rename_all = "camelCase")]
+struct AudioSnapshot {
+    active_source: String,
+    is_playing: bool,
+    play_pause_enabled: bool,
+    previous_enabled: bool,
+    next_enabled: bool,
+    focus_sound: String,
+}
+
+#[derive(Debug, Clone, serde::Deserialize)]
+#[serde(rename_all = "camelCase")]
+struct MenuSyncPayload {
+    pomodoro: PomodoroSnapshot,
+    countdown: CountdownSnapshot,
+    audio: AudioSnapshot,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+enum MenuMode {
+    Pomodoro,
+    Break,
+    Countdown,
+    Idle,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+struct MenuPresentation {
+    mode: MenuMode,
+    play_pause_label: String,
+    play_pause_enabled: bool,
+    previous_enabled: bool,
+    next_enabled: bool,
+    focus_sound: String,
+    countdown_running: bool,
+    countdown_active: bool,
+}
+
+#[derive(Default)]
+struct TrayState {
+    menu: Mutex<TraySnapshot>,
+}
+
+#[derive(Default)]
+struct TraySnapshot {
+    last_title: String,
+    last_presentation: Option<MenuPresentation>,
 }
 
 #[cfg(target_os = "macos")]
@@ -224,6 +296,290 @@ return ""
     }
 }
 
+fn format_duration(total_seconds: u64) -> String {
+    let minutes = total_seconds / 60;
+    let seconds = total_seconds % 60;
+    format!("{minutes:02}:{seconds:02}")
+}
+
+fn build_presentation(payload: &MenuSyncPayload) -> (MenuPresentation, String) {
+    let pomodoro_active = payload.pomodoro.active;
+    let is_break = payload.pomodoro.mode != "work";
+    let countdown_running = payload.countdown.running;
+    let menu_mode = if pomodoro_active {
+        if is_break {
+            MenuMode::Break
+        } else {
+            MenuMode::Pomodoro
+        }
+    } else if countdown_running {
+        MenuMode::Countdown
+    } else {
+        MenuMode::Idle
+    };
+
+    let play_pause_label = if payload.audio.is_playing {
+        "⏸ Pause"
+    } else {
+        "▶ Play"
+    };
+
+    let title = if pomodoro_active {
+        if is_break {
+            format!("☕ {}", format_duration(payload.pomodoro.remaining_seconds))
+        } else {
+            format!("🍅 {}", format_duration(payload.pomodoro.remaining_seconds))
+        }
+    } else if countdown_running {
+        format!("⏱ {}", format_duration(payload.countdown.remaining_seconds))
+    } else {
+        "🍅 Ready".to_string()
+    };
+
+    (
+        MenuPresentation {
+            mode: menu_mode,
+            play_pause_label: play_pause_label.to_string(),
+            play_pause_enabled: payload.audio.play_pause_enabled,
+            previous_enabled: payload.audio.previous_enabled,
+            next_enabled: payload.audio.next_enabled,
+            focus_sound: payload.audio.focus_sound.clone(),
+            countdown_running: payload.countdown.running,
+            countdown_active: payload.countdown.active,
+        },
+        title,
+    )
+}
+
+fn build_music_submenu(presentation: &MenuPresentation) -> SystemTraySubmenu {
+    let play_pause = if presentation.play_pause_enabled {
+        CustomMenuItem::new("music_play_pause", &presentation.play_pause_label)
+    } else {
+        CustomMenuItem::new("music_play_pause", &presentation.play_pause_label).disabled()
+    };
+    let previous = if presentation.previous_enabled {
+        CustomMenuItem::new("music_previous", "⏮ Previous")
+    } else {
+        CustomMenuItem::new("music_previous", "⏮ Previous").disabled()
+    };
+    let next = if presentation.next_enabled {
+        CustomMenuItem::new("music_next", "⏭ Next")
+    } else {
+        CustomMenuItem::new("music_next", "⏭ Next").disabled()
+    };
+
+    let focus_off = if presentation.focus_sound == "off" {
+        CustomMenuItem::new("focus_sound_off", "Off").selected()
+    } else {
+        CustomMenuItem::new("focus_sound_off", "Off")
+    };
+    let focus_white = if presentation.focus_sound == "white" {
+        CustomMenuItem::new("focus_sound_white", "White").selected()
+    } else {
+        CustomMenuItem::new("focus_sound_white", "White")
+    };
+    let focus_rain = if presentation.focus_sound == "rain" {
+        CustomMenuItem::new("focus_sound_rain", "Rain").selected()
+    } else {
+        CustomMenuItem::new("focus_sound_rain", "Rain")
+    };
+    let focus_brown = if presentation.focus_sound == "brown" {
+        CustomMenuItem::new("focus_sound_brown", "Brown").selected()
+    } else {
+        CustomMenuItem::new("focus_sound_brown", "Brown")
+    };
+
+    let focus_menu = SystemTrayMenu::new()
+        .add_item(focus_off)
+        .add_item(focus_white)
+        .add_item(focus_rain)
+        .add_item(focus_brown);
+    let focus_submenu = SystemTraySubmenu::new("Focus Sound", focus_menu);
+
+    let menu = SystemTrayMenu::new()
+        .add_item(play_pause)
+        .add_item(previous)
+        .add_item(next)
+        .add_native_item(SystemTrayMenuItem::Separator)
+        .add_submenu(focus_submenu)
+        .add_native_item(SystemTrayMenuItem::Separator)
+        .add_item(CustomMenuItem::new("open_music", "Open Music Tab"));
+
+    SystemTraySubmenu::new("Music", menu)
+}
+
+fn build_countdown_submenu(presentation: &MenuPresentation) -> SystemTraySubmenu {
+    let start = if presentation.countdown_running {
+        CustomMenuItem::new("countdown_start", "Start").disabled()
+    } else {
+        CustomMenuItem::new("countdown_start", "Start")
+    };
+    let pause = if presentation.countdown_running {
+        CustomMenuItem::new("countdown_pause", "Pause")
+    } else {
+        CustomMenuItem::new("countdown_pause", "Pause").disabled()
+    };
+    let reset = if presentation.countdown_active {
+        CustomMenuItem::new("countdown_reset", "Reset")
+    } else {
+        CustomMenuItem::new("countdown_reset", "Reset").disabled()
+    };
+
+    let menu = SystemTrayMenu::new()
+        .add_item(start)
+        .add_item(pause)
+        .add_item(reset)
+        .add_native_item(SystemTrayMenuItem::Separator)
+        .add_item(CustomMenuItem::new("open_countdown", "Open Countdown Tab"));
+
+    SystemTraySubmenu::new("Countdown", menu)
+}
+
+fn build_tray_menu(presentation: &MenuPresentation) -> SystemTrayMenu {
+    let music_submenu = build_music_submenu(presentation);
+    let countdown_submenu = build_countdown_submenu(presentation);
+
+    match presentation.mode {
+        MenuMode::Pomodoro => SystemTrayMenu::new()
+            .add_item(CustomMenuItem::new("header", "Pomodoro — Work").disabled())
+            .add_native_item(SystemTrayMenuItem::Separator)
+            .add_item(CustomMenuItem::new("pomodoro_pause", "⏸ Pause"))
+            .add_item(CustomMenuItem::new("pomodoro_reset", "↺ Reset"))
+            .add_native_item(SystemTrayMenuItem::Separator)
+            .add_item(CustomMenuItem::new("break_start", "Start Break"))
+            .add_native_item(SystemTrayMenuItem::Separator)
+            .add_submenu(music_submenu)
+            .add_submenu(countdown_submenu)
+            .add_native_item(SystemTrayMenuItem::Separator)
+            .add_item(CustomMenuItem::new("open_app", "Open App"))
+            .add_item(CustomMenuItem::new("quit", "Quit")),
+        MenuMode::Break => SystemTrayMenu::new()
+            .add_item(CustomMenuItem::new("header", "Break Time").disabled())
+            .add_native_item(SystemTrayMenuItem::Separator)
+            .add_item(CustomMenuItem::new("pomodoro_pause", "⏸ Pause"))
+            .add_item(CustomMenuItem::new("pomodoro_reset", "↺ Reset"))
+            .add_native_item(SystemTrayMenuItem::Separator)
+            .add_item(CustomMenuItem::new("break_skip", "Skip Break"))
+            .add_native_item(SystemTrayMenuItem::Separator)
+            .add_submenu(music_submenu)
+            .add_submenu(countdown_submenu)
+            .add_native_item(SystemTrayMenuItem::Separator)
+            .add_item(CustomMenuItem::new("open_app", "Open App"))
+            .add_item(CustomMenuItem::new("quit", "Quit")),
+        MenuMode::Countdown => SystemTrayMenu::new()
+            .add_item(CustomMenuItem::new("header", "Countdown Timer").disabled())
+            .add_native_item(SystemTrayMenuItem::Separator)
+            .add_item(if presentation.countdown_running {
+                CustomMenuItem::new("countdown_pause", "⏸ Pause")
+            } else {
+                CustomMenuItem::new("countdown_pause", "⏸ Pause").disabled()
+            })
+            .add_item(if presentation.countdown_active {
+                CustomMenuItem::new("countdown_reset", "↺ Reset")
+            } else {
+                CustomMenuItem::new("countdown_reset", "↺ Reset").disabled()
+            })
+            .add_native_item(SystemTrayMenuItem::Separator)
+            .add_submenu(music_submenu)
+            .add_native_item(SystemTrayMenuItem::Separator)
+            .add_item(CustomMenuItem::new("open_countdown", "Open Countdown Tab"))
+            .add_item(CustomMenuItem::new("open_app", "Open App"))
+            .add_item(CustomMenuItem::new("quit", "Quit")),
+        MenuMode::Idle => SystemTrayMenu::new()
+            .add_item(CustomMenuItem::new("header", "Pomodoro Timer").disabled())
+            .add_native_item(SystemTrayMenuItem::Separator)
+            .add_item(CustomMenuItem::new("pomodoro_start", "Start Pomodoro"))
+            .add_item(CustomMenuItem::new("countdown_start", "Start Countdown"))
+            .add_native_item(SystemTrayMenuItem::Separator)
+            .add_submenu(music_submenu)
+            .add_native_item(SystemTrayMenuItem::Separator)
+            .add_item(CustomMenuItem::new("open_app", "Open App"))
+            .add_item(CustomMenuItem::new("quit", "Quit")),
+    }
+}
+
+fn sync_tray_state(
+    app: &AppHandle,
+    tray_state: &mut TraySnapshot,
+    payload: &MenuSyncPayload,
+) -> Result<(), String> {
+    let (presentation, title) = build_presentation(payload);
+
+    #[cfg(target_os = "macos")]
+    if tray_state.last_title != title {
+        app.tray_handle()
+            .set_title(&title)
+            .map_err(|err| format!("Failed to update tray title: {err}"))?;
+        tray_state.last_title = title;
+    }
+
+    if tray_state
+        .last_presentation
+        .as_ref()
+        .map(|last| last != &presentation)
+        .unwrap_or(true)
+    {
+        let menu = build_tray_menu(&presentation);
+        app.tray_handle()
+            .set_menu(menu)
+            .map_err(|err| format!("Failed to update tray menu: {err}"))?;
+        tray_state.last_presentation = Some(presentation);
+    }
+
+    Ok(())
+}
+
+#[derive(Clone, serde::Serialize)]
+struct TrayActionPayload {
+    action: String,
+    value: Option<String>,
+}
+
+fn emit_tray_action(app: &AppHandle, action: &str, value: Option<&str>) {
+    let _ = app.emit_all(
+        "tray-action",
+        TrayActionPayload {
+            action: action.to_string(),
+            value: value.map(|value| value.to_string()),
+        },
+    );
+}
+
+fn show_main_window(app: &AppHandle, tab: Option<&str>) {
+    if let Some(window) = app.get_window("main") {
+        let _ = window.show();
+        let _ = window.set_focus();
+    }
+    if let Some(tab) = tab {
+        let _ = app.emit_all("select-tab", tab.to_string());
+    }
+}
+
+fn handle_tray_menu_event(app: &AppHandle, id: &str) {
+    match id {
+        "open_app" => show_main_window(app, None),
+        "open_music" => show_main_window(app, Some("music")),
+        "open_countdown" => show_main_window(app, Some("countdown")),
+        "quit" => app.exit(0),
+        "pomodoro_start" => emit_tray_action(app, "pomodoro_start", None),
+        "pomodoro_pause" => emit_tray_action(app, "pomodoro_pause", None),
+        "pomodoro_reset" => emit_tray_action(app, "pomodoro_reset", None),
+        "break_start" => emit_tray_action(app, "break_start", None),
+        "break_skip" => emit_tray_action(app, "break_skip", None),
+        "countdown_start" => emit_tray_action(app, "countdown_start", None),
+        "countdown_pause" => emit_tray_action(app, "countdown_pause", None),
+        "countdown_reset" => emit_tray_action(app, "countdown_reset", None),
+        "music_play_pause" => emit_tray_action(app, "music_play_pause", None),
+        "music_previous" => emit_tray_action(app, "music_previous", None),
+        "music_next" => emit_tray_action(app, "music_next", None),
+        "focus_sound_off" => emit_tray_action(app, "focus_sound", Some("off")),
+        "focus_sound_white" => emit_tray_action(app, "focus_sound", Some("white")),
+        "focus_sound_rain" => emit_tray_action(app, "focus_sound", Some("rain")),
+        "focus_sound_brown" => emit_tray_action(app, "focus_sound", Some("brown")),
+        _ => {}
+    }
+}
+
 struct BackendProcess {
     _child: Child,
     stdin: ChildStdin,
@@ -312,6 +668,19 @@ fn backend_request(
     }
 }
 
+#[tauri::command]
+fn sync_menu_state(
+    payload: MenuSyncPayload,
+    app: AppHandle,
+    tray_state: State<'_, TrayState>,
+) -> Result<(), String> {
+    let mut state = tray_state
+        .menu
+        .lock()
+        .map_err(|_| "Tray state lock poisoned".to_string())?;
+    sync_tray_state(&app, &mut state, &payload)
+}
+
 /// Resolve backend/app.py path for:
 ///  - dev mode
 ///  - packaged builds
@@ -350,14 +719,53 @@ fn main() {
         context.package_info(),
         &env,
     );
+    let initial_presentation = MenuPresentation {
+        mode: MenuMode::Idle,
+        play_pause_label: "▶ Play".to_string(),
+        play_pause_enabled: false,
+        previous_enabled: false,
+        next_enabled: false,
+        focus_sound: "off".to_string(),
+        countdown_running: false,
+        countdown_active: false,
+    };
+    let tray_menu = build_tray_menu(&initial_presentation);
+    let tray_icon = Icon::Rgba {
+        rgba: vec![0, 0, 0, 0],
+        width: 1,
+        height: 1,
+    };
+    let mut tray = SystemTray::new()
+        .with_icon(tray_icon)
+        .with_menu(tray_menu);
+    #[cfg(target_os = "macos")]
+    {
+        tray = tray.with_title("🍅 Ready").with_menu_on_left_click(true);
+    }
 
     tauri::Builder::default()
         .manage(BackendState::new(resource_dir).expect("Unable to start backend"))
+        .manage(TrayState::default())
         .invoke_handler(tauri::generate_handler![
             backend_request,
             get_system_media_state,
-            control_system_media
+            control_system_media,
+            sync_menu_state
         ])
+        .system_tray(tray)
+        .on_system_tray_event(|app, event| {
+            if let SystemTrayEvent::MenuItemClick { id, .. } = event {
+                handle_tray_menu_event(app, id.as_ref());
+            }
+        })
+        .on_window_event(|event: GlobalWindowEvent| {
+            if let WindowEvent::CloseRequested { api, .. } = event.event() {
+                if let Some(window) = event.window().app_handle().get_window("main") {
+                    let _ = window.hide();
+                }
+                api.prevent_close();
+            }
+        })
         .run(context)
         .expect("error while running tauri application");
 }
