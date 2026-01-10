@@ -102,12 +102,15 @@
 
 .window {
   width: min(920px, 92vw);
-  padding: 32px;
+  padding: 32px 32px 20px;
   border-radius: 28px;
   background: var(--window-bg);
   box-shadow: var(--window-shadow);
   border: 1px solid var(--window-border);
   backdrop-filter: blur(28px);
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
 }
 
 .header {
@@ -232,6 +235,22 @@
   gap: 18px;
 }
 
+.content {
+  display: grid;
+  gap: 24px;
+  min-height: 560px;
+}
+
+.view {
+  display: none;
+  min-height: 560px;
+}
+
+.viewActive {
+  display: grid;
+  gap: 24px;
+}
+
 .glassCard {
   padding: 18px;
   border-radius: 20px;
@@ -281,36 +300,6 @@
   color: var(--card-note-text);
 }
 
-.moreFunctions {
-  margin-top: 24px;
-  display: grid;
-  gap: 16px;
-  justify-items: stretch;
-}
-
-.moreFunctionsToggle {
-  border-radius: 999px;
-  padding: 10px 20px;
-  font-size: 14px;
-  border: 1px solid var(--toggle-border);
-  background: var(--toggle-bg);
-  color: var(--toggle-text);
-  cursor: pointer;
-  justify-self: end;
-}
-
-.moreFunctionsPanel {
-  display: grid;
-  gap: 12px;
-  margin-top: 16px;
-  width: 100%;
-}
-
-.moreFunctionsItem {
-  display: grid;
-  gap: 12px;
-}
-
 .moreFunctionsLabel {
   margin: 0;
   font-size: 14px;
@@ -354,6 +343,129 @@
   margin: 0;
   font-size: 13px;
   color: var(--card-body-text);
+}
+
+.templateList {
+  display: grid;
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.templateButton {
+  border-radius: 16px;
+  border: 1px solid var(--glass-border);
+  background: var(--glass-bg);
+  padding: 12px 14px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  text-align: left;
+  color: var(--card-body-text);
+  cursor: pointer;
+}
+
+.templateButton:hover {
+  border-color: var(--secondary-border);
+}
+
+.templateButton:focus-visible {
+  outline: 2px solid rgba(120, 160, 255, 0.6);
+  outline-offset: 2px;
+}
+
+.templateLabel {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--app-text);
+}
+
+.templateMeta {
+  margin: 4px 0 0;
+  font-size: 12px;
+  color: var(--card-note-text);
+}
+
+.templateTime {
+  font-size: 12px;
+  color: var(--card-note-text);
+  white-space: nowrap;
+}
+
+.templateChips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.templateChip {
+  border-radius: 999px;
+  border: 1px solid var(--glass-border);
+  background: var(--glass-bg);
+  padding: 6px 12px;
+  font-size: 12px;
+  color: var(--card-body-text);
+  cursor: pointer;
+}
+
+.templateChip:hover {
+  border-color: var(--secondary-border);
+}
+
+.templateChip:focus-visible {
+  outline: 2px solid rgba(120, 160, 255, 0.6);
+  outline-offset: 2px;
+}
+
+.bottomNav {
+  margin-top: auto;
+  border-radius: 18px 18px 22px 22px;
+  border: 1px solid var(--glass-border);
+  background: var(--glass-bg);
+  backdrop-filter: blur(20px);
+  padding: 10px 14px;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.3);
+}
+
+.navRow {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.navButton {
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--card-note-text);
+  padding: 8px 6px;
+  border-radius: 14px;
+  display: grid;
+  gap: 4px;
+  justify-items: center;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.navButtonActive {
+  border-color: var(--glass-border);
+  background: rgba(255, 255, 255, 0.25);
+  color: var(--app-text);
+}
+
+.navButton:focus-visible {
+  outline: 2px solid rgba(120, 160, 255, 0.6);
+  outline-offset: 2px;
+}
+
+.navIcon {
+  font-size: 18px;
+  line-height: 1;
+}
+
+.navLabel {
+  letter-spacing: 0.02em;
 }
 
 .reminderToast {
