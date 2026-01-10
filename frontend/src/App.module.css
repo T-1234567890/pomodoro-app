@@ -259,6 +259,40 @@
   gap: 24px;
 }
 
+.countdownView {
+  display: grid;
+  gap: 32px;
+  justify-items: center;
+  text-align: center;
+  padding: 10px 0 24px;
+}
+
+.countdownHeader {
+  display: grid;
+  gap: 6px;
+  max-width: 420px;
+}
+
+.countdownKicker {
+  margin: 0;
+  text-transform: uppercase;
+  letter-spacing: 0.32em;
+  font-size: 11px;
+  color: var(--kicker-text);
+}
+
+.countdownTitle {
+  margin: 0;
+  font-size: 28px;
+  font-weight: 600;
+}
+
+.countdownNote {
+  margin: 0;
+  font-size: 13px;
+  color: var(--card-note-text);
+}
+
 .glassCard {
   padding: 18px;
   border-radius: 20px;

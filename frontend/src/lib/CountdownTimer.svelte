@@ -4,6 +4,8 @@
   const STORAGE_KEY = 'countdown_duration_minutes';
   const MINUTES_MIN = 1;
   const MINUTES_MAX = 180;
+  const RING_RADIUS = 96;
+  const RING_CIRCUMFERENCE = 2 * Math.PI * RING_RADIUS;
 
   export let defaultMinutes = 25;
 
@@ -87,6 +89,10 @@
     remainingSeconds = durationMinutes * 60;
   }
 
+  $: totalSeconds = durationMinutes * 60;
+  $: progressRatio = totalSeconds > 0 ? remainingSeconds / totalSeconds : 0;
+  $: ringOffset = RING_CIRCUMFERENCE * (1 - progressRatio);
+
   onMount(() => {
     const storedValue = localStorage.getItem(STORAGE_KEY);
     if (storedValue) {
@@ -105,6 +111,30 @@
 </script>
 
 <div class="countdown-timer">
+  <div class="countdown-ring">
+    <svg viewBox="0 0 220 220" class="ring-graphic" aria-hidden="true">
+      <circle class="ring-track" cx="110" cy="110" r={RING_RADIUS} />
+      <circle
+        class="ring-progress"
+        cx="110"
+        cy="110"
+        r={RING_RADIUS}
+        stroke-dasharray={RING_CIRCUMFERENCE}
+        stroke-dashoffset={ringOffset}
+      />
+    </svg>
+    <div class="countdown-center">
+      <span class="countdown-label">Remaining</span>
+      <span class="countdown-display">{formatTime(remainingSeconds)}</span>
+    </div>
+  </div>
+
+  <div class="countdown-actions" role="group" aria-label="Countdown controls">
+    <button type="button" on:click={startCountdown}>Start</button>
+    <button type="button" on:click={pauseCountdown}>Pause</button>
+    <button type="button" on:click={resetCountdown}>Reset</button>
+  </div>
+
   <label class="duration-input">
     <span>Duration (minutes)</span>
     <input
@@ -119,37 +149,111 @@
       aria-label="Countdown duration in minutes"
     />
   </label>
-  <div class="countdown-display">{formatTime(remainingSeconds)}</div>
-  <div class="countdown-actions">
-    <button type="button" on:click={startCountdown}>Start</button>
-    <button type="button" on:click={pauseCountdown}>Pause</button>
-    <button type="button" on:click={resetCountdown}>Reset</button>
-  </div>
 </div>
 
 <style>
   .countdown-timer {
     display: grid;
-    gap: 0.75rem;
+    gap: 1.5rem;
+    justify-items: center;
   }
 
-  .duration-input {
+  .countdown-ring {
+    position: relative;
+    width: min(380px, 78vw);
+    aspect-ratio: 1;
     display: grid;
+    place-items: center;
+  }
+
+  .ring-graphic {
+    width: 100%;
+    height: 100%;
+    transform: rotate(-90deg);
+  }
+
+  .ring-track {
+    fill: none;
+    stroke: rgba(255, 255, 255, 0.45);
+    stroke-width: 16;
+    stroke-linecap: round;
+  }
+
+  :global(html[data-theme='dark']) .ring-track {
+    stroke: rgba(15, 24, 40, 0.55);
+  }
+
+  .ring-progress {
+    fill: none;
+    stroke: rgba(90, 140, 245, 0.85);
+    stroke-width: 16;
+    stroke-linecap: round;
+    transition: stroke-dashoffset 1s linear;
+  }
+
+  :global(html[data-theme='dark']) .ring-progress {
+    stroke: rgba(122, 164, 255, 0.9);
+  }
+
+  .countdown-center {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    align-content: center;
+    justify-items: center;
     gap: 0.35rem;
-    font-size: 0.85rem;
-    color: var(--form-row-text);
+    text-align: center;
+    padding: 1rem;
+  }
+
+  .countdown-label {
+    font-size: 0.75rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--card-note-text);
+  }
+
+  .countdown-display {
+    font-size: clamp(2.4rem, 6vw, 3.5rem);
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: 0.08em;
+    color: var(--app-text);
+  }
+
+  .countdown-actions {
+    display: flex;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .countdown-actions button {
+    border-radius: 12px;
+    padding: 0.75rem 2rem;
+    border: 1px solid var(--secondary-border);
+    background: var(--secondary-bg);
+    color: var(--secondary-text);
+    font-size: 1rem;
+    cursor: pointer;
+  }
+
+  .countdown-actions button:first-child {
+    background: var(--primary-bg);
+    border-color: var(--primary-border);
+    color: var(--primary-text);
   }
 
   .duration-field {
     width: 100%;
-    padding: 0.5rem 2.25rem 0.5rem 0.75rem;
-    border-radius: 0.75rem;
+    padding: 0.65rem 2.5rem 0.65rem 1rem;
+    border-radius: 999px;
     border: 1px solid var(--input-border);
     background: var(--input-bg);
     color: var(--input-text);
-    font-size: 0.875rem;
+    font-size: 1rem;
     line-height: 1.2;
-    min-height: 40px;
+    min-height: 48px;
     box-sizing: border-box;
     caret-color: var(--input-text);
   }
@@ -159,14 +263,12 @@
     opacity: 1;
   }
 
-  .countdown-display {
-    font-size: 2rem;
-    font-variant-numeric: tabular-nums;
-  }
-
-  .countdown-actions {
-    display: flex;
-    gap: 0.5rem;
-    flex-wrap: wrap;
+  .duration-input {
+    display: grid;
+    gap: 0.35rem;
+    font-size: 0.9rem;
+    color: var(--form-row-text);
+    width: min(300px, 84vw);
+    text-align: center;
   }
 </style>
