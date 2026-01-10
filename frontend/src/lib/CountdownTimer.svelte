@@ -137,25 +137,26 @@
     display: grid;
     gap: 0.35rem;
     font-size: 0.85rem;
-    color: rgba(255, 255, 255, 0.7);
-  }
-
-  :global(body.light) .duration-input {
-    color: rgba(15, 23, 42, 0.7);
+    color: var(--form-row-text);
   }
 
   .duration-field {
     width: 100%;
-    padding: 0.5rem 0.75rem;
+    padding: 0.5rem 2.25rem 0.5rem 0.75rem;
     border-radius: 0.75rem;
-    border: 1px solid rgba(255, 255, 255, 0.18);
-    background: rgba(255, 255, 255, 0.08);
-    color: inherit;
+    border: 1px solid var(--input-border);
+    background: var(--input-bg);
+    color: var(--input-text);
+    font-size: 0.875rem;
+    line-height: 1.2;
+    min-height: 40px;
+    box-sizing: border-box;
+    caret-color: var(--input-text);
   }
 
-  :global(body.light) .duration-field {
-    border: 1px solid rgba(15, 23, 42, 0.12);
-    background: rgba(15, 23, 42, 0.04);
+  .duration-field::placeholder {
+    color: var(--card-note-text);
+    opacity: 1;
   }
 
   .countdown-display {
