@@ -1,0 +1,8 @@
+/Users/2111832868qq.com/PycharmProjects/Learning/pomodoro-app/frontend/src-tauri/target/debug/deps/serde_with_macros-59647e023c0b1ab9.d: /Users/2111832868qq.com/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde_with_macros-3.16.1/src/lib.rs /Users/2111832868qq.com/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde_with_macros-3.16.1/src/apply.rs /Users/2111832868qq.com/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde_with_macros-3.16.1/src/lazy_bool.rs /Users/2111832868qq.com/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde_with_macros-3.16.1/src/utils.rs
+
+/Users/2111832868qq.com/PycharmProjects/Learning/pomodoro-app/frontend/src-tauri/target/debug/deps/libserde_with_macros-59647e023c0b1ab9.dylib: /Users/2111832868qq.com/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde_with_macros-3.16.1/src/lib.rs /Users/2111832868qq.com/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde_with_macros-3.16.1/src/apply.rs /Users/2111832868qq.com/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde_with_macros-3.16.1/src/lazy_bool.rs /Users/2111832868qq.com/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde_with_macros-3.16.1/src/utils.rs
+
+/Users/2111832868qq.com/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde_with_macros-3.16.1/src/lib.rs:
+/Users/2111832868qq.com/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde_with_macros-3.16.1/src/apply.rs:
+/Users/2111832868qq.com/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde_with_macros-3.16.1/src/lazy_bool.rs:
+/Users/2111832868qq.com/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/serde_with_macros-3.16.1/src/utils.rs:
