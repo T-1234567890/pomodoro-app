@@ -211,6 +211,14 @@
   cursor: pointer;
 }
 
+.primaryButton:disabled,
+.secondaryButton:disabled,
+.ghostButton:disabled,
+.sourceToggleButton:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
 .primaryButton {
   background: var(--primary-bg);
   color: var(--primary-text);
@@ -324,6 +332,41 @@
   margin-top: 12px;
 }
 
+.audioSourceSelector {
+  display: grid;
+  gap: 10px;
+  padding: 12px;
+  border-radius: 16px;
+  border: 1px solid var(--glass-border);
+  background: var(--glass-bg);
+}
+
+.sourceToggleRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.sourceToggleButton {
+  border-radius: 999px;
+  border: 1px solid var(--glass-border);
+  background: var(--glass-bg);
+  padding: 8px 14px;
+  font-size: 13px;
+  color: var(--card-body-text);
+  cursor: pointer;
+}
+
+.sourceToggleButton:hover {
+  border-color: var(--secondary-border);
+}
+
+.sourceToggleActive {
+  background: var(--secondary-bg);
+  border-color: var(--secondary-border);
+  color: var(--secondary-text);
+}
+
 .audioSection {
   display: grid;
   gap: 8px;
@@ -333,10 +376,31 @@
   background: var(--glass-bg);
 }
 
+.sourceTitle {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--app-text);
+}
+
 .audioButtonRow {
   display: flex;
   flex-wrap: wrap;
   gap: 10px;
+}
+
+.playbackBar {
+  display: grid;
+  gap: 12px;
+  padding: 12px;
+  border-radius: 16px;
+  border: 1px solid var(--glass-border);
+  background: var(--glass-bg);
+}
+
+.audioMeta {
+  display: grid;
+  gap: 4px;
 }
 
 .playbackStatus {
