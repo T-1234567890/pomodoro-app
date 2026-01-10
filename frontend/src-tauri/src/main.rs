@@ -6,8 +6,9 @@ use std::process::{Child, ChildStdin, ChildStdout, Command, Stdio};
 use std::sync::Mutex;
 
 use tauri::{
-    AppHandle, CustomMenuItem, Env, GlobalWindowEvent, Icon, Manager, State, SystemTray,
-    SystemTrayEvent, SystemTrayMenu, SystemTrayMenuItem, SystemTraySubmenu, WindowEvent,
+    api::notification::Notification, AppHandle, CustomMenuItem, Env, GlobalWindowEvent, Icon,
+    Manager, State, SystemTray, SystemTrayEvent, SystemTrayMenu, SystemTrayMenuItem,
+    SystemTraySubmenu, WindowEvent,
 };
 
 #[derive(serde::Serialize)]
@@ -681,6 +682,21 @@ fn sync_menu_state(
     sync_tray_state(&app, &mut state, &payload)
 }
 
+#[tauri::command]
+fn notify_session_complete(mode: String, app: AppHandle) -> Result<(), String> {
+    let (title, body) = match mode.as_str() {
+        "work" => ("🍅 Work session complete", "Time to take a break."),
+        "break" => ("☕ Break finished", "Ready to focus again?"),
+        _ => return Err("Unsupported session mode".to_string()),
+    };
+
+    Notification::new(&app.config().tauri.bundle.identifier)
+        .title(title)
+        .body(body)
+        .show()
+        .map_err(|err| format!("Failed to send notification: {err}"))
+}
+
 /// Resolve backend/app.py path for:
 ///  - dev mode
 ///  - packaged builds
@@ -750,7 +766,8 @@ fn main() {
             backend_request,
             get_system_media_state,
             control_system_media,
-            sync_menu_state
+            sync_menu_state,
+            notify_session_complete
         ])
         .system_tray(tray)
         .on_system_tray_event(|app, event| {
