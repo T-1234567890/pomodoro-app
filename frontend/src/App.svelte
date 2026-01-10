@@ -39,7 +39,6 @@
   let theme: Theme = 'light';
   let preferSystemTheme = true;
   let systemThemeMedia: MediaQueryList | null = null;
-  let moreFunctionsOpen = false;
   let fileInput: HTMLInputElement | null = null;
   let audioElement: HTMLAudioElement | null = null;
   let audioUrl: string | null = null;
@@ -73,6 +72,14 @@
     localAudio: false,
     systemAudio: false
   };
+  type AppTab = 'pomodoro' | 'music' | 'countdown' | 'settings';
+  const tabs: { id: AppTab; label: string; icon: string; description: string }[] = [
+    { id: 'pomodoro', label: 'Pomodoro', icon: '⏱', description: 'Focus timer' },
+    { id: 'music', label: 'Music', icon: '🎧', description: 'Focus sounds and music' },
+    { id: 'countdown', label: 'Countdown', icon: '⏳', description: 'Independent countdown' },
+    { id: 'settings', label: 'More', icon: '⚙️', description: 'Settings and preferences' }
+  ];
+  let activeTab: AppTab = 'pomodoro';
 
   const handleAudioPlay = () => {
     playbackStatus = 'Playing';
@@ -443,10 +450,6 @@
     setTheme(nextTheme, true);
   };
 
-  const toggleMoreFunctions = () => {
-    moreFunctionsOpen = !moreFunctionsOpen;
-  };
-
   const updateSystemMediaState = async () => {
     try {
       const state = await getSystemMediaState();
@@ -628,275 +631,294 @@
       </div>
     </header>
 
-    <!-- TIMER CARD -->
-    <section class={styles.timerCard}>
-      <div class={styles.timerMeta}>
-        <p class={styles.timerLabel}>Focus timer</p>
-        <p class={styles.timerCycle}>
-          {modeLabels[mode]} · {getDurationForMode(mode)} minutes
-        </p>
-      </div>
-
-      <div class={styles.timerValue}>{formatSeconds(remainingSeconds)}</div>
-
-      <div class={styles.timerActions}>
-        <button class={styles.primaryButton} type="button" on:click={startTimer}>
-          {running ? 'Running' : remainingSeconds === 0 ? 'Restart' : 'Start'}
-        </button>
-
-        <button class={styles.secondaryButton} type="button" on:click={pauseTimer}>
-          Pause
-        </button>
-
-        <button class={styles.ghostButton} type="button" on:click={resetTimer}>
-          Reset
-        </button>
-      </div>
-    </section>
-
-    <!-- SETTINGS + STATS GRID -->
-    <section class={styles.grid}>
-
-      <!-- PRESETS CARD -->
-      <div class={styles.glassCard}>
-        <h2 class={styles.cardTitle}>Timer settings</h2>
-
-        <div class={styles.cardBody}>
-          <label class={styles.formRow}>
-            <span>Work duration (minutes)</span>
-            <input
-              class={styles.input}
-              type="number"
-              min="1"
-              bind:value={settings.workMinutes}
-              on:input={updateSettings}
-            />
-          </label>
-          <label class={styles.formRow}>
-            <span>Short break duration (minutes)</span>
-            <input
-              class={styles.input}
-              type="number"
-              min="1"
-              bind:value={settings.shortBreakMinutes}
-              on:input={updateSettings}
-            />
-          </label>
-          <label class={styles.formRow}>
-            <span>Long break duration (minutes)</span>
-            <input
-              class={styles.input}
-              type="number"
-              min="1"
-              bind:value={settings.longBreakMinutes}
-              on:input={updateSettings}
-            />
-          </label>
-          <label class={styles.formRow}>
-            <span>Sessions before long break</span>
-            <input
-              class={styles.input}
-              type="number"
-              min="1"
-              bind:value={settings.sessionsBeforeLongBreak}
-              on:input={updateSettings}
-            />
-          </label>
-          <label class={styles.formRow}>
-            <span>Automatic long break trigger</span>
-            <input
-              class={styles.checkbox}
-              type="checkbox"
-              bind:checked={settings.autoLongBreak}
-              on:change={updateSettings}
-            />
-          </label>
-          <label class={styles.formRow}>
-            <span>Enable session-end pop-up reminder</span>
-            <input
-              class={styles.checkbox}
-              type="checkbox"
-              bind:checked={settings.enableSessionReminder}
-              on:change={updateSettings}
-            />
-          </label>
-        </div>
-
-        <p class={styles.cardNote}>
-          Settings persist locally and only update the active timer if needed.
-        </p>
-      </div>
-
-      <div class={styles.glassCard}>
-        <h2 class={styles.cardTitle}>Session details</h2>
-
-        <div class={styles.cardBody}>
-          <p>Current mode: {modeLabels[mode]}</p>
-          <p>Total session length: {formatSeconds(totalSeconds)}</p>
-          <p>Time remaining: {formatSeconds(remainingSeconds)}</p>
-          <p>Status: {running ? 'Counting down' : 'Paused'}</p>
-          <p>Work sessions this cycle: {cycleWorkSessions}</p>
-          <p>Total work sessions: {totalWorkSessions}</p>
-          <p>Total sessions completed: {totalSessionsCompleted}</p>
-        </div>
-
-        <p class={styles.cardNote}>Timer updates every second while running.</p>
-      </div>
-
-    </section>
-
-    <section class={styles.moreFunctions}>
-      <button
-        class={styles.moreFunctionsToggle}
-        type="button"
-        on:click={toggleMoreFunctions}
-        aria-expanded={moreFunctionsOpen}
+    <div class={styles.content}>
+      <section
+        class={`${styles.view} ${activeTab === 'pomodoro' ? styles.viewActive : ''}`}
+        id="view-pomodoro"
+        aria-hidden={activeTab !== 'pomodoro'}
       >
-        More Functions
-      </button>
+        <section class={styles.timerCard}>
+          <div class={styles.timerMeta}>
+            <p class={styles.timerLabel}>Focus timer</p>
+            <p class={styles.timerCycle}>
+              {modeLabels[mode]} · {getDurationForMode(mode)} minutes
+            </p>
+          </div>
 
-      {#if moreFunctionsOpen}
-        <div class={styles.moreFunctionsPanel}>
+          <div class={styles.timerValue}>{formatSeconds(remainingSeconds)}</div>
+
+          <div class={styles.timerActions}>
+            <button class={styles.primaryButton} type="button" on:click={startTimer}>
+              {running ? 'Running' : remainingSeconds === 0 ? 'Restart' : 'Start'}
+            </button>
+
+            <button class={styles.secondaryButton} type="button" on:click={pauseTimer}>
+              Pause
+            </button>
+
+            <button class={styles.ghostButton} type="button" on:click={resetTimer}>
+              Reset
+            </button>
+          </div>
+        </section>
+
+        <section class={styles.grid}>
           <div class={styles.glassCard}>
-            <h2 class={styles.cardTitle}>More Functions</h2>
+            <h2 class={styles.cardTitle}>Session details</h2>
+
             <div class={styles.cardBody}>
-              <div class={styles.moreFunctionsItem}>
+              <p>Current mode: {modeLabels[mode]}</p>
+              <p>Total session length: {formatSeconds(totalSeconds)}</p>
+              <p>Time remaining: {formatSeconds(remainingSeconds)}</p>
+              <p>Status: {running ? 'Counting down' : 'Paused'}</p>
+              <p>Work sessions this cycle: {cycleWorkSessions}</p>
+              <p>Total work sessions: {totalWorkSessions}</p>
+              <p>Total sessions completed: {totalSessionsCompleted}</p>
+            </div>
+
+            <p class={styles.cardNote}>Timer updates every second while running.</p>
+          </div>
+        </section>
+      </section>
+
+      <section
+        class={`${styles.view} ${activeTab === 'music' ? styles.viewActive : ''}`}
+        id="view-music"
+        aria-hidden={activeTab !== 'music'}
+      >
+        <div class={styles.glassCard}>
+          <h2 class={styles.cardTitle}>Music player</h2>
+          <p class={styles.cardNote}>
+            Pick a local track or focus sound to stay in the zone.
+          </p>
+          <div class={styles.cardBody}>
+            <input
+              class={styles.fileInput}
+              type="file"
+              accept="audio/*"
+              bind:this={fileInput}
+              on:change={handleAudioFileChange}
+            />
+
+            <div class={styles.audioControls}>
+              <div class={styles.audioSection}>
                 <div>
-                  <p class={styles.moreFunctionsLabel}>Music player</p>
-                  <p class={styles.moreFunctionsNote}>
-                    Pick a local track or focus sound to stay in the zone.
-                  </p>
+                  <p class={styles.moreFunctionsLabel}>System media</p>
+                  <p class={styles.moreFunctionsNote}>{systemMediaDescription}</p>
                 </div>
-                <div>
-                  <input
-                    class={styles.fileInput}
-                    type="file"
-                    accept="audio/*"
-                    bind:this={fileInput}
-                    on:change={handleAudioFileChange}
-                  />
-
-                  <div class={styles.audioControls}>
-                    <div class={styles.audioSection}>
-                      <div>
-                        <p class={styles.moreFunctionsLabel}>System media</p>
-                        <p class={styles.moreFunctionsNote}>{systemMediaDescription}</p>
-                      </div>
-                      <div class={styles.audioButtonRow}>
-                        <button
-                          class={styles.ghostButton}
-                          type="button"
-                          disabled={!systemMediaState.supportsPrevious}
-                          on:click={() => void controlSystemMedia('previous')}
-                        >
-                          Previous
-                        </button>
-                        <button
-                          class={styles.secondaryButton}
-                          type="button"
-                          disabled={!systemMediaState.supportsPlayPause}
-                          on:click={() => void controlSystemMedia('play_pause')}
-                        >
-                          {systemMediaState.isPlaying ? 'Pause' : 'Play'}
-                        </button>
-                        <button
-                          class={styles.ghostButton}
-                          type="button"
-                          disabled={!systemMediaState.supportsNext}
-                          on:click={() => void controlSystemMedia('next')}
-                        >
-                          Next
-                        </button>
-                      </div>
-                    </div>
-
-                    <div class={styles.audioSection}>
-                      <div>
-                        <p class={styles.moreFunctionsLabel}>Focus sounds</p>
-                        <p class={styles.moreFunctionsNote}>
-                          Built-in focus soundscapes (white, rain, brown) that stay inside the app.
-                        </p>
-                      </div>
-                      <label class={styles.formRow}>
-                        <span>Focus sound</span>
-                        <select
-                          class={styles.input}
-                          bind:value={focusSoundMode}
-                          on:change={handleFocusSoundChange}
-                        >
-                          <option value="off">Off</option>
-                          <option value="white">White noise</option>
-                          <option value="rain">Rain</option>
-                          <option value="brown">Brown noise</option>
-                        </select>
-                      </label>
-                    </div>
-
-                    <div class={styles.audioSection}>
-                      <div>
-                        <p class={styles.moreFunctionsLabel}>Local audio file</p>
-                        <p class={styles.moreFunctionsNote}>
-                          Select a file to play alongside your focus session.
-                        </p>
-                      </div>
-                      <button class={styles.secondaryButton} type="button" on:click={selectAudioFile}>
-                        Select Audio File
-                      </button>
-
-                      <div class={styles.audioButtonRow}>
-                        <button class={styles.primaryButton} type="button" on:click={playAudio}>
-                          Play
-                        </button>
-                        <button class={styles.secondaryButton} type="button" on:click={pauseAudio}>
-                          Pause
-                        </button>
-                        <button class={styles.ghostButton} type="button" on:click={stopAudio}>
-                          Stop
-                        </button>
-                      </div>
-                    </div>
-
-                    <label class={styles.formRow}>
-                      <span>Volume ({volume.toFixed(2)})</span>
-                      <input
-                        class={styles.input}
-                        type="range"
-                        min="0"
-                        max="1"
-                        step="0.01"
-                        bind:value={volume}
-                      />
-                    </label>
-
-                    <label class={styles.formRow}>
-                      <span>Pause music on break</span>
-                      <input
-                        class={styles.checkbox}
-                        type="checkbox"
-                        bind:checked={settings.pauseMusicOnBreak}
-                        on:change={updateSettings}
-                      />
-                    </label>
-
-                    <p class={styles.playbackStatus}>Status: {playbackStatus}</p>
-                    <p class={styles.playbackStatus}>Active source: {currentAudioSource}</p>
-                  </div>
+                <div class={styles.audioButtonRow}>
+                  <button
+                    class={styles.ghostButton}
+                    type="button"
+                    disabled={!systemMediaState.supportsPrevious}
+                    on:click={() => void controlSystemMedia('previous')}
+                  >
+                    Previous
+                  </button>
+                  <button
+                    class={styles.secondaryButton}
+                    type="button"
+                    disabled={!systemMediaState.supportsPlayPause}
+                    on:click={() => void controlSystemMedia('play_pause')}
+                  >
+                    {systemMediaState.isPlaying ? 'Pause' : 'Play'}
+                  </button>
+                  <button
+                    class={styles.ghostButton}
+                    type="button"
+                    disabled={!systemMediaState.supportsNext}
+                    on:click={() => void controlSystemMedia('next')}
+                  >
+                    Next
+                  </button>
                 </div>
               </div>
-              <div class={styles.moreFunctionsItem}>
+
+              <div class={styles.audioSection}>
                 <div>
-                  <p class={styles.moreFunctionsLabel}>Countdown timer</p>
+                  <p class={styles.moreFunctionsLabel}>Focus sounds</p>
                   <p class={styles.moreFunctionsNote}>
-                    An optional countdown that runs independently from your Pomodoro session.
+                    Built-in focus soundscapes (white, rain, brown) that stay inside the app.
                   </p>
                 </div>
-                <CountdownTimer />
+                <label class={styles.formRow}>
+                  <span>Focus sound</span>
+                  <select
+                    class={styles.input}
+                    bind:value={focusSoundMode}
+                    on:change={handleFocusSoundChange}
+                  >
+                    <option value="off">Off</option>
+                    <option value="white">White noise</option>
+                    <option value="rain">Rain</option>
+                    <option value="brown">Brown noise</option>
+                  </select>
+                </label>
               </div>
+
+              <div class={styles.audioSection}>
+                <div>
+                  <p class={styles.moreFunctionsLabel}>Local audio file</p>
+                  <p class={styles.moreFunctionsNote}>
+                    Select a file to play alongside your focus session.
+                  </p>
+                </div>
+                <button class={styles.secondaryButton} type="button" on:click={selectAudioFile}>
+                  Select Audio File
+                </button>
+
+                <div class={styles.audioButtonRow}>
+                  <button class={styles.primaryButton} type="button" on:click={playAudio}>
+                    Play
+                  </button>
+                  <button class={styles.secondaryButton} type="button" on:click={pauseAudio}>
+                    Pause
+                  </button>
+                  <button class={styles.ghostButton} type="button" on:click={stopAudio}>
+                    Stop
+                  </button>
+                </div>
+              </div>
+
+              <label class={styles.formRow}>
+                <span>Volume ({volume.toFixed(2)})</span>
+                <input
+                  class={styles.input}
+                  type="range"
+                  min="0"
+                  max="1"
+                  step="0.01"
+                  bind:value={volume}
+                />
+              </label>
+
+              <label class={styles.formRow}>
+                <span>Pause music on break</span>
+                <input
+                  class={styles.checkbox}
+                  type="checkbox"
+                  bind:checked={settings.pauseMusicOnBreak}
+                  on:change={updateSettings}
+                />
+              </label>
+
+              <p class={styles.playbackStatus}>Status: {playbackStatus}</p>
+              <p class={styles.playbackStatus}>Active source: {currentAudioSource}</p>
             </div>
           </div>
         </div>
-      {/if}
-    </section>
+      </section>
+
+      <section
+        class={`${styles.view} ${activeTab === 'countdown' ? styles.viewActive : ''}`}
+        id="view-countdown"
+        aria-hidden={activeTab !== 'countdown'}
+      >
+        <div class={styles.glassCard}>
+          <h2 class={styles.cardTitle}>Countdown timer</h2>
+          <p class={styles.cardNote}>
+            An optional countdown that runs independently from your Pomodoro session.
+          </p>
+          <CountdownTimer />
+        </div>
+      </section>
+
+      <section
+        class={`${styles.view} ${activeTab === 'settings' ? styles.viewActive : ''}`}
+        id="view-settings"
+        aria-hidden={activeTab !== 'settings'}
+      >
+        <section class={styles.grid}>
+          <div class={styles.glassCard}>
+            <h2 class={styles.cardTitle}>Timer settings</h2>
+
+            <div class={styles.cardBody}>
+              <label class={styles.formRow}>
+                <span>Work duration (minutes)</span>
+                <input
+                  class={styles.input}
+                  type="number"
+                  min="1"
+                  bind:value={settings.workMinutes}
+                  on:input={updateSettings}
+                />
+              </label>
+              <label class={styles.formRow}>
+                <span>Short break duration (minutes)</span>
+                <input
+                  class={styles.input}
+                  type="number"
+                  min="1"
+                  bind:value={settings.shortBreakMinutes}
+                  on:input={updateSettings}
+                />
+              </label>
+              <label class={styles.formRow}>
+                <span>Long break duration (minutes)</span>
+                <input
+                  class={styles.input}
+                  type="number"
+                  min="1"
+                  bind:value={settings.longBreakMinutes}
+                  on:input={updateSettings}
+                />
+              </label>
+              <label class={styles.formRow}>
+                <span>Sessions before long break</span>
+                <input
+                  class={styles.input}
+                  type="number"
+                  min="1"
+                  bind:value={settings.sessionsBeforeLongBreak}
+                  on:input={updateSettings}
+                />
+              </label>
+              <label class={styles.formRow}>
+                <span>Automatic long break trigger</span>
+                <input
+                  class={styles.checkbox}
+                  type="checkbox"
+                  bind:checked={settings.autoLongBreak}
+                  on:change={updateSettings}
+                />
+              </label>
+              <label class={styles.formRow}>
+                <span>Enable session-end pop-up reminder</span>
+                <input
+                  class={styles.checkbox}
+                  type="checkbox"
+                  bind:checked={settings.enableSessionReminder}
+                  on:change={updateSettings}
+                />
+              </label>
+            </div>
+
+            <p class={styles.cardNote}>
+              Settings persist locally and only update the active timer if needed.
+            </p>
+          </div>
+        </section>
+      </section>
+    </div>
+
+    <nav class={styles.bottomNav} aria-label="Primary">
+      <div class={styles.navRow} role="tablist">
+        {#each tabs as tab}
+          <button
+            class={`${styles.navButton} ${activeTab === tab.id ? styles.navButtonActive : ''}`}
+            type="button"
+            role="tab"
+            aria-selected={activeTab === tab.id}
+            aria-controls={`view-${tab.id}`}
+            title={tab.description}
+            on:click={() => (activeTab = tab.id)}
+          >
+            <span class={styles.navIcon} aria-hidden="true">{tab.icon}</span>
+            <span class={styles.navLabel}>{tab.label}</span>
+          </button>
+        {/each}
+      </div>
+    </nav>
   </section>
 </main>
 
