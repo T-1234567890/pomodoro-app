@@ -6,8 +6,8 @@ use std::process::{Child, ChildStdin, ChildStdout, Command, Stdio};
 use std::sync::Mutex;
 
 use tauri::{
-    AppHandle, CustomMenuItem, Env, Icon, Manager, State, SystemTray, SystemTrayEvent,
-    SystemTrayMenu, SystemTrayMenuItem, SystemTraySubmenu, WindowEvent,
+    AppHandle, CustomMenuItem, Env, GlobalWindowEvent, Icon, Manager, State, SystemTray,
+    SystemTrayEvent, SystemTrayMenu, SystemTrayMenuItem, SystemTraySubmenu, WindowEvent,
 };
 
 #[derive(serde::Serialize)]
@@ -368,14 +368,26 @@ fn build_music_submenu(presentation: &MenuPresentation) -> SystemTraySubmenu {
         CustomMenuItem::new("music_next", "⏭ Next").disabled()
     };
 
-    let focus_off = CustomMenuItem::new("focus_sound_off", "Off")
-        .selected(presentation.focus_sound == "off");
-    let focus_white = CustomMenuItem::new("focus_sound_white", "White")
-        .selected(presentation.focus_sound == "white");
-    let focus_rain = CustomMenuItem::new("focus_sound_rain", "Rain")
-        .selected(presentation.focus_sound == "rain");
-    let focus_brown = CustomMenuItem::new("focus_sound_brown", "Brown")
-        .selected(presentation.focus_sound == "brown");
+    let focus_off = if presentation.focus_sound == "off" {
+        CustomMenuItem::new("focus_sound_off", "Off").selected()
+    } else {
+        CustomMenuItem::new("focus_sound_off", "Off")
+    };
+    let focus_white = if presentation.focus_sound == "white" {
+        CustomMenuItem::new("focus_sound_white", "White").selected()
+    } else {
+        CustomMenuItem::new("focus_sound_white", "White")
+    };
+    let focus_rain = if presentation.focus_sound == "rain" {
+        CustomMenuItem::new("focus_sound_rain", "Rain").selected()
+    } else {
+        CustomMenuItem::new("focus_sound_rain", "Rain")
+    };
+    let focus_brown = if presentation.focus_sound == "brown" {
+        CustomMenuItem::new("focus_sound_brown", "Brown").selected()
+    } else {
+        CustomMenuItem::new("focus_sound_brown", "Brown")
+    };
 
     let focus_menu = SystemTrayMenu::new()
         .add_item(focus_off)
@@ -517,7 +529,7 @@ fn sync_tray_state(
     Ok(())
 }
 
-#[derive(serde::Serialize)]
+#[derive(Clone, serde::Serialize)]
 struct TrayActionPayload {
     action: String,
     value: Option<String>,
@@ -746,7 +758,7 @@ fn main() {
                 handle_tray_menu_event(app, id.as_ref());
             }
         })
-        .on_window_event(|event| {
+        .on_window_event(|event: GlobalWindowEvent| {
             if let WindowEvent::CloseRequested { api, .. } = event.event() {
                 if let Some(window) = event.window().app_handle().get_window("main") {
                     let _ = window.hide();
