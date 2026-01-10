@@ -9,7 +9,7 @@ The 0.5.x branch introduces a new glass-panel layout system with separate tiles 
 ## Version status
 
 Current Version: <br>
-🧪 0.6.2 Beta
+🧪 0.6.3 Beta
 
 Update history: see history_versions/ for archived notes.
 
@@ -30,39 +30,27 @@ Update history: see history_versions/ for archived notes.
 
 ## Changelog (short)
 
-## 0.6.2
-- Added session-end pop-up reminder
-- Improved session completion feedback
-- No changes to existing timer behavior or settings
-- Improved timer
-
-- UI redesign with layered macOS 26-inspired glass tiles and a stronger hierarchy.
-- New glass theme engine with rounded panels, gradients, and depth layering.
-- Dark Mode contrast improved so text and disabled buttons remain readable.
+## 0.6.3
+- Added session-end pop-up reminder and clearer completion feedback
+- Added white noise playback alongside the in-app music player
+- Refined timer visuals and readability across glass tiles
+- Improved Dark Mode contrast for text, disabled buttons, and dividers
+- Expanded glass theme depth with layered panels, gradients, and softer shadows
+- No changes to timer logic or settings behavior in this update
 
 ## Features
 
-- Customizable work and break durations
-- Long-break interval support (configure duration and cadence)
-- Session presets for quickly switching routines
-- Start, pause/resume, and reset controls
-- Session-end pop-up reminder
-- Popup notification when a session finishes
-- Optional chime when sessions complete
-- Tracks how many Pomodoros you have completed today
-- Daily productivity summary (focus time, break counts)
-- Displays remaining time
-- Works offline on macOS (Python and tkinter are usually included)
+- Customizable work/break durations with long-break cadence
+- Session presets for quick switching (25/5, 50/10, etc.)
+- Start, pause/resume, and reset controls with clear state feedback
+- Dedicated focus timer with a separate mini countdown window
+- Session-end pop-up reminder and optional chime
+- Daily productivity summary (focus time, break counts, sessions completed)
+- Auto-saves daily progress and stats history
 - Optional dark mode for late-night sessions
-- Pomodoro work & break timer
-- Configurable long-break intervals
-- Built-in session presets (25/5, 50/10, etc.)
-- Daily statistics (focus time, breaks taken, sessions completed)
-- Optional sound notification on completion
 - Countdown mini-timer window
-- Simple built-in music player window
-- Auto-saves daily progress
-- Glass-panel UI layout (0.4.x series)
+- Simple built-in music player and white noise player window
+- Glass-panel UI layout with layered tiles and depth
 
 ## 🚀 Running the App (v0.5.0+ Migration Build)
 
@@ -163,7 +151,7 @@ If you want to:
 
 You can open a Discussion or Issue instead of a PR.
 
-Constructive feedback is especially welcome during the current 0.4.x UI refinement phase.
+Constructive feedback is especially welcome during the current 0.6.x UI refinement phase.
 
 ## Usage
 
