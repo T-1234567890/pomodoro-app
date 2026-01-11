@@ -110,9 +110,8 @@
   color: var(--app-text);
 }
 
-.app::before {
-  content: '';
-  position: absolute;
+.glassBackground {
+  position: fixed;
   inset: 0;
   background: var(--app-glass-bg);
   backdrop-filter: blur(30px);
@@ -120,7 +119,7 @@
   z-index: 0;
 }
 
-.app > * {
+.app > :not(.glassBackground) {
   position: relative;
   z-index: 1;
 }
