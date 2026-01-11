@@ -968,7 +968,7 @@
 </script>
 
 <main class={styles.app}>
-  <div class={styles.titleBar} data-tauri-drag-region aria-hidden="true"></div>
+  <div class={styles.dragRegion} data-tauri-drag-region aria-hidden="true"></div>
   <section class={styles.window}>
     <header class={styles.header}>
       <div>
