@@ -30,7 +30,9 @@
         "height": 720,
         "resizable": true,
         "transparent": true,
-        "decorations": false
+        "decorations": true,
+        "titleBarStyle": "Transparent",
+        "hiddenTitle": true
       }
     ]
   }
