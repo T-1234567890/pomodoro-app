@@ -968,6 +968,7 @@
 </script>
 
 <main class={styles.app}>
+  <div class={styles.titleBar} data-tauri-drag-region aria-hidden="true"></div>
   <section class={styles.window}>
     <header class={styles.header}>
       <div>
