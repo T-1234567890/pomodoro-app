@@ -766,7 +766,6 @@ fn main() {
                 // Ensure the macOS window stays transparent and frameless-style while
                 // keeping native traffic lights available via the config settings.
                 if let Some(window) = app.get_window("main") {
-                    let _ = window.set_transparent(true);
                     let _ = window.set_decorations(true);
                 }
             }
