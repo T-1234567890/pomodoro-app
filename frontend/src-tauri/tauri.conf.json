@@ -10,11 +10,6 @@
     "version": "0.1.0"
   },
   "tauri": {
-    "allowlist": {
-      "shell": {
-        "all": true
-      }
-    },
     "bundle": {
       "active": true,
       "targets": "all",
