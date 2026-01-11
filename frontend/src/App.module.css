@@ -43,6 +43,15 @@
   --toggle-text: rgba(12, 27, 42, 0.75);
 }
 
+:global(html, body, #app) {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  background: transparent;
+  background-color: transparent;
+  background-image: none;
+}
+
 :global(html[data-theme='dark']) {
   color-scheme: dark;
   --app-bg-start: #0b1321;
@@ -91,13 +100,39 @@
   min-height: 100vh;
   display: grid;
   place-items: center;
-  background: radial-gradient(
-    circle at top left,
-    var(--app-bg-start),
-    var(--app-bg-mid) 45%,
-    var(--app-bg-end)
-  );
+  background: rgba(245, 247, 250, 0.85);
+  backdrop-filter: blur(30px);
+  -webkit-backdrop-filter: blur(30px);
   color: var(--app-text);
+}
+
+.titleBar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 28px;
+  z-index: 20;
+  -webkit-app-region: drag;
+}
+
+.trafficLightsGuard {
+  position: fixed;
+  top: 12px;
+  left: 12px;
+  width: 52px;
+  height: 12px;
+  z-index: 21;
+  -webkit-app-region: no-drag;
+  pointer-events: none;
+}
+
+.window button,
+.window input,
+.window select,
+.window textarea,
+.window [role='button'] {
+  -webkit-app-region: no-drag;
 }
 
 .window {
