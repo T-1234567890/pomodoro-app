@@ -43,6 +43,16 @@
   --toggle-text: rgba(12, 27, 42, 0.75);
 }
 
+:global(html, body) {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+}
+
+:global(#app) {
+  height: 100%;
+}
+
 :global(html[data-theme='dark']) {
   color-scheme: dark;
   --app-bg-start: #0b1321;
@@ -88,7 +98,8 @@
 }
 
 .app {
-  min-height: 100vh;
+  min-height: 100%;
+  height: 100%;
   display: grid;
   place-items: center;
   background: radial-gradient(
@@ -98,6 +109,15 @@
     var(--app-bg-end)
   );
   color: var(--app-text);
+}
+
+.dragRegion {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 26px;
+  z-index: 10;
 }
 
 .window {
