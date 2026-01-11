@@ -118,6 +118,15 @@
   right: 0;
   height: 26px;
   z-index: 10;
+  -webkit-app-region: drag;
+}
+
+.window button,
+.window input,
+.window select,
+.window textarea,
+.window [role='button'] {
+  -webkit-app-region: no-drag;
 }
 
 .window {
