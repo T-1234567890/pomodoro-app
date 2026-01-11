@@ -760,6 +760,17 @@ fn main() {
     }
 
     tauri::Builder::default()
+        .setup(|app| {
+            #[cfg(target_os = "macos")]
+            {
+                // Ensure the macOS window stays transparent and frameless-style while
+                // keeping native traffic lights available via the config settings.
+                if let Some(window) = app.get_window("main") {
+                    let _ = window.set_decorations(true);
+                }
+            }
+            Ok(())
+        })
         .manage(BackendState::new(resource_dir).expect("Unable to start backend"))
         .manage(TrayState::default())
         .invoke_handler(tauri::generate_handler![
