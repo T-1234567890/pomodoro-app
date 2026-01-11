@@ -101,12 +101,9 @@
   height: 100%;
   display: grid;
   place-items: center;
-  background: radial-gradient(
-    circle at top left,
-    var(--app-bg-start),
-    var(--app-bg-mid) 45%,
-    var(--app-bg-end)
-  );
+  background: rgba(255, 255, 255, 0.6);
+  backdrop-filter: blur(30px);
+  -webkit-backdrop-filter: blur(30px);
   color: var(--app-text);
 }
 
