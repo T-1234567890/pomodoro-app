@@ -25,14 +25,17 @@
     },
     "windows": [
       {
+        "label": "main",
         "title": "Pomodoro",
         "width": 940,
         "height": 720,
         "resizable": true,
+
         "transparent": true,
         "decorations": true,
         "titleBarStyle": "Overlay",
-        "hiddenTitle": true
+
+        "visible": true
       }
     ]
   }
