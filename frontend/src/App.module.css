@@ -4,6 +4,7 @@
   --app-bg-start: #e7f0ff;
   --app-bg-mid: #d0e1ff;
   --app-bg-end: #b7cdfa;
+  --app-glass-bg: rgba(255, 255, 255, 0.55);
   --app-text: #0c1b2a;
   --kicker-text: rgba(12, 27, 42, 0.55);
   --subtitle-text: rgba(12, 27, 42, 0.62);
@@ -58,6 +59,7 @@
   --app-bg-start: rgba(0, 0, 0, 0);
   --app-bg-mid: rgba(0, 0, 0, 0);
   --app-bg-end: rgba(0, 0, 0, 0);
+  --app-glass-bg: rgba(18, 20, 26, 0.55);
   --app-text: #e6edf7;
   --kicker-text: rgba(230, 237, 247, 0.6);
   --subtitle-text: rgba(230, 237, 247, 0.72);
@@ -103,10 +105,24 @@
   height: 100%;
   display: grid;
   place-items: center;
-  background: rgba(255, 255, 255, 0.6);
+  position: relative;
+  background: transparent;
+  color: var(--app-text);
+}
+
+.app::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: var(--app-glass-bg);
   backdrop-filter: blur(30px);
   -webkit-backdrop-filter: blur(30px);
-  color: var(--app-text);
+  z-index: 0;
+}
+
+.app > * {
+  position: relative;
+  z-index: 1;
 }
 
 .dragRegion {
