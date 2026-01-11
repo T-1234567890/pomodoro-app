@@ -1,10 +1,11 @@
 <script lang="ts">
   import { onMount } from 'svelte';
   import { listen } from '@tauri-apps/api/event';
-  import { invoke } from '@tauri-apps/api/tauri';
+  import { invoke } from '@tauri-apps/api/core';
   import CountdownTimer from './lib/CountdownTimer.svelte';
   import {
     countdownState,
+    applyCountdownState,
     getCountdownSnapshot,
     initializeCountdown,
     pauseCountdown,
@@ -38,17 +39,33 @@
     pauseMusicOnBreak: false
   };
 
+  type TimerStatePayload = {
+    pomodoro: {
+      mode: SessionMode;
+      running: boolean;
+      remainingSeconds: number;
+      totalSeconds: number;
+      awaitingNextSession: boolean;
+      autoStartRemaining: number;
+      cycleWorkSessions: number;
+      totalWorkSessions: number;
+      totalSessionsCompleted: number;
+      settings: PomodoroSettings;
+    };
+    countdown: {
+      durationMinutes: number;
+      remainingSeconds: number;
+      running: boolean;
+    };
+    focusSound: FocusSoundType;
+  };
+
   let settings: PomodoroSettings = { ...defaultSettings };
   let mode: SessionMode = 'work';
   let totalSeconds = settings.workMinutes * 60;
   let remainingSeconds = totalSeconds;
   let running = false;
-  let intervalId: ReturnType<typeof setInterval> | null = null;
-  const AUTO_START_DELAY_SECONDS = 5;
-  let autoStartTimeout: ReturnType<typeof setTimeout> | null = null;
-  let autoStartInterval: ReturnType<typeof setInterval> | null = null;
   let autoStartRemaining = 0;
-  let autoStartActive = false;
   let awaitingNextSession = false;
   let theme: Theme = 'light';
   let preferSystemTheme = true;
@@ -104,7 +121,6 @@
   let activeTab: AppTab = 'pomodoro';
   let countdownSnapshot = getCountdownSnapshot();
   let countdownUnsubscribe: (() => void) | null = null;
-  let menuSyncId: ReturnType<typeof setInterval> | null = null;
   let menuListenerCleanup: (() => void) | null = null;
   type PomodoroTemplate = {
     id: string;
@@ -323,6 +339,7 @@
   const handleFocusSoundChange = async (event: Event) => {
     const target = event.currentTarget as HTMLSelectElement;
     focusSoundSelection = target.value as FocusSoundType;
+    void invoke('focus_sound_set', { sound: focusSoundSelection });
     if (focusSoundSelection === 'off') {
       stopFocusSound();
       return;
@@ -379,6 +396,7 @@
     }
     if (focusSoundSelection === 'off') {
       focusSoundSelection = 'white';
+      void invoke('focus_sound_set', { sound: focusSoundSelection });
     }
     if (focusSoundPlaying) {
       pauseFocusSound();
@@ -407,70 +425,14 @@
     }
   };
 
-  const syncMenuState = async () => {
-    const pomodoroActive = running || remainingSeconds < totalSeconds;
-    const countdownTotalSeconds = countdownSnapshot.durationMinutes * 60;
-    const countdownActive =
-      countdownSnapshot.running || countdownSnapshot.remainingSeconds < countdownTotalSeconds;
-    const audioIsPlaying =
-      activeAudioSource === 'system'
-        ? systemMediaState.isPlaying
-        : activeAudioSource === 'local'
-          ? localAudioPlaying
-          : focusSoundPlaying;
-    const nextEnabled =
-      activeAudioSource === 'system' &&
-      systemMediaState.available &&
-      systemMediaState.supportsNext;
-
-    try {
-      await invoke('sync_menu_state', {
-        payload: {
-          pomodoro: {
-            running,
-            active: pomodoroActive,
-            mode,
-            remainingSeconds,
-            totalSeconds
-          },
-          countdown: {
-            running: countdownSnapshot.running,
-            active: countdownActive,
-            remainingSeconds: countdownSnapshot.remainingSeconds,
-            totalSeconds: countdownTotalSeconds
-          },
-          audio: {
-            activeSource: activeAudioSource,
-            isPlaying: audioIsPlaying,
-            playPauseEnabled: !playPauseDisabled,
-            previousEnabled: !previousDisabled,
-            nextEnabled,
-            focusSound: focusSoundSelection
-          }
-        }
-      });
-    } catch (error) {
-      console.error('Failed to sync menu state', error);
-    }
-  };
-
-  const startPomodoroFromMenu = () => {
-    setMode('work');
-    startTimer();
-  };
-
-  const startBreakFromMenu = () => {
-    setMode('short_break');
-    startTimer();
-  };
-
-  const skipBreakFromMenu = () => {
-    setMode('work');
-    startTimer();
-  };
-
-  const handleFocusSoundMenuSelection = async (selection: FocusSoundType) => {
+  const handleFocusSoundMenuSelection = async (
+    selection: FocusSoundType,
+    notifyBackend = true
+  ) => {
     focusSoundSelection = selection;
+    if (notifyBackend) {
+      void invoke('focus_sound_set', { sound: selection });
+    }
     if (selection === 'off') {
       stopFocusSound();
       return;
@@ -488,15 +450,6 @@
     work: 'Work session',
     short_break: 'Short break',
     long_break: 'Long break'
-  };
-
-  const notifySessionComplete = async (completedMode: SessionMode) => {
-    const modeLabel = completedMode === 'work' ? 'work' : 'break';
-    try {
-      await invoke('notify_session_complete', { mode: modeLabel });
-    } catch (error) {
-      console.warn('Unable to send session notification', error);
-    }
   };
 
   const getDurationForMode = (targetMode: SessionMode) => {
@@ -517,6 +470,30 @@
       .padStart(2, '0')}`;
   };
 
+  const applyTimerSnapshot = (snapshot: TimerStatePayload) => {
+    mode = snapshot.pomodoro.mode;
+    running = snapshot.pomodoro.running;
+    remainingSeconds = snapshot.pomodoro.remainingSeconds;
+    totalSeconds = snapshot.pomodoro.totalSeconds;
+    awaitingNextSession = snapshot.pomodoro.awaitingNextSession;
+    autoStartRemaining = snapshot.pomodoro.autoStartRemaining;
+    cycleWorkSessions = snapshot.pomodoro.cycleWorkSessions;
+    totalWorkSessions = snapshot.pomodoro.totalWorkSessions;
+    totalSessionsCompleted = snapshot.pomodoro.totalSessionsCompleted;
+    settings = {
+      ...settings,
+      ...snapshot.pomodoro.settings
+    };
+    applyCountdownState({
+      durationMinutes: snapshot.countdown.durationMinutes,
+      remainingSeconds: snapshot.countdown.remainingSeconds,
+      running: snapshot.countdown.running
+    });
+    if (focusSoundSelection !== snapshot.focusSound) {
+      void handleFocusSoundMenuSelection(snapshot.focusSound, false);
+    }
+  };
+
   const sanitizeMinutes = (value: number, fallback: number) => {
     if (!value || Number.isNaN(value) || value < 1) {
       return fallback;
@@ -533,53 +510,6 @@
 
   const persistSettings = () => {
     localStorage.setItem(SETTINGS_STORAGE_KEY, JSON.stringify(settings));
-  };
-
-  const applyCurrentSessionDuration = () => {
-    totalSeconds = getDurationForMode(mode) * 60;
-    if (!running && !awaitingNextSession) {
-      remainingSeconds = totalSeconds;
-    } else if (remainingSeconds > totalSeconds) {
-      remainingSeconds = totalSeconds;
-    }
-  };
-
-  const cancelAutoStart = () => {
-    if (autoStartTimeout) {
-      clearTimeout(autoStartTimeout);
-      autoStartTimeout = null;
-    }
-    if (autoStartInterval) {
-      clearInterval(autoStartInterval);
-      autoStartInterval = null;
-    }
-    autoStartRemaining = 0;
-    autoStartActive = false;
-  };
-
-  const scheduleAutoStart = () => {
-    cancelAutoStart();
-    autoStartRemaining = AUTO_START_DELAY_SECONDS;
-    autoStartActive = true;
-    autoStartInterval = setInterval(() => {
-      autoStartRemaining = Math.max(0, autoStartRemaining - 1);
-      if (autoStartRemaining === 0 && autoStartInterval) {
-        clearInterval(autoStartInterval);
-        autoStartInterval = null;
-      }
-    }, 1000);
-    autoStartTimeout = setTimeout(() => {
-      if (!autoStartActive) {
-        return;
-      }
-      autoStartActive = false;
-      if (autoStartInterval) {
-        clearInterval(autoStartInterval);
-        autoStartInterval = null;
-      }
-      autoStartTimeout = null;
-      startTimer();
-    }, AUTO_START_DELAY_SECONDS * 1000);
   };
 
   const updateSettings = () => {
@@ -601,7 +531,14 @@
       pauseMusicOnBreak: settings.pauseMusicOnBreak ?? defaultSettings.pauseMusicOnBreak
     };
     persistSettings();
-    applyCurrentSessionDuration();
+    void invoke('pomodoro_update_settings', {
+      workMinutes: settings.workMinutes,
+      shortBreakMinutes: settings.shortBreakMinutes,
+      longBreakMinutes: settings.longBreakMinutes,
+      sessionsBeforeLongBreak: settings.sessionsBeforeLongBreak,
+      autoLongBreak: settings.autoLongBreak,
+      pauseMusicOnBreak: settings.pauseMusicOnBreak
+    });
   };
 
   const applyTemplate = (template: PomodoroTemplate) => {
@@ -612,67 +549,16 @@
     updateSettings();
   };
 
-  const setMode = (nextMode: SessionMode) => {
-    mode = nextMode;
-    applyCurrentSessionDuration();
-  };
-
-  const handleSessionComplete = () => {
-    const completedMode = mode;
-    totalSessionsCompleted += 1;
-    if (mode === 'work') {
-      totalWorkSessions += 1;
-      cycleWorkSessions += 1;
-      const shouldLongBreak =
-        settings.autoLongBreak &&
-        cycleWorkSessions >= settings.sessionsBeforeLongBreak;
-      setMode(shouldLongBreak ? 'long_break' : 'short_break');
-    } else {
-      if (mode === 'long_break') {
-        cycleWorkSessions = 0;
-      }
-      setMode('work');
-    }
-    notifySessionComplete(completedMode);
-  };
-
-  const tick = () => {
-    remainingSeconds = Math.max(0, remainingSeconds - 1);
-    if (remainingSeconds === 0) {
-      pauseTimer();
-      awaitingNextSession = true;
-      handleSessionComplete();
-      scheduleAutoStart();
-    }
-  };
-
   const startTimer = () => {
-    if (running) {
-      return;
-    }
-    cancelAutoStart();
-    awaitingNextSession = false;
-    if (remainingSeconds === 0) {
-      remainingSeconds = totalSeconds;
-    }
-    running = true;
-    intervalId = setInterval(tick, 1000);
+    void invoke('pomodoro_start');
   };
 
   const pauseTimer = () => {
-    cancelAutoStart();
-    if (intervalId) {
-      clearInterval(intervalId);
-      intervalId = null;
-    }
-    running = false;
+    void invoke('pomodoro_pause');
   };
 
   const resetTimer = () => {
-    pauseTimer();
-    cancelAutoStart();
-    awaitingNextSession = false;
-    applyCurrentSessionDuration();
+    void invoke('pomodoro_reset');
   };
 
   const applyTheme = (value: Theme) => {
@@ -794,52 +680,22 @@
     updateSettings();
     void updateSystemMediaState();
     systemMediaPollId = setInterval(updateSystemMediaState, 4000);
-    menuSyncId = setInterval(syncMenuState, 1000);
-    void syncMenuState();
+    void (async () => {
+      try {
+        const initialState = await invoke('timer_get_state');
+        applyTimerSnapshot(initialState as TimerStatePayload);
+      } catch (error) {
+        console.error('Failed to load timer state', error);
+      }
+    })();
 
     void (async () => {
-      const unlistenTray = await listen('tray-action', async (event) => {
-        const payload = event.payload as { action: string; value?: string };
-        switch (payload.action) {
-          case 'pomodoro_start':
-            startPomodoroFromMenu();
-            break;
-          case 'pomodoro_pause':
-            pauseTimer();
-            break;
-          case 'pomodoro_reset':
-            resetTimer();
-            break;
-          case 'break_start':
-            startBreakFromMenu();
-            break;
-          case 'break_skip':
-            skipBreakFromMenu();
-            break;
-          case 'countdown_start':
-            startCountdown();
-            break;
-          case 'countdown_pause':
-            pauseCountdown();
-            break;
-          case 'countdown_reset':
-            resetCountdown();
-            break;
-          case 'music_play_pause':
-            await handlePlayPause();
-            break;
-          case 'music_previous':
-            await controlSystemMedia('previous');
-            break;
-          case 'music_next':
-            await controlSystemMedia('next');
-            break;
-          case 'focus_sound':
-            await handleFocusSoundMenuSelection(payload.value as FocusSoundType);
-            break;
-          default:
-            break;
-        }
+      const unlistenTimer = await listen('timer_state', (event) => {
+        applyTimerSnapshot(event.payload as TimerStatePayload);
+      });
+
+      const unlistenFocus = await listen('focus_sound', (event) => {
+        void handleFocusSoundMenuSelection(event.payload as FocusSoundType, false);
       });
 
       const unlistenTab = await listen('select-tab', (event) => {
@@ -847,7 +703,8 @@
       });
 
       menuListenerCleanup = () => {
-        unlistenTray();
+        unlistenTimer();
+        unlistenFocus();
         unlistenTab();
       };
     })();
@@ -862,13 +719,9 @@
 
     return () => {
       pauseTimer();
-      cancelAutoStart();
       systemThemeMedia?.removeEventListener('change', handleSystemThemeChange);
       if (systemMediaPollId) {
         clearInterval(systemMediaPollId);
-      }
-      if (menuSyncId) {
-        clearInterval(menuSyncId);
       }
       if (menuListenerCleanup) {
         menuListenerCleanup();

@@ -1,40 +1,29 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
-use std::sync::Mutex;
+mod status_bar;
+mod system_media;
+mod timer;
 
-use tauri::{
-    api::notification::Notification,
-    AppHandle, CustomMenuItem, Env, GlobalWindowEvent, Manager,
-    SystemTray, SystemTrayEvent, SystemTrayMenu, SystemTrayMenuItem, WindowEvent,
+use tauri::{AppHandle, GlobalWindowEvent, Manager, WindowEvent};
+use tauri_plugin_notification::NotificationExt;
+
+use system_media::{control_system_media, get_system_media_state};
+use timer::{
+    countdown_pause, countdown_reset, countdown_set_duration, countdown_start, focus_sound_set,
+    pomodoro_pause, pomodoro_reset, pomodoro_skip_break, pomodoro_start, pomodoro_start_break,
+    pomodoro_update_settings, timer_get_state, TimerEngine, TimerHandle,
 };
 
-#[derive(serde::Serialize)]
-#[serde(rename_all = "camelCase")]
-struct SystemMediaState {
-    available: bool,
-    title: String,
-    artist: Option<String>,
-    source: String,
-    is_playing: bool,
-    supports_play_pause: bool,
-    supports_next: bool,
-    supports_previous: bool,
-}
-
-#[derive(Default)]
-struct TrayState {
-    menu: Mutex<()>,
-}
-
 #[tauri::command]
-fn notify_session_complete(mode: String, app: AppHandle) -> Result<(), String> {
+pub fn notify_session_complete(mode: String, app: AppHandle) -> Result<(), String> {
     let (title, body) = match mode.as_str() {
         "work" => ("🍅 Work session complete", "Time to take a break."),
         "break" => ("☕ Break finished", "Ready to focus again?"),
         _ => return Err("Unsupported session mode".into()),
     };
 
-    Notification::new(&app.config().tauri.bundle.identifier)
+    app.notification()
+        .builder()
         .title(title)
         .body(body)
         .show()
@@ -46,47 +35,50 @@ use window_vibrancy::{apply_vibrancy, NSVisualEffectMaterial};
 
 fn main() {
     let context = tauri::generate_context!();
-    let env = Env::default();
-    let resource_dir = tauri::api::path::resource_dir(context.package_info(), &env);
-
-    let tray_menu = SystemTrayMenu::new()
-        .add_item(CustomMenuItem::new("open", "Open App"))
-        .add_native_item(SystemTrayMenuItem::Separator)
-        .add_item(CustomMenuItem::new("quit", "Quit"));
-
-    let tray = SystemTray::new()
-        // .with_icon(tauri::Icon::Raw(vec![0, 0, 0, 0]))
-        .with_menu(tray_menu);
-
     tauri::Builder::default()
+        .plugin(tauri_plugin_notification::init())
         .setup(|app| {
             #[cfg(target_os = "macos")]
             {
-                if let Some(window) = app.get_window("main") {
-                    #[cfg(target_os = "macos")]
-                    apply_vibrancy(&window, NSVisualEffectMaterial::UnderWindowBackground, None, None)
-                        .expect("Unsupported platform! 'apply_vibrancy' is only supported on macOS");
+                if let Some(window) = app.get_webview_window("main") {
+                    apply_vibrancy(
+                        &window,
+                        NSVisualEffectMaterial::UnderWindowBackground,
+                        None,
+                        None,
+                    )
+                    .expect(
+                        "Unsupported platform! 'apply_vibrancy' is only supported on macOS",
+                    );
                 }
             }
+            let engine = TimerEngine::new(app.handle());
+            TimerEngine::start(engine.clone());
+            app.manage(TimerHandle(engine.clone()));
+            #[cfg(target_os = "macos")]
+            {
+                status_bar::init(app.handle(), engine);
+            }
+            engine.emit_snapshot();
             Ok(())
         })
-        .manage(TrayState::default())
-        .invoke_handler(tauri::generate_handler![notify_session_complete])
-        .system_tray(tray)
-        .on_system_tray_event(|app, event| {
-            if let SystemTrayEvent::MenuItemClick { id, .. } = event {
-                match id.as_str() {
-                    "open" => {
-                        if let Some(w) = app.get_window("main") {
-                            let _ = w.show();
-                            let _ = w.set_focus();
-                        }
-                    }
-                    "quit" => app.exit(0),
-                    _ => {}
-                }
-            }
-        })
+        .invoke_handler(tauri::generate_handler![
+            notify_session_complete,
+            timer_get_state,
+            pomodoro_update_settings,
+            pomodoro_start,
+            pomodoro_pause,
+            pomodoro_reset,
+            pomodoro_start_break,
+            pomodoro_skip_break,
+            countdown_start,
+            countdown_pause,
+            countdown_reset,
+            countdown_set_duration,
+            focus_sound_set,
+            get_system_media_state,
+            control_system_media,
+        ])
         .on_window_event(|event: GlobalWindowEvent| {
             if let WindowEvent::CloseRequested { api, .. } = event.event() {
                 event.window().hide().ok();

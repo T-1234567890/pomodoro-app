@@ -1,4 +1,5 @@
 import { writable } from 'svelte/store';
+import { invoke } from '@tauri-apps/api/core';
 
 const STORAGE_KEY = 'countdown_duration_minutes';
 const MINUTES_MIN = 1;
@@ -23,7 +24,6 @@ const createCountdownStore = () => {
   let durationMinutes = initialMinutes;
   let remainingSeconds = initialMinutes * 60;
   let running = false;
-  let intervalId: ReturnType<typeof setInterval> | null = null;
   let initialized = false;
 
   const { subscribe, set } = writable<CountdownState>({
@@ -36,69 +36,24 @@ const createCountdownStore = () => {
     set({ durationMinutes, remainingSeconds, running });
   };
 
-  const stopInterval = () => {
-    if (intervalId) {
-      clearInterval(intervalId);
-      intervalId = null;
-    }
+  const startCountdown = async () => {
+    await invoke('countdown_start');
   };
 
-  const tick = () => {
-    if (remainingSeconds <= 0) {
-      remainingSeconds = 0;
-      running = false;
-      stopInterval();
-      publish();
-      return;
-    }
-
-    remainingSeconds -= 1;
-    if (remainingSeconds <= 0) {
-      remainingSeconds = 0;
-      running = false;
-      stopInterval();
-    }
-    publish();
+  const pauseCountdown = async () => {
+    await invoke('countdown_pause');
   };
 
-  const startCountdown = () => {
-    if (running) {
-      return;
-    }
-
-    if (remainingSeconds <= 0) {
-      remainingSeconds = durationMinutes * 60;
-    }
-
-    running = true;
-    stopInterval();
-    intervalId = setInterval(tick, 1000);
-    publish();
-  };
-
-  const pauseCountdown = () => {
-    if (!running) {
-      return;
-    }
-
-    running = false;
-    stopInterval();
-    publish();
-  };
-
-  const resetCountdown = () => {
-    running = false;
-    stopInterval();
-    remainingSeconds = durationMinutes * 60;
-    publish();
+  const resetCountdown = async () => {
+    await invoke('countdown_reset');
   };
 
   const setDurationMinutes = (value: number) => {
     durationMinutes = clampMinutes(value, durationMinutes);
     remainingSeconds = durationMinutes * 60;
     running = false;
-    stopInterval();
     localStorage.setItem(STORAGE_KEY, String(durationMinutes));
+    void invoke('countdown_set_duration', { minutes: durationMinutes });
     publish();
   };
 
@@ -119,6 +74,7 @@ const createCountdownStore = () => {
       durationMinutes = clampMinutes(defaultMinutes, defaultMinutes);
       remainingSeconds = durationMinutes * 60;
     }
+    void invoke('countdown_set_duration', { minutes: durationMinutes });
     publish();
   };
 
@@ -129,6 +85,12 @@ const createCountdownStore = () => {
     resetCountdown,
     setDurationMinutes,
     initializeCountdown,
+    applyBackendState: (state: CountdownState) => {
+      durationMinutes = state.durationMinutes;
+      remainingSeconds = state.remainingSeconds;
+      running = state.running;
+      publish();
+    },
     getSnapshot: () => ({ durationMinutes, remainingSeconds, running })
   };
 };
@@ -140,6 +102,7 @@ export const pauseCountdown = countdownState.pauseCountdown;
 export const resetCountdown = countdownState.resetCountdown;
 export const setCountdownDuration = countdownState.setDurationMinutes;
 export const initializeCountdown = countdownState.initializeCountdown;
+export const applyCountdownState = countdownState.applyBackendState;
 export const getCountdownSnapshot = countdownState.getSnapshot;
 
 export const COUNTDOWN_MINUTES_MIN = MINUTES_MIN;
