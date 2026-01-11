@@ -43,21 +43,20 @@
   --toggle-text: rgba(12, 27, 42, 0.75);
 }
 
-:global(html, body) {
-  margin: 0;
-  padding: 0;
-  height: 100%;
-}
-
-:global(#app) {
-  height: 100%;
+:global(html, body, #app) {
+  background: transparent;
+  background-color: transparent;
+  background-image: none;
+  --app-bg-start: rgba(0, 0, 0, 0);
+  --app-bg-mid: rgba(0, 0, 0, 0);
+  --app-bg-end: rgba(0, 0, 0, 0);
 }
 
 :global(html[data-theme='dark']) {
   color-scheme: dark;
-  --app-bg-start: #0b1321;
-  --app-bg-mid: #0f1b30;
-  --app-bg-end: #14243f;
+  --app-bg-start: rgba(0, 0, 0, 0);
+  --app-bg-mid: rgba(0, 0, 0, 0);
+  --app-bg-end: rgba(0, 0, 0, 0);
   --app-text: #e6edf7;
   --kicker-text: rgba(230, 237, 247, 0.6);
   --subtitle-text: rgba(230, 237, 247, 0.72);
