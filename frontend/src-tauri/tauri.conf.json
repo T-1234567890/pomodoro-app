@@ -30,7 +30,7 @@
         "height": 720,
         "resizable": true,
         "transparent": true,
-        "decorations": true
+        "decorations": false
       }
     ]
   }
