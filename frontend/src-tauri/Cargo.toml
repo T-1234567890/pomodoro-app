@@ -8,9 +8,12 @@ edition = "2021"
 tauri-build = { version = "1.5", features = [] }
 
 [dependencies]
+tauri = { version = "1.8.3", features = [ "shell-all",
+  "system-tray",
+  "notification"] }
+window-vibrancy = "0.4"
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
-tauri = { version = "1.5", features = [ "shell-all", "system-tray", "notification" ] }
 
 [features]
 custom-protocol = ["tauri/custom-protocol"]
