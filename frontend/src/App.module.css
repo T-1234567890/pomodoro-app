@@ -100,6 +100,24 @@
   color: var(--app-text);
 }
 
+.dragRegion {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 26px;
+  z-index: 10;
+  -webkit-app-region: drag;
+}
+
+.window button,
+.window input,
+.window select,
+.window textarea,
+.window [role='button'] {
+  -webkit-app-region: no-drag;
+}
+
 .window {
   width: min(920px, 92vw);
   padding: 32px 32px 20px;
