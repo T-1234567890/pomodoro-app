@@ -19,7 +19,7 @@ use objc2_foundation::{NSDictionary, NSString};
 #[cfg(target_os = "macos")]
 use once_cell::sync::OnceCell;
 #[cfg(target_os = "macos")]
-use tauri::{AppHandle, Manager};
+use tauri::{AppHandle, Emitter, Manager};
 
 #[cfg(target_os = "macos")]
 use crate::system_media::{control_media_action, get_system_media_state, SystemMediaState};
@@ -107,7 +107,7 @@ impl StatusBarController {
 
         let mut last_signature = self.last_signature.lock().expect("menu signature lock");
         if last_signature.as_ref() != Some(&signature) {
-        self.rebuild_menu(snapshot, &media_state);
+            self.rebuild_menu(snapshot, &media_state);
             *last_signature = Some(signature);
         }
     }
@@ -614,5 +614,3 @@ fn handle_focus_sound(sound: FocusSound) {
         let _ = app.emit("focus_sound", sound);
     });
 }
-
-#[cfg(target_os = "macos")]

@@ -50,7 +50,10 @@ pub fn control_system_media(action: String) -> Result<(), String> {
     {
         return control_media_action(&action).ok_or_else(|| "Media control unavailable".to_string());
     }
-    Err("Media control not supported on this platform".to_string())
+    #[cfg(not(target_os = "macos"))]
+    {
+        Err("Media control not supported on this platform".to_string())
+    }
 }
 
 #[cfg(target_os = "macos")]
