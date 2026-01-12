@@ -47,7 +47,7 @@ fn main() {
             app.manage(TimerHandle(engine.clone()));
             #[cfg(target_os = "macos")]
             {
-                status_bar::init(app.handle(), engine);
+                status_bar::init(app.handle().clone(), engine);
             }
             engine.emit_snapshot();
             Ok(())
