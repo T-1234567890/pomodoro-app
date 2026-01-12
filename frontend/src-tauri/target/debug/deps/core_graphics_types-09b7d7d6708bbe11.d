@@ -1,0 +1,9 @@
+/Users/2111832868qq.com/PycharmProjects/Learning/pomodoro-app/frontend/src-tauri/target/debug/deps/core_graphics_types-09b7d7d6708bbe11.d: /Users/2111832868qq.com/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/core-graphics-types-0.2.0/src/lib.rs /Users/2111832868qq.com/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/core-graphics-types-0.2.0/src/base.rs /Users/2111832868qq.com/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/core-graphics-types-0.2.0/src/geometry.rs
+
+/Users/2111832868qq.com/PycharmProjects/Learning/pomodoro-app/frontend/src-tauri/target/debug/deps/libcore_graphics_types-09b7d7d6708bbe11.rlib: /Users/2111832868qq.com/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/core-graphics-types-0.2.0/src/lib.rs /Users/2111832868qq.com/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/core-graphics-types-0.2.0/src/base.rs /Users/2111832868qq.com/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/core-graphics-types-0.2.0/src/geometry.rs
+
+/Users/2111832868qq.com/PycharmProjects/Learning/pomodoro-app/frontend/src-tauri/target/debug/deps/libcore_graphics_types-09b7d7d6708bbe11.rmeta: /Users/2111832868qq.com/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/core-graphics-types-0.2.0/src/lib.rs /Users/2111832868qq.com/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/core-graphics-types-0.2.0/src/base.rs /Users/2111832868qq.com/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/core-graphics-types-0.2.0/src/geometry.rs
+
+/Users/2111832868qq.com/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/core-graphics-types-0.2.0/src/lib.rs:
+/Users/2111832868qq.com/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/core-graphics-types-0.2.0/src/base.rs:
+/Users/2111832868qq.com/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/core-graphics-types-0.2.0/src/geometry.rs:
