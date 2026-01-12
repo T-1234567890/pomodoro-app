@@ -1,3 +1,5 @@
+#[cfg(all(target_os = "macos", feature = "status-bar"))]
+mod macos {
 #[cfg(target_os = "macos")]
 use std::sync::{Arc, Mutex};
 
@@ -8,7 +10,7 @@ use objc2::rc::Id;
 #[cfg(target_os = "macos")]
 use objc2::runtime::{Class, Object, Sel};
 #[cfg(target_os = "macos")]
-use objc2::{class, msg_send, sel, sel_impl};
+use objc2::{class, msg_send, sel};
 #[cfg(target_os = "macos")]
 use objc2_app_kit::{
     NSAttributedString, NSControlStateValue, NSFont, NSMenu, NSMenuItem, NSStatusBar,
@@ -19,7 +21,7 @@ use objc2_foundation::{NSDictionary, NSString};
 #[cfg(target_os = "macos")]
 use once_cell::sync::OnceCell;
 #[cfg(target_os = "macos")]
-use tauri::{AppHandle, Manager};
+use tauri::{AppHandle, Emitter, Manager};
 
 #[cfg(target_os = "macos")]
 use crate::system_media::{control_media_action, get_system_media_state, SystemMediaState};
@@ -107,7 +109,7 @@ impl StatusBarController {
 
         let mut last_signature = self.last_signature.lock().expect("menu signature lock");
         if last_signature.as_ref() != Some(&signature) {
-        self.rebuild_menu(snapshot, &media_state);
+            self.rebuild_menu(snapshot, &media_state);
             *last_signature = Some(signature);
         }
     }
@@ -614,5 +616,20 @@ fn handle_focus_sound(sound: FocusSound) {
         let _ = app.emit("focus_sound", sound);
     });
 }
+}
 
-#[cfg(target_os = "macos")]
+#[cfg(all(target_os = "macos", feature = "status-bar"))]
+pub use macos::{init, update_status_bar};
+
+#[cfg(not(all(target_os = "macos", feature = "status-bar")))]
+use std::sync::Arc;
+#[cfg(not(all(target_os = "macos", feature = "status-bar")))]
+use tauri::AppHandle;
+#[cfg(not(all(target_os = "macos", feature = "status-bar")))]
+use crate::timer::{TimerEngine, TimerSnapshot};
+
+#[cfg(not(all(target_os = "macos", feature = "status-bar")))]
+pub fn init(_app: AppHandle, _engine: Arc<TimerEngine>) {}
+
+#[cfg(not(all(target_os = "macos", feature = "status-bar")))]
+pub fn update_status_bar(_app: &AppHandle, _snapshot: &TimerSnapshot) {}

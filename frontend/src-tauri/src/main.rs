@@ -4,7 +4,7 @@ mod status_bar;
 mod system_media;
 mod timer;
 
-use tauri::{AppHandle, GlobalWindowEvent, Manager, WindowEvent};
+use tauri::{AppHandle, Manager, WindowEvent};
 use tauri_plugin_notification::NotificationExt;
 
 use system_media::{control_system_media, get_system_media_state};
@@ -15,7 +15,7 @@ use timer::{
 };
 
 #[tauri::command]
-pub fn notify_session_complete(mode: String, app: AppHandle) -> Result<(), String> {
+fn notify_session_complete(mode: String, app: AppHandle) -> Result<(), String> {
     let (title, body) = match mode.as_str() {
         "work" => ("🍅 Work session complete", "Time to take a break."),
         "break" => ("☕ Break finished", "Ready to focus again?"),
@@ -30,34 +30,24 @@ pub fn notify_session_complete(mode: String, app: AppHandle) -> Result<(), Strin
         .map_err(|e| e.to_string())
 }
 
-#[cfg(target_os = "macos")]
-use window_vibrancy::{apply_vibrancy, NSVisualEffectMaterial};
+pub(crate) fn notify_session_complete_for_engine(
+    mode: String,
+    app: AppHandle,
+) -> Result<(), String> {
+    notify_session_complete(mode, app)
+}
 
 fn main() {
     let context = tauri::generate_context!();
     tauri::Builder::default()
         .plugin(tauri_plugin_notification::init())
         .setup(|app| {
-            #[cfg(target_os = "macos")]
-            {
-                if let Some(window) = app.get_webview_window("main") {
-                    apply_vibrancy(
-                        &window,
-                        NSVisualEffectMaterial::UnderWindowBackground,
-                        None,
-                        None,
-                    )
-                    .expect(
-                        "Unsupported platform! 'apply_vibrancy' is only supported on macOS",
-                    );
-                }
-            }
-            let engine = TimerEngine::new(app.handle());
+            let engine = TimerEngine::new(app.handle().clone());
             TimerEngine::start(engine.clone());
             app.manage(TimerHandle(engine.clone()));
             #[cfg(target_os = "macos")]
             {
-                status_bar::init(app.handle(), engine);
+                status_bar::init(app.handle().clone(), engine);
             }
             engine.emit_snapshot();
             Ok(())
@@ -79,9 +69,9 @@ fn main() {
             get_system_media_state,
             control_system_media,
         ])
-        .on_window_event(|event: GlobalWindowEvent| {
-            if let WindowEvent::CloseRequested { api, .. } = event.event() {
-                event.window().hide().ok();
+        .on_window_event(|window, event| {
+            if let WindowEvent::CloseRequested { api, .. } = event {
+                window.hide().ok();
                 api.prevent_close();
             }
         })

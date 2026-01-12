@@ -2,10 +2,10 @@ use std::sync::{Arc, Mutex};
 use std::thread;
 use std::time::Duration;
 
-use serde::Serialize;
-use tauri::{AppHandle, Manager};
+use serde::{Deserialize, Serialize};
+use tauri::{AppHandle, Emitter};
 
-use crate::notify_session_complete;
+use crate::notify_session_complete_for_engine;
 
 #[derive(Clone, Copy, Debug, Serialize, PartialEq, Eq)]
 #[serde(rename_all = "snake_case")]
@@ -15,7 +15,7 @@ pub enum PomodoroMode {
     LongBreak,
 }
 
-#[derive(Clone, Copy, Debug, Serialize, PartialEq, Eq)]
+#[derive(Clone, Copy, Debug, Deserialize, Serialize, PartialEq, Eq)]
 #[serde(rename_all = "snake_case")]
 pub enum FocusSound {
     Off,
@@ -24,7 +24,7 @@ pub enum FocusSound {
     Brown,
 }
 
-#[derive(Clone, Debug, Serialize)]
+#[derive(Clone, Debug, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct PomodoroSettings {
     pub work_minutes: u32,
@@ -174,7 +174,7 @@ impl TimerEngine {
 
     pub fn emit_snapshot(&self) {
         let snapshot = self.snapshot();
-        let _ = self.app.emit("timer_state", snapshot);
+        let _ = self.app.emit("timer_state", &snapshot);
         #[cfg(target_os = "macos")]
         {
             crate::status_bar::update_status_bar(&self.app, &snapshot);
@@ -245,7 +245,7 @@ impl TimerEngine {
                 PomodoroMode::Work => "work",
                 PomodoroMode::ShortBreak | PomodoroMode::LongBreak => "break",
             };
-            let _ = notify_session_complete(mode_label.to_string(), self.app.clone());
+            let _ = notify_session_complete_for_engine(mode_label.to_string(), self.app.clone());
         }
 
         self.emit_snapshot();
