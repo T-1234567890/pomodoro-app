@@ -1,3 +1,14 @@
-# os specific files
+# OS specific
 .DS_Store
 Thumbs.db
+
+# Rust (Tauri)
+target/
+
+# Node / Frontend
+node_modules/
+dist/
+
+# Logs / cache
+*.log
+.cache/

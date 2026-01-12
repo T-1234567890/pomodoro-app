@@ -1,9 +1,0 @@
-/Users/2111832868qq.com/PycharmProjects/Learning/pomodoro-app/frontend/src-tauri/target/debug/deps/mac_notification_sys-f7597a4ece426bd9.d: /Users/2111832868qq.com/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/mac-notification-sys-0.6.9/src/lib.rs /Users/2111832868qq.com/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/mac-notification-sys-0.6.9/src/error.rs /Users/2111832868qq.com/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/mac-notification-sys-0.6.9/src/notification.rs
-
-/Users/2111832868qq.com/PycharmProjects/Learning/pomodoro-app/frontend/src-tauri/target/debug/deps/libmac_notification_sys-f7597a4ece426bd9.rlib: /Users/2111832868qq.com/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/mac-notification-sys-0.6.9/src/lib.rs /Users/2111832868qq.com/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/mac-notification-sys-0.6.9/src/error.rs /Users/2111832868qq.com/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/mac-notification-sys-0.6.9/src/notification.rs
-
-/Users/2111832868qq.com/PycharmProjects/Learning/pomodoro-app/frontend/src-tauri/target/debug/deps/libmac_notification_sys-f7597a4ece426bd9.rmeta: /Users/2111832868qq.com/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/mac-notification-sys-0.6.9/src/lib.rs /Users/2111832868qq.com/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/mac-notification-sys-0.6.9/src/error.rs /Users/2111832868qq.com/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/mac-notification-sys-0.6.9/src/notification.rs
-
-/Users/2111832868qq.com/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/mac-notification-sys-0.6.9/src/lib.rs:
-/Users/2111832868qq.com/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/mac-notification-sys-0.6.9/src/error.rs:
-/Users/2111832868qq.com/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/mac-notification-sys-0.6.9/src/notification.rs:

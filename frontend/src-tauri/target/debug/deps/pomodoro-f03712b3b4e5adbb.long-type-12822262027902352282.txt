@@ -1,2 +1,0 @@
-<tauri::tauri_utils::config::BundleTarget as Deserialize<'de>>::deserialize::BundleTargetInner
-<tauri::tauri_utils::config_v1::BundleTarget as Deserialize<'de>>::deserialize::BundleTargetInner

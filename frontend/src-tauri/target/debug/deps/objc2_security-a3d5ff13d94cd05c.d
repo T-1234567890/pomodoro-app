@@ -1,9 +1,0 @@
-/Users/2111832868qq.com/PycharmProjects/Learning/pomodoro-app/frontend/src-tauri/target/debug/deps/objc2_security-a3d5ff13d94cd05c.d: /Users/2111832868qq.com/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/objc2-security-0.3.2/src/lib.rs /Users/2111832868qq.com/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/objc2-security-0.3.2/src/generated/mod.rs /Users/2111832868qq.com/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/objc2-security-0.3.2/src/generated/SecTrust.rs
-
-/Users/2111832868qq.com/PycharmProjects/Learning/pomodoro-app/frontend/src-tauri/target/debug/deps/libobjc2_security-a3d5ff13d94cd05c.rlib: /Users/2111832868qq.com/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/objc2-security-0.3.2/src/lib.rs /Users/2111832868qq.com/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/objc2-security-0.3.2/src/generated/mod.rs /Users/2111832868qq.com/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/objc2-security-0.3.2/src/generated/SecTrust.rs
-
-/Users/2111832868qq.com/PycharmProjects/Learning/pomodoro-app/frontend/src-tauri/target/debug/deps/libobjc2_security-a3d5ff13d94cd05c.rmeta: /Users/2111832868qq.com/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/objc2-security-0.3.2/src/lib.rs /Users/2111832868qq.com/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/objc2-security-0.3.2/src/generated/mod.rs /Users/2111832868qq.com/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/objc2-security-0.3.2/src/generated/SecTrust.rs
-
-/Users/2111832868qq.com/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/objc2-security-0.3.2/src/lib.rs:
-/Users/2111832868qq.com/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/objc2-security-0.3.2/src/generated/mod.rs:
-/Users/2111832868qq.com/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/objc2-security-0.3.2/src/generated/SecTrust.rs:
