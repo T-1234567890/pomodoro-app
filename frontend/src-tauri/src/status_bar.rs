@@ -1,3 +1,5 @@
+#[cfg(all(target_os = "macos", feature = "status-bar"))]
+mod macos {
 #[cfg(target_os = "macos")]
 use std::sync::{Arc, Mutex};
 
@@ -8,7 +10,7 @@ use objc2::rc::Id;
 #[cfg(target_os = "macos")]
 use objc2::runtime::{Class, Object, Sel};
 #[cfg(target_os = "macos")]
-use objc2::{class, msg_send, sel, sel_impl};
+use objc2::{class, msg_send, sel};
 #[cfg(target_os = "macos")]
 use objc2_app_kit::{
     NSAttributedString, NSControlStateValue, NSFont, NSMenu, NSMenuItem, NSStatusBar,
@@ -614,3 +616,20 @@ fn handle_focus_sound(sound: FocusSound) {
         let _ = app.emit("focus_sound", sound);
     });
 }
+}
+
+#[cfg(all(target_os = "macos", feature = "status-bar"))]
+pub use macos::{init, update_status_bar};
+
+#[cfg(not(all(target_os = "macos", feature = "status-bar")))]
+use std::sync::Arc;
+#[cfg(not(all(target_os = "macos", feature = "status-bar")))]
+use tauri::AppHandle;
+#[cfg(not(all(target_os = "macos", feature = "status-bar")))]
+use crate::timer::{TimerEngine, TimerSnapshot};
+
+#[cfg(not(all(target_os = "macos", feature = "status-bar")))]
+pub fn init(_app: AppHandle, _engine: Arc<TimerEngine>) {}
+
+#[cfg(not(all(target_os = "macos", feature = "status-bar")))]
+pub fn update_status_bar(_app: &AppHandle, _snapshot: &TimerSnapshot) {}
