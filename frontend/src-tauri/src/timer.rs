@@ -175,7 +175,7 @@ impl TimerEngine {
     pub fn emit_snapshot(&self) {
         let snapshot = self.snapshot();
         let _ = self.app.emit("timer_state", &snapshot);
-        #[cfg(target_os = "macos")]
+        #[cfg(all(target_os = "macos", feature = "status-bar"))]
         {
             crate::status_bar::update_status_bar(&self.app, &snapshot);
         }
