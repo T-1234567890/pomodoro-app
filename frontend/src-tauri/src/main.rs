@@ -4,6 +4,8 @@ mod status_bar;
 mod system_media;
 mod timer;
 
+use std::sync::Arc;
+
 use tauri::{AppHandle, Manager, WindowEvent};
 use tauri_plugin_notification::NotificationExt;
 
@@ -45,9 +47,9 @@ fn main() {
             let engine = TimerEngine::new(app.handle().clone());
             TimerEngine::start(engine.clone());
             app.manage(TimerHandle(engine.clone()));
-            #[cfg(target_os = "macos")]
+            #[cfg(all(target_os = "macos", feature = "status-bar"))]
             {
-                status_bar::init(app.handle().clone(), engine);
+                status_bar::init(app.handle().clone(), Arc::clone(&engine));
             }
             engine.emit_snapshot();
             Ok(())

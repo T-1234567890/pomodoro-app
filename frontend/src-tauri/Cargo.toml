@@ -20,3 +20,4 @@ objc2-app-kit = "0.2"
 
 [features]
 custom-protocol = ["tauri/custom-protocol"]
+status-bar = []
