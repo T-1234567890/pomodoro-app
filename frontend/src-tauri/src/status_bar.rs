@@ -1,4 +1,4 @@
-#[cfg(all(target_os = "macos", feature = "status-bar"))]
+#[cfg(target_os = "macos")]
 mod macos {
 #[cfg(target_os = "macos")]
 use std::sync::{Arc, Mutex};
@@ -618,18 +618,18 @@ fn handle_focus_sound(sound: FocusSound) {
 }
 }
 
-#[cfg(all(target_os = "macos", feature = "status-bar"))]
+#[cfg(target_os = "macos")]
 pub use macos::{init, update_status_bar};
 
-#[cfg(not(all(target_os = "macos", feature = "status-bar")))]
+#[cfg(not(target_os = "macos"))]
 use std::sync::Arc;
-#[cfg(not(all(target_os = "macos", feature = "status-bar")))]
+#[cfg(not(target_os = "macos"))]
 use tauri::AppHandle;
-#[cfg(not(all(target_os = "macos", feature = "status-bar")))]
+#[cfg(not(target_os = "macos"))]
 use crate::timer::{TimerEngine, TimerSnapshot};
 
-#[cfg(not(all(target_os = "macos", feature = "status-bar")))]
+#[cfg(not(target_os = "macos"))]
 pub fn init(_app: AppHandle, _engine: Arc<TimerEngine>) {}
 
-#[cfg(not(all(target_os = "macos", feature = "status-bar")))]
+#[cfg(not(target_os = "macos"))]
 pub fn update_status_bar(_app: &AppHandle, _snapshot: &TimerSnapshot) {}
