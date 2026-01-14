@@ -338,7 +338,9 @@
   const handleFocusSoundChange = async (event: Event) => {
     const target = event.currentTarget as HTMLSelectElement;
     focusSoundSelection = target.value as FocusSoundType;
-    void safeInvoke('focus_sound_set', { sound: focusSoundSelection });
+    void safeInvoke('focus_sound_set', { sound: focusSoundSelection }).catch((error) => {
+      console.error('Failed to update focus sound', error);
+    });
     if (focusSoundSelection === 'off') {
       stopFocusSound();
       return;
@@ -395,7 +397,9 @@
     }
     if (focusSoundSelection === 'off') {
       focusSoundSelection = 'white';
-      void safeInvoke('focus_sound_set', { sound: focusSoundSelection });
+      void safeInvoke('focus_sound_set', { sound: focusSoundSelection }).catch((error) => {
+        console.error('Failed to update focus sound', error);
+      });
     }
     if (focusSoundPlaying) {
       pauseFocusSound();
@@ -430,7 +434,9 @@
   ) => {
     focusSoundSelection = selection;
     if (notifyBackend) {
-      void safeInvoke('focus_sound_set', { sound: selection });
+      void safeInvoke('focus_sound_set', { sound: selection }).catch((error) => {
+        console.error('Failed to update focus sound', error);
+      });
     }
     if (selection === 'off') {
       stopFocusSound();
@@ -537,6 +543,8 @@
       sessionsBeforeLongBreak: settings.sessionsBeforeLongBreak,
       autoLongBreak: settings.autoLongBreak,
       pauseMusicOnBreak: settings.pauseMusicOnBreak
+    }).catch((error) => {
+      console.error('[startup] Failed to sync pomodoro settings', error);
     });
   };
 
@@ -549,15 +557,38 @@
   };
 
   const startTimer = () => {
-    void safeInvoke('pomodoro_start');
+    void safeInvoke('pomodoro_start').catch((error) => {
+      console.error('Failed to start timer', error);
+    });
   };
 
   const pauseTimer = () => {
-    void safeInvoke('pomodoro_pause');
+    void safeInvoke('pomodoro_pause').catch((error) => {
+      console.error('Failed to pause timer', error);
+    });
   };
 
   const resetTimer = () => {
-    void safeInvoke('pomodoro_reset');
+    void safeInvoke('pomodoro_reset').catch((error) => {
+      console.error('Failed to reset timer', error);
+    });
+  };
+
+  const runStartupStep = async <T>(label: string, task: () => Promise<T>) => {
+    try {
+      console.info(`[startup] ${label}`);
+      return await task();
+    } catch (error) {
+      console.error(`[startup] ${label} failed`, error);
+      return undefined;
+    }
+  };
+
+  const startupBackendToggles = {
+    invoke: true,
+    listen: true,
+    countdown: true,
+    systemMedia: true
   };
 
   const applyTheme = (value: Theme) => {
@@ -646,108 +677,128 @@
   };
 
   onMount(() => {
-    const storedTheme = localStorage.getItem(THEME_STORAGE_KEY);
-    const storedSettings = localStorage.getItem(SETTINGS_STORAGE_KEY);
-    systemThemeMedia = window.matchMedia('(prefers-color-scheme: dark)');
-    lastMode = mode;
+    console.info('App mounted');
 
-    initializeCountdown(25);
-    countdownUnsubscribe = countdownState.subscribe((state) => {
-      countdownSnapshot = state;
-    });
+    try {
+      const storedTheme = localStorage.getItem(THEME_STORAGE_KEY);
+      const storedSettings = localStorage.getItem(SETTINGS_STORAGE_KEY);
+      systemThemeMedia = window.matchMedia('(prefers-color-scheme: dark)');
+      lastMode = mode;
 
-    if (storedTheme === 'light' || storedTheme === 'dark') {
-      preferSystemTheme = false;
-      applyTheme(storedTheme);
-    } else {
-      applyTheme(systemThemeMedia.matches ? 'dark' : 'light');
-    }
+      countdownUnsubscribe = countdownState.subscribe((state) => {
+        countdownSnapshot = state;
+      });
 
-    if (storedSettings) {
-      try {
-        const parsed = JSON.parse(storedSettings) as Partial<PomodoroSettings>;
-        settings = {
-          ...defaultSettings,
-          ...parsed
-        };
-      } catch (error) {
-        console.error('Failed to load pomodoro settings', error);
-        settings = { ...defaultSettings };
+      if (storedTheme === 'light' || storedTheme === 'dark') {
+        preferSystemTheme = false;
+        applyTheme(storedTheme);
+      } else {
+        applyTheme(systemThemeMedia.matches ? 'dark' : 'light');
       }
-    }
 
-    updateSettings();
-    void updateSystemMediaState();
-    systemMediaPollId = setInterval(updateSystemMediaState, 4000);
-    void (async () => {
-      try {
-        const initialState = await safeInvoke('timer_get_state');
-        if (initialState) {
-          applyTimerSnapshot(initialState as TimerStatePayload);
+      if (storedSettings) {
+        try {
+          const parsed = JSON.parse(storedSettings) as Partial<PomodoroSettings>;
+          settings = {
+            ...defaultSettings,
+            ...parsed
+          };
+        } catch (error) {
+          console.error('Failed to load pomodoro settings', error);
+          settings = { ...defaultSettings };
         }
-      } catch (error) {
-        console.error('Failed to load timer state', error);
       }
-    })();
 
-    void (async () => {
-      const unlistenTimer = await safeListen('timer_state', (event) => {
-        applyTimerSnapshot(event.payload as TimerStatePayload);
-      });
+      updateSettings();
 
-      const unlistenFocus = await safeListen('focus_sound', (event) => {
-        void handleFocusSoundMenuSelection(event.payload as FocusSoundType, false);
-      });
+      void (async () => {
+        if (startupBackendToggles.invoke) {
+          await runStartupStep('invoke: timer_get_state', async () => {
+            const initialState = await safeInvoke('timer_get_state');
+            if (initialState) {
+              applyTimerSnapshot(initialState as TimerStatePayload);
+            }
+          });
+        }
 
-      const unlistenTab = await safeListen('select-tab', (event) => {
-        activeTab = event.payload as AppTab;
-      });
+        if (startupBackendToggles.listen) {
+          await runStartupStep('listen: timer_state/focus_sound/select-tab', async () => {
+            const unlistenTimer = await safeListen('timer_state', (event) => {
+              applyTimerSnapshot(event.payload as TimerStatePayload);
+            });
 
-      menuListenerCleanup = () => {
-        unlistenTimer();
-        unlistenFocus();
-        unlistenTab();
+            const unlistenFocus = await safeListen('focus_sound', (event) => {
+              void handleFocusSoundMenuSelection(event.payload as FocusSoundType, false);
+            });
+
+            const unlistenTab = await safeListen('select-tab', (event) => {
+              activeTab = event.payload as AppTab;
+            });
+
+            menuListenerCleanup = () => {
+              unlistenTimer();
+              unlistenFocus();
+              unlistenTab();
+            };
+          });
+        }
+
+        if (startupBackendToggles.countdown) {
+          await runStartupStep('countdown store initialization', async () => {
+            initializeCountdown(25);
+          });
+        }
+
+        if (startupBackendToggles.systemMedia) {
+          await runStartupStep('system media polling', async () => {
+            await updateSystemMediaState();
+            systemMediaPollId = setInterval(updateSystemMediaState, 4000);
+          });
+        }
+      })();
+
+      const handleSystemThemeChange = (event: MediaQueryListEvent) => {
+        if (preferSystemTheme) {
+          applyTheme(event.matches ? 'dark' : 'light');
+        }
       };
-    })();
 
-    const handleSystemThemeChange = (event: MediaQueryListEvent) => {
-      if (preferSystemTheme) {
-        applyTheme(event.matches ? 'dark' : 'light');
-      }
-    };
+      systemThemeMedia.addEventListener('change', handleSystemThemeChange);
 
-    systemThemeMedia.addEventListener('change', handleSystemThemeChange);
-
-    return () => {
-      pauseTimer();
-      systemThemeMedia?.removeEventListener('change', handleSystemThemeChange);
-      if (systemMediaPollId) {
-        clearInterval(systemMediaPollId);
-      }
-      if (menuListenerCleanup) {
-        menuListenerCleanup();
-      }
-      if (countdownUnsubscribe) {
-        countdownUnsubscribe();
-      }
-      if (audioElement) {
-        audioElement.pause();
-        audioElement.removeEventListener('play', handleAudioPlay);
-        audioElement.removeEventListener('pause', handleAudioPause);
-        audioElement.removeEventListener('ended', handleAudioEnded);
-        audioElement.src = '';
-      }
-      focusNoiseSource?.stop();
-      focusNoiseSource?.disconnect();
-      focusNoiseSource = null;
-      focusGainNode?.disconnect();
-      focusGainNode = null;
-      if (focusAudioContext) {
-        focusAudioContext.close().catch(() => null);
-        focusAudioContext = null;
-      }
-      clearAudioUrl();
-    };
+      return () => {
+        pauseTimer();
+        systemThemeMedia?.removeEventListener('change', handleSystemThemeChange);
+        if (systemMediaPollId) {
+          clearInterval(systemMediaPollId);
+        }
+        if (menuListenerCleanup) {
+          menuListenerCleanup();
+        }
+        if (countdownUnsubscribe) {
+          countdownUnsubscribe();
+        }
+        if (audioElement) {
+          audioElement.pause();
+          audioElement.removeEventListener('play', handleAudioPlay);
+          audioElement.removeEventListener('pause', handleAudioPause);
+          audioElement.removeEventListener('ended', handleAudioEnded);
+          audioElement.src = '';
+        }
+        focusNoiseSource?.stop();
+        focusNoiseSource?.disconnect();
+        focusNoiseSource = null;
+        focusGainNode?.disconnect();
+        focusGainNode = null;
+        if (focusAudioContext) {
+          focusAudioContext.close().catch(() => null);
+          focusAudioContext = null;
+        }
+        clearAudioUrl();
+      };
+    } catch (error) {
+      console.error('[startup] App initialization failed', error);
+      return () => undefined;
+    }
   });
 
   $: if (audioElement) {
@@ -822,6 +873,7 @@
 </script>
 
 <main class={styles.app}>
+  <div class={styles.startupBanner}>App Loaded</div>
   <div class={styles.glassBackground} aria-hidden="true"></div>
   <div class={styles.dragRegion} data-tauri-drag-region aria-hidden="true"></div>
   <section class={styles.window}>

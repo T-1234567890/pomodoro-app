@@ -108,6 +108,19 @@
   color: var(--app-text);
 }
 
+.startupBanner {
+  position: absolute;
+  top: 18px;
+  left: 24px;
+  padding: 6px 12px;
+  border-radius: 999px;
+  background: rgba(20, 28, 44, 0.1);
+  color: var(--app-text);
+  font-size: 12px;
+  letter-spacing: 0.02em;
+  z-index: 3;
+}
+
 .glassBackground {
   position: fixed;
   inset: 0;

@@ -37,15 +37,21 @@ const createCountdownStore = () => {
   };
 
   const startCountdown = async () => {
-    await safeInvoke('countdown_start');
+    await safeInvoke('countdown_start').catch((error) => {
+      console.error('Failed to start countdown', error);
+    });
   };
 
   const pauseCountdown = async () => {
-    await safeInvoke('countdown_pause');
+    await safeInvoke('countdown_pause').catch((error) => {
+      console.error('Failed to pause countdown', error);
+    });
   };
 
   const resetCountdown = async () => {
-    await safeInvoke('countdown_reset');
+    await safeInvoke('countdown_reset').catch((error) => {
+      console.error('Failed to reset countdown', error);
+    });
   };
 
   const setDurationMinutes = (value: number) => {
@@ -53,7 +59,9 @@ const createCountdownStore = () => {
     remainingSeconds = durationMinutes * 60;
     running = false;
     localStorage.setItem(STORAGE_KEY, String(durationMinutes));
-    void safeInvoke('countdown_set_duration', { minutes: durationMinutes });
+    void safeInvoke('countdown_set_duration', { minutes: durationMinutes }).catch((error) => {
+      console.error('Failed to update countdown duration', error);
+    });
     publish();
   };
 
@@ -74,7 +82,9 @@ const createCountdownStore = () => {
       durationMinutes = clampMinutes(defaultMinutes, defaultMinutes);
       remainingSeconds = durationMinutes * 60;
     }
-    void safeInvoke('countdown_set_duration', { minutes: durationMinutes });
+    void safeInvoke('countdown_set_duration', { minutes: durationMinutes }).catch((error) => {
+      console.error('Failed to initialize countdown duration', error);
+    });
     publish();
   };
 
