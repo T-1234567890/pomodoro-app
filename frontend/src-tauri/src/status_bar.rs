@@ -14,7 +14,7 @@ use objc2::{class, msg_send, sel};
 #[cfg(target_os = "macos")]
 use objc2_app_kit::{
     NSAttributedString, NSControlStateValue, NSFont, NSMenu, NSMenuItem, NSStatusBar,
-    NSStatusItem, NSStatusItemLength,
+    NSStatusBarButton, NSStatusItem, NSStatusItemLength,
 };
 #[cfg(target_os = "macos")]
 use objc2_foundation::{NSDictionary, NSString};
@@ -116,9 +116,14 @@ impl StatusBarController {
 
     fn set_title(&self, title: &str) {
         if let Some(button) = unsafe { self.status_item.button() } {
+            let button: Id<NSStatusBarButton> = button;
             let font: Id<NSFont> = unsafe {
-                let font: *mut NSFont = msg_send![class!(NSFont), monospacedDigitSystemFontOfSize: 0.0 weight: 0.0];
-                Id::retain_autoreleased(font).expect("NSFont retained")
+                let font: *mut NSFont = msg_send![
+                    class!(NSFont),
+                    monospacedDigitSystemFontOfSize: 0.0
+                    weight: 0.0
+                ];
+                Id::retain(font).expect("NSFont retained")
             };
             let ns_title = NSString::from_str(title);
             let attributes = NSDictionary::from_keys_and_objects(
