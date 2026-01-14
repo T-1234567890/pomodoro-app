@@ -8,7 +8,7 @@ use objc2::declare::ClassDecl;
 #[cfg(target_os = "macos")]
 use objc2::rc::Id;
 #[cfg(target_os = "macos")]
-use objc2::runtime::{Class, Object, Sel};
+use objc2::runtime::{AnyObject, Class, Object, Sel};
 #[cfg(target_os = "macos")]
 use objc2::{class, msg_send, sel};
 #[cfg(target_os = "macos")]
@@ -460,33 +460,95 @@ fn create_handler() -> Id<Object> {
         let superclass = class!(NSObject);
         let mut decl = ClassDecl::new("PomodoroStatusHandler", superclass)
             .expect("Unable to register PomodoroStatusHandler class");
-        decl.add_method(sel!(startPomodoro:), start_pomodoro as extern "C" fn(&Object, Sel, *mut Object));
-        decl.add_method(sel!(startBreak:), start_break as extern "C" fn(&Object, Sel, *mut Object));
-        decl.add_method(sel!(skipBreak:), skip_break as extern "C" fn(&Object, Sel, *mut Object));
-        decl.add_method(sel!(pausePomodoro:), pause_pomodoro as extern "C" fn(&Object, Sel, *mut Object));
-        decl.add_method(sel!(resetPomodoro:), reset_pomodoro as extern "C" fn(&Object, Sel, *mut Object));
-        decl.add_method(sel!(startCountdown:), start_countdown as extern "C" fn(&Object, Sel, *mut Object));
-        decl.add_method(sel!(pauseCountdown:), pause_countdown as extern "C" fn(&Object, Sel, *mut Object));
-        decl.add_method(sel!(resetCountdown:), reset_countdown as extern "C" fn(&Object, Sel, *mut Object));
-        decl.add_method(sel!(openApp:), open_app as extern "C" fn(&Object, Sel, *mut Object));
-        decl.add_method(sel!(openMusic:), open_music as extern "C" fn(&Object, Sel, *mut Object));
-        decl.add_method(sel!(openCountdown:), open_countdown as extern "C" fn(&Object, Sel, *mut Object));
-        decl.add_method(sel!(quitApp:), quit_app as extern "C" fn(&Object, Sel, *mut Object));
-        decl.add_method(sel!(musicPlayPause:), music_play_pause as extern "C" fn(&Object, Sel, *mut Object));
-        decl.add_method(sel!(musicPrevious:), music_previous as extern "C" fn(&Object, Sel, *mut Object));
-        decl.add_method(sel!(musicNext:), music_next as extern "C" fn(&Object, Sel, *mut Object));
-        decl.add_method(sel!(focusOff:), focus_off as extern "C" fn(&Object, Sel, *mut Object));
-        decl.add_method(sel!(focusWhite:), focus_white as extern "C" fn(&Object, Sel, *mut Object));
-        decl.add_method(sel!(focusRain:), focus_rain as extern "C" fn(&Object, Sel, *mut Object));
-        decl.add_method(sel!(focusBrown:), focus_brown as extern "C" fn(&Object, Sel, *mut Object));
-        decl.add_method(sel!(noop:), noop as extern "C" fn(&Object, Sel, *mut Object));
+        unsafe {
+            decl.add_method(
+                sel!(startPomodoro:),
+                start_pomodoro as extern "C" fn(&AnyObject, Sel, *mut AnyObject),
+            );
+            decl.add_method(
+                sel!(startBreak:),
+                start_break as extern "C" fn(&AnyObject, Sel, *mut AnyObject),
+            );
+            decl.add_method(
+                sel!(skipBreak:),
+                skip_break as extern "C" fn(&AnyObject, Sel, *mut AnyObject),
+            );
+            decl.add_method(
+                sel!(pausePomodoro:),
+                pause_pomodoro as extern "C" fn(&AnyObject, Sel, *mut AnyObject),
+            );
+            decl.add_method(
+                sel!(resetPomodoro:),
+                reset_pomodoro as extern "C" fn(&AnyObject, Sel, *mut AnyObject),
+            );
+            decl.add_method(
+                sel!(startCountdown:),
+                start_countdown as extern "C" fn(&AnyObject, Sel, *mut AnyObject),
+            );
+            decl.add_method(
+                sel!(pauseCountdown:),
+                pause_countdown as extern "C" fn(&AnyObject, Sel, *mut AnyObject),
+            );
+            decl.add_method(
+                sel!(resetCountdown:),
+                reset_countdown as extern "C" fn(&AnyObject, Sel, *mut AnyObject),
+            );
+            decl.add_method(
+                sel!(openApp:),
+                open_app as extern "C" fn(&AnyObject, Sel, *mut AnyObject),
+            );
+            decl.add_method(
+                sel!(openMusic:),
+                open_music as extern "C" fn(&AnyObject, Sel, *mut AnyObject),
+            );
+            decl.add_method(
+                sel!(openCountdown:),
+                open_countdown as extern "C" fn(&AnyObject, Sel, *mut AnyObject),
+            );
+            decl.add_method(
+                sel!(quitApp:),
+                quit_app as extern "C" fn(&AnyObject, Sel, *mut AnyObject),
+            );
+            decl.add_method(
+                sel!(musicPlayPause:),
+                music_play_pause as extern "C" fn(&AnyObject, Sel, *mut AnyObject),
+            );
+            decl.add_method(
+                sel!(musicPrevious:),
+                music_previous as extern "C" fn(&AnyObject, Sel, *mut AnyObject),
+            );
+            decl.add_method(
+                sel!(musicNext:),
+                music_next as extern "C" fn(&AnyObject, Sel, *mut AnyObject),
+            );
+            decl.add_method(
+                sel!(focusOff:),
+                focus_off as extern "C" fn(&AnyObject, Sel, *mut AnyObject),
+            );
+            decl.add_method(
+                sel!(focusWhite:),
+                focus_white as extern "C" fn(&AnyObject, Sel, *mut AnyObject),
+            );
+            decl.add_method(
+                sel!(focusRain:),
+                focus_rain as extern "C" fn(&AnyObject, Sel, *mut AnyObject),
+            );
+            decl.add_method(
+                sel!(focusBrown:),
+                focus_brown as extern "C" fn(&AnyObject, Sel, *mut AnyObject),
+            );
+            decl.add_method(
+                sel!(noop:),
+                noop as extern "C" fn(&AnyObject, Sel, *mut AnyObject),
+            );
+        }
         decl.register()
     });
     unsafe { Id::from_raw(msg_send![*class, new]).expect("PomodoroStatusHandler instance") }
 }
 
 #[cfg(target_os = "macos")]
-extern "C" fn noop(_: &Object, _: Sel, _: *mut Object) {}
+extern "C" fn noop(_: &AnyObject, _: Sel, _: *mut AnyObject) {}
 
 #[cfg(target_os = "macos")]
 fn with_engine<F: FnOnce(&Arc<TimerEngine>)>(action: F) {
@@ -503,47 +565,47 @@ fn with_app<F: FnOnce(&AppHandle)>(action: F) {
 }
 
 #[cfg(target_os = "macos")]
-extern "C" fn start_pomodoro(_: &Object, _: Sel, _: *mut Object) {
+extern "C" fn start_pomodoro(_: &AnyObject, _: Sel, _: *mut AnyObject) {
     with_engine(|engine| engine.start_pomodoro());
 }
 
 #[cfg(target_os = "macos")]
-extern "C" fn start_break(_: &Object, _: Sel, _: *mut Object) {
+extern "C" fn start_break(_: &AnyObject, _: Sel, _: *mut AnyObject) {
     with_engine(|engine| engine.start_break());
 }
 
 #[cfg(target_os = "macos")]
-extern "C" fn skip_break(_: &Object, _: Sel, _: *mut Object) {
+extern "C" fn skip_break(_: &AnyObject, _: Sel, _: *mut AnyObject) {
     with_engine(|engine| engine.skip_break());
 }
 
 #[cfg(target_os = "macos")]
-extern "C" fn pause_pomodoro(_: &Object, _: Sel, _: *mut Object) {
+extern "C" fn pause_pomodoro(_: &AnyObject, _: Sel, _: *mut AnyObject) {
     with_engine(|engine| engine.pause_pomodoro());
 }
 
 #[cfg(target_os = "macos")]
-extern "C" fn reset_pomodoro(_: &Object, _: Sel, _: *mut Object) {
+extern "C" fn reset_pomodoro(_: &AnyObject, _: Sel, _: *mut AnyObject) {
     with_engine(|engine| engine.reset_pomodoro());
 }
 
 #[cfg(target_os = "macos")]
-extern "C" fn start_countdown(_: &Object, _: Sel, _: *mut Object) {
+extern "C" fn start_countdown(_: &AnyObject, _: Sel, _: *mut AnyObject) {
     with_engine(|engine| engine.start_countdown());
 }
 
 #[cfg(target_os = "macos")]
-extern "C" fn pause_countdown(_: &Object, _: Sel, _: *mut Object) {
+extern "C" fn pause_countdown(_: &AnyObject, _: Sel, _: *mut AnyObject) {
     with_engine(|engine| engine.pause_countdown());
 }
 
 #[cfg(target_os = "macos")]
-extern "C" fn reset_countdown(_: &Object, _: Sel, _: *mut Object) {
+extern "C" fn reset_countdown(_: &AnyObject, _: Sel, _: *mut AnyObject) {
     with_engine(|engine| engine.reset_countdown());
 }
 
 #[cfg(target_os = "macos")]
-extern "C" fn open_app(_: &Object, _: Sel, _: *mut Object) {
+extern "C" fn open_app(_: &AnyObject, _: Sel, _: *mut AnyObject) {
     with_app(|app| {
         if let Some(window) = app.get_webview_window("main") {
             let _ = window.show();
@@ -553,7 +615,7 @@ extern "C" fn open_app(_: &Object, _: Sel, _: *mut Object) {
 }
 
 #[cfg(target_os = "macos")]
-extern "C" fn open_music(_: &Object, _: Sel, _: *mut Object) {
+extern "C" fn open_music(_: &AnyObject, _: Sel, _: *mut AnyObject) {
     with_app(|app| {
         if let Some(window) = app.get_webview_window("main") {
             let _ = window.show();
@@ -564,7 +626,7 @@ extern "C" fn open_music(_: &Object, _: Sel, _: *mut Object) {
 }
 
 #[cfg(target_os = "macos")]
-extern "C" fn open_countdown(_: &Object, _: Sel, _: *mut Object) {
+extern "C" fn open_countdown(_: &AnyObject, _: Sel, _: *mut AnyObject) {
     with_app(|app| {
         if let Some(window) = app.get_webview_window("main") {
             let _ = window.show();
@@ -575,42 +637,42 @@ extern "C" fn open_countdown(_: &Object, _: Sel, _: *mut Object) {
 }
 
 #[cfg(target_os = "macos")]
-extern "C" fn quit_app(_: &Object, _: Sel, _: *mut Object) {
+extern "C" fn quit_app(_: &AnyObject, _: Sel, _: *mut AnyObject) {
     with_app(|app| app.exit(0));
 }
 
 #[cfg(target_os = "macos")]
-extern "C" fn music_play_pause(_: &Object, _: Sel, _: *mut Object) {
+extern "C" fn music_play_pause(_: &AnyObject, _: Sel, _: *mut AnyObject) {
     let _ = control_media_action("play_pause");
 }
 
 #[cfg(target_os = "macos")]
-extern "C" fn music_previous(_: &Object, _: Sel, _: *mut Object) {
+extern "C" fn music_previous(_: &AnyObject, _: Sel, _: *mut AnyObject) {
     let _ = control_media_action("previous");
 }
 
 #[cfg(target_os = "macos")]
-extern "C" fn music_next(_: &Object, _: Sel, _: *mut Object) {
+extern "C" fn music_next(_: &AnyObject, _: Sel, _: *mut AnyObject) {
     let _ = control_media_action("next");
 }
 
 #[cfg(target_os = "macos")]
-extern "C" fn focus_off(_: &Object, _: Sel, _: *mut Object) {
+extern "C" fn focus_off(_: &AnyObject, _: Sel, _: *mut AnyObject) {
     handle_focus_sound(FocusSound::Off);
 }
 
 #[cfg(target_os = "macos")]
-extern "C" fn focus_white(_: &Object, _: Sel, _: *mut Object) {
+extern "C" fn focus_white(_: &AnyObject, _: Sel, _: *mut AnyObject) {
     handle_focus_sound(FocusSound::White);
 }
 
 #[cfg(target_os = "macos")]
-extern "C" fn focus_rain(_: &Object, _: Sel, _: *mut Object) {
+extern "C" fn focus_rain(_: &AnyObject, _: Sel, _: *mut AnyObject) {
     handle_focus_sound(FocusSound::Rain);
 }
 
 #[cfg(target_os = "macos")]
-extern "C" fn focus_brown(_: &Object, _: Sel, _: *mut Object) {
+extern "C" fn focus_brown(_: &AnyObject, _: Sel, _: *mut AnyObject) {
     handle_focus_sound(FocusSound::Brown);
 }
 
