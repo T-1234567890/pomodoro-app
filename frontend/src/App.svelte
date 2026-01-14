@@ -1,7 +1,5 @@
 <script lang="ts">
   import { onMount } from 'svelte';
-  import { listen } from '@tauri-apps/api/event';
-  import { invoke } from '@tauri-apps/api/core';
   import CountdownTimer from './lib/CountdownTimer.svelte';
   import {
     countdownState,
@@ -13,6 +11,7 @@
     startCountdown
   } from './lib/countdownStore';
   import { controlSystemMedia, getSystemMediaState, type SystemMediaState } from './lib/systemMedia';
+  import { safeInvoke, safeListen } from './lib/tauri';
   import styles from './App.module.css';
 
   const SETTINGS_STORAGE_KEY = 'pomodoro_settings';
@@ -339,7 +338,7 @@
   const handleFocusSoundChange = async (event: Event) => {
     const target = event.currentTarget as HTMLSelectElement;
     focusSoundSelection = target.value as FocusSoundType;
-    void invoke('focus_sound_set', { sound: focusSoundSelection });
+    void safeInvoke('focus_sound_set', { sound: focusSoundSelection });
     if (focusSoundSelection === 'off') {
       stopFocusSound();
       return;
@@ -396,7 +395,7 @@
     }
     if (focusSoundSelection === 'off') {
       focusSoundSelection = 'white';
-      void invoke('focus_sound_set', { sound: focusSoundSelection });
+      void safeInvoke('focus_sound_set', { sound: focusSoundSelection });
     }
     if (focusSoundPlaying) {
       pauseFocusSound();
@@ -431,7 +430,7 @@
   ) => {
     focusSoundSelection = selection;
     if (notifyBackend) {
-      void invoke('focus_sound_set', { sound: selection });
+      void safeInvoke('focus_sound_set', { sound: selection });
     }
     if (selection === 'off') {
       stopFocusSound();
@@ -531,7 +530,7 @@
       pauseMusicOnBreak: settings.pauseMusicOnBreak ?? defaultSettings.pauseMusicOnBreak
     };
     persistSettings();
-    void invoke('pomodoro_update_settings', {
+    void safeInvoke('pomodoro_update_settings', {
       workMinutes: settings.workMinutes,
       shortBreakMinutes: settings.shortBreakMinutes,
       longBreakMinutes: settings.longBreakMinutes,
@@ -550,15 +549,15 @@
   };
 
   const startTimer = () => {
-    void invoke('pomodoro_start');
+    void safeInvoke('pomodoro_start');
   };
 
   const pauseTimer = () => {
-    void invoke('pomodoro_pause');
+    void safeInvoke('pomodoro_pause');
   };
 
   const resetTimer = () => {
-    void invoke('pomodoro_reset');
+    void safeInvoke('pomodoro_reset');
   };
 
   const applyTheme = (value: Theme) => {
@@ -682,23 +681,25 @@
     systemMediaPollId = setInterval(updateSystemMediaState, 4000);
     void (async () => {
       try {
-        const initialState = await invoke('timer_get_state');
-        applyTimerSnapshot(initialState as TimerStatePayload);
+        const initialState = await safeInvoke('timer_get_state');
+        if (initialState) {
+          applyTimerSnapshot(initialState as TimerStatePayload);
+        }
       } catch (error) {
         console.error('Failed to load timer state', error);
       }
     })();
 
     void (async () => {
-      const unlistenTimer = await listen('timer_state', (event) => {
+      const unlistenTimer = await safeListen('timer_state', (event) => {
         applyTimerSnapshot(event.payload as TimerStatePayload);
       });
 
-      const unlistenFocus = await listen('focus_sound', (event) => {
+      const unlistenFocus = await safeListen('focus_sound', (event) => {
         void handleFocusSoundMenuSelection(event.payload as FocusSoundType, false);
       });
 
-      const unlistenTab = await listen('select-tab', (event) => {
+      const unlistenTab = await safeListen('select-tab', (event) => {
         activeTab = event.payload as AppTab;
       });
 

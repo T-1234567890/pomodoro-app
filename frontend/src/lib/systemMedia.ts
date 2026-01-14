@@ -1,4 +1,4 @@
-import { invoke } from '@tauri-apps/api/core';
+import { safeInvoke } from './tauri';
 
 export type SystemMediaState = {
   available: boolean;
@@ -12,9 +12,13 @@ export type SystemMediaState = {
 };
 
 export async function getSystemMediaState(): Promise<SystemMediaState> {
-  return invoke('get_system_media_state');
+  const state = await safeInvoke<SystemMediaState>('get_system_media_state');
+  if (!state) {
+    throw new Error('System media state unavailable');
+  }
+  return state;
 }
 
 export async function controlSystemMedia(action: 'play_pause' | 'next' | 'previous') {
-  return invoke('control_system_media', { action });
+  return safeInvoke('control_system_media', { action });
 }

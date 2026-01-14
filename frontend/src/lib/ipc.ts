@@ -1,4 +1,4 @@
-import { invoke } from '@tauri-apps/api/core';
+import { safeInvoke } from './tauri';
 
 export type BackendRequest = {
   action: string;
@@ -12,7 +12,8 @@ export type BackendResponse = {
 };
 
 export async function send(request: BackendRequest): Promise<BackendResponse> {
-  return invoke('backend_request', { payload: request });
+  const response = await safeInvoke<BackendResponse>('backend_request', { payload: request });
+  return response ?? { ok: false, error: 'Backend unavailable' };
 }
 
 export async function getState(): Promise<BackendResponse> {

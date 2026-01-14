@@ -1,5 +1,5 @@
 import { writable } from 'svelte/store';
-import { invoke } from '@tauri-apps/api/core';
+import { safeInvoke } from './tauri';
 
 const STORAGE_KEY = 'countdown_duration_minutes';
 const MINUTES_MIN = 1;
@@ -37,15 +37,15 @@ const createCountdownStore = () => {
   };
 
   const startCountdown = async () => {
-    await invoke('countdown_start');
+    await safeInvoke('countdown_start');
   };
 
   const pauseCountdown = async () => {
-    await invoke('countdown_pause');
+    await safeInvoke('countdown_pause');
   };
 
   const resetCountdown = async () => {
-    await invoke('countdown_reset');
+    await safeInvoke('countdown_reset');
   };
 
   const setDurationMinutes = (value: number) => {
@@ -53,7 +53,7 @@ const createCountdownStore = () => {
     remainingSeconds = durationMinutes * 60;
     running = false;
     localStorage.setItem(STORAGE_KEY, String(durationMinutes));
-    void invoke('countdown_set_duration', { minutes: durationMinutes });
+    void safeInvoke('countdown_set_duration', { minutes: durationMinutes });
     publish();
   };
 
@@ -74,7 +74,7 @@ const createCountdownStore = () => {
       durationMinutes = clampMinutes(defaultMinutes, defaultMinutes);
       remainingSeconds = durationMinutes * 60;
     }
-    void invoke('countdown_set_duration', { minutes: durationMinutes });
+    void safeInvoke('countdown_set_duration', { minutes: durationMinutes });
     publish();
   };
 
