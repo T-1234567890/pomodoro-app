@@ -461,86 +461,26 @@ fn create_handler() -> Id<Object> {
         let mut decl = ClassDecl::new("PomodoroStatusHandler", superclass)
             .expect("Unable to register PomodoroStatusHandler class");
         unsafe {
-            decl.add_method(
-                sel!(startPomodoro:),
-                start_pomodoro as extern "C" fn(&AnyObject, Sel, *mut AnyObject),
-            );
-            decl.add_method(
-                sel!(startBreak:),
-                start_break as extern "C" fn(&AnyObject, Sel, *mut AnyObject),
-            );
-            decl.add_method(
-                sel!(skipBreak:),
-                skip_break as extern "C" fn(&AnyObject, Sel, *mut AnyObject),
-            );
-            decl.add_method(
-                sel!(pausePomodoro:),
-                pause_pomodoro as extern "C" fn(&AnyObject, Sel, *mut AnyObject),
-            );
-            decl.add_method(
-                sel!(resetPomodoro:),
-                reset_pomodoro as extern "C" fn(&AnyObject, Sel, *mut AnyObject),
-            );
-            decl.add_method(
-                sel!(startCountdown:),
-                start_countdown as extern "C" fn(&AnyObject, Sel, *mut AnyObject),
-            );
-            decl.add_method(
-                sel!(pauseCountdown:),
-                pause_countdown as extern "C" fn(&AnyObject, Sel, *mut AnyObject),
-            );
-            decl.add_method(
-                sel!(resetCountdown:),
-                reset_countdown as extern "C" fn(&AnyObject, Sel, *mut AnyObject),
-            );
-            decl.add_method(
-                sel!(openApp:),
-                open_app as extern "C" fn(&AnyObject, Sel, *mut AnyObject),
-            );
-            decl.add_method(
-                sel!(openMusic:),
-                open_music as extern "C" fn(&AnyObject, Sel, *mut AnyObject),
-            );
-            decl.add_method(
-                sel!(openCountdown:),
-                open_countdown as extern "C" fn(&AnyObject, Sel, *mut AnyObject),
-            );
-            decl.add_method(
-                sel!(quitApp:),
-                quit_app as extern "C" fn(&AnyObject, Sel, *mut AnyObject),
-            );
-            decl.add_method(
-                sel!(musicPlayPause:),
-                music_play_pause as extern "C" fn(&AnyObject, Sel, *mut AnyObject),
-            );
-            decl.add_method(
-                sel!(musicPrevious:),
-                music_previous as extern "C" fn(&AnyObject, Sel, *mut AnyObject),
-            );
-            decl.add_method(
-                sel!(musicNext:),
-                music_next as extern "C" fn(&AnyObject, Sel, *mut AnyObject),
-            );
-            decl.add_method(
-                sel!(focusOff:),
-                focus_off as extern "C" fn(&AnyObject, Sel, *mut AnyObject),
-            );
-            decl.add_method(
-                sel!(focusWhite:),
-                focus_white as extern "C" fn(&AnyObject, Sel, *mut AnyObject),
-            );
-            decl.add_method(
-                sel!(focusRain:),
-                focus_rain as extern "C" fn(&AnyObject, Sel, *mut AnyObject),
-            );
-            decl.add_method(
-                sel!(focusBrown:),
-                focus_brown as extern "C" fn(&AnyObject, Sel, *mut AnyObject),
-            );
-            decl.add_method(
-                sel!(noop:),
-                noop as extern "C" fn(&AnyObject, Sel, *mut AnyObject),
-            );
+            decl.add_method(sel!(startPomodoro:), start_pomodoro);
+            decl.add_method(sel!(startBreak:), start_break);
+            decl.add_method(sel!(skipBreak:), skip_break);
+            decl.add_method(sel!(pausePomodoro:), pause_pomodoro);
+            decl.add_method(sel!(resetPomodoro:), reset_pomodoro);
+            decl.add_method(sel!(startCountdown:), start_countdown);
+            decl.add_method(sel!(pauseCountdown:), pause_countdown);
+            decl.add_method(sel!(resetCountdown:), reset_countdown);
+            decl.add_method(sel!(openApp:), open_app);
+            decl.add_method(sel!(openMusic:), open_music);
+            decl.add_method(sel!(openCountdown:), open_countdown);
+            decl.add_method(sel!(quitApp:), quit_app);
+            decl.add_method(sel!(musicPlayPause:), music_play_pause);
+            decl.add_method(sel!(musicPrevious:), music_previous);
+            decl.add_method(sel!(musicNext:), music_next);
+            decl.add_method(sel!(focusOff:), focus_off);
+            decl.add_method(sel!(focusWhite:), focus_white);
+            decl.add_method(sel!(focusRain:), focus_rain);
+            decl.add_method(sel!(focusBrown:), focus_brown);
+            decl.add_method(sel!(noop:), noop);
         }
         decl.register()
     });
