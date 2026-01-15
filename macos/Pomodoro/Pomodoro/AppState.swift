@@ -13,7 +13,9 @@ final class AppState: ObservableObject {
     let pomodoro: PomodoroTimerEngine
     let countdown: CountdownTimerEngine
 
-    private var menuBarController: MenuBarController?
+    var openWindowHandler: (() -> Void)?
+
+    private let menuBarController: MenuBarController
     private var cancellables: Set<AnyCancellable> = []
 
     init(
@@ -79,6 +81,11 @@ final class AppState: ObservableObject {
     }
 
     func openMainWindow() {
+        if let openWindowHandler {
+            openWindowHandler()
+            return
+        }
+
         NSApplication.shared.activate(ignoringOtherApps: true)
         if let window = NSApplication.shared.windows.first {
             window.makeKeyAndOrderFront(nil)
@@ -87,5 +94,9 @@ final class AppState: ObservableObject {
 
     func quitApp() {
         NSApplication.shared.terminate(nil)
+    }
+
+    func shutdown() {
+        menuBarController.shutdown()
     }
 }

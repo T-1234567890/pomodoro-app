@@ -8,7 +8,7 @@
 import AppKit
 import Combine
 
-final class MenuBarController {
+final class MenuBarController: NSObject, NSMenuDelegate {
     private enum MenuMode {
         case pomodoro
         case breakTime
@@ -18,25 +18,30 @@ final class MenuBarController {
 
     private unowned let appState: AppState
     private let statusItem: NSStatusItem
+    private let menu: NSMenu
     private var titleTimer: Timer?
     private var cancellables: Set<AnyCancellable> = []
 
     init(appState: AppState) {
         self.appState = appState
         statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
+        menu = NSMenu()
+        menu.autoenablesItems = false
         configureStatusItem()
         observeStateChanges()
         startTitleTimer()
     }
 
     deinit {
-        titleTimer?.invalidate()
+        shutdown()
     }
 
     private func configureStatusItem() {
         if let button = statusItem.button {
             button.attributedTitle = statusTitleAttributedString()
         }
+        menu.delegate = self
+        statusItem.menu = menu
         rebuildMenu()
     }
 
@@ -117,13 +122,13 @@ final class MenuBarController {
     }
 
     private func rebuildMenu() {
-        let menu = NSMenu()
+        menu.removeAllItems()
 
         switch currentMenuMode() {
         case .pomodoro:
             menu.addItem(sectionHeader(title: "Pomodoro — Work"))
             menu.addItem(.separator())
-            menu.addItem(actionItem(title: "⏸ Pause", action: #selector(pausePomodoro)))
+            menu.addItem(actionItem(title: pomodoroPauseTitle(), action: #selector(pausePomodoro)))
             menu.addItem(actionItem(title: "↺ Reset", action: #selector(resetPomodoro)))
             menu.addItem(.separator())
             menu.addItem(actionItem(title: "Start Break", action: #selector(startBreak)))
@@ -133,7 +138,7 @@ final class MenuBarController {
         case .breakTime:
             menu.addItem(sectionHeader(title: "Break Time"))
             menu.addItem(.separator())
-            menu.addItem(actionItem(title: "⏸ Pause", action: #selector(pausePomodoro)))
+            menu.addItem(actionItem(title: pomodoroPauseTitle(), action: #selector(pausePomodoro)))
             menu.addItem(actionItem(title: "↺ Reset", action: #selector(resetPomodoro)))
             menu.addItem(.separator())
             menu.addItem(actionItem(title: "Skip Break", action: #selector(skipBreak)))
@@ -143,7 +148,7 @@ final class MenuBarController {
         case .countdown:
             menu.addItem(sectionHeader(title: "Countdown Timer"))
             menu.addItem(.separator())
-            menu.addItem(actionItem(title: "⏸ Pause", action: #selector(pauseCountdown)))
+            menu.addItem(actionItem(title: countdownPauseTitle(), action: #selector(pauseCountdown)))
             menu.addItem(actionItem(title: "↺ Reset", action: #selector(resetCountdown)))
             menu.addItem(.separator())
             menu.addItem(actionItem(title: "Open App", action: #selector(openApp)))
@@ -177,6 +182,14 @@ final class MenuBarController {
         let minutes = clampedSeconds / 60
         let remaining = clampedSeconds % 60
         return String(format: "%02d:%02d", minutes, remaining)
+    }
+
+    private func pomodoroPauseTitle() -> String {
+        appState.pomodoro.state.isPaused ? "▶ Resume" : "⏸ Pause"
+    }
+
+    private func countdownPauseTitle() -> String {
+        appState.countdown.state.isPaused ? "▶ Resume" : "⏸ Pause"
     }
 
     @objc private func startPomodoro() {
@@ -217,5 +230,17 @@ final class MenuBarController {
 
     @objc private func quitApp() {
         appState.quitApp()
+    }
+
+    func menuWillOpen(_ menu: NSMenu) {
+        updateTitle()
+        rebuildMenu()
+    }
+
+    func shutdown() {
+        titleTimer?.invalidate()
+        titleTimer = nil
+        cancellables.removeAll()
+        NSStatusBar.system.removeStatusItem(statusItem)
     }
 }
