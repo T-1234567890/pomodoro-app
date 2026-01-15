@@ -12,3 +12,6 @@ dist/
 # Logs / cache
 *.log
 .cache/
+
+# IDE
+.idea/
