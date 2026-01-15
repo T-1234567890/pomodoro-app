@@ -16,7 +16,7 @@ struct PomodoroApp: App {
         WindowGroup {
             ContentView()
                 .environmentObject(appState)
-                .task {
+                .task(id: ObjectIdentifier(appState)) {
                     appDelegate.appState = appState
                 }
         }

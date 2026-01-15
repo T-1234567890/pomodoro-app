@@ -14,7 +14,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
     var appState: AppState? {
         didSet {
-            guard !appStateConfigured, let appState else { return }
+            guard !appStateConfigured else { return }
+            guard let appState else { return }
             appStateConfigured = true
             appState.openWindowHandler = { [weak self] in
                 self?.openMainWindow()
