@@ -31,6 +31,7 @@ final class MenuBarController: NSObject, NSMenuDelegate {
         statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
         menu = NSMenu()
         menu.autoenablesItems = false
+        super.init()
         configureStatusItem()
         observeStateChanges()
         startTitleTimer()
