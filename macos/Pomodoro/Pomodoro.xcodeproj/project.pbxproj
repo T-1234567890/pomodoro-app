@@ -14,6 +14,7 @@
 		7C360D5B2F191F17007313D3 /* MainWindowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C360D542F191F17007313D3 /* MainWindowView.swift */; };
 		7C360D5C2F191F17007313D3 /* PomodoroApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C360D552F191F17007313D3 /* PomodoroApp.swift */; };
 		7C360D6A2F191F17007313D3 /* MenuBarController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C360D692F191F17007313D3 /* MenuBarController.swift */; };
+		7C360D6B2F191F17007313D3 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C360D6C2F191F17007313D3 /* AppDelegate.swift */; };
 		7C360D5D2F191F17007313D3 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 7C360D562F191F17007313D3 /* Assets.xcassets */; };
 /* End PBXBuildFile section */
 
@@ -26,6 +27,7 @@
 		7C360D542F191F17007313D3 /* MainWindowView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainWindowView.swift; sourceTree = "<group>"; };
 		7C360D552F191F17007313D3 /* PomodoroApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PomodoroApp.swift; sourceTree = "<group>"; };
 		7C360D692F191F17007313D3 /* MenuBarController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MenuBarController.swift; sourceTree = "<group>"; };
+		7C360D6C2F191F17007313D3 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		7C360D562F191F17007313D3 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -72,6 +74,7 @@
 			isa = PBXGroup;
 			children = (
 				7C360D552F191F17007313D3 /* PomodoroApp.swift */,
+				7C360D6C2F191F17007313D3 /* AppDelegate.swift */,
 				7C360D692F191F17007313D3 /* MenuBarController.swift */,
 			);
 			name = App;
@@ -186,6 +189,7 @@
 				7C360D5A2F191F17007313D3 /* ContentView.swift in Sources */,
 				7C360D5B2F191F17007313D3 /* MainWindowView.swift in Sources */,
 				7C360D5C2F191F17007313D3 /* PomodoroApp.swift in Sources */,
+				7C360D6B2F191F17007313D3 /* AppDelegate.swift in Sources */,
 				7C360D6A2F191F17007313D3 /* MenuBarController.swift in Sources */,
 				7C360D572F191F17007313D3 /* AppState.swift in Sources */,
 				7C360D582F191F17007313D3 /* CountdownTimerEngine.swift in Sources */,

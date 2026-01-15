@@ -10,18 +10,15 @@ import SwiftUI
 @main
 struct PomodoroApp: App {
     @NSApplicationDelegateAdaptor(AppDelegate.self) private var appDelegate
-    @StateObject private var appState: AppState
-
-    init() {
-        let state = AppState()
-        _appState = StateObject(wrappedValue: state)
-        appDelegate.appState = state
-    }
+    @StateObject private var appState = AppState()
 
     var body: some Scene {
         WindowGroup {
             ContentView()
                 .environmentObject(appState)
+                .onAppear {
+                    appDelegate.appState = appState
+                }
         }
     }
 }
