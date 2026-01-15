@@ -79,6 +79,14 @@ final class PomodoroTimerEngine: ObservableObject {
         remainingSeconds = workDuration
     }
 
+    func startBreak() {
+        guard state == .running || state == .paused else { return }
+        stopTimer()
+        state = .breakRunning
+        remainingSeconds = breakDuration
+        startTimer()
+    }
+
     private func startTimer() {
         stopTimer()
         timer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { [weak self] _ in
