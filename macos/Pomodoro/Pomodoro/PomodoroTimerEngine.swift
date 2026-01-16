@@ -9,6 +9,12 @@ import Combine
 import Foundation
 
 final class PomodoroTimerEngine: ObservableObject {
+    enum Mode: String {
+        case work
+        case breakTime
+        case longBreak
+    }
+
     enum State: String {
         case idle
         case running
@@ -36,21 +42,50 @@ final class PomodoroTimerEngine: ObservableObject {
 
     @Published private(set) var state: State = .idle
     @Published private(set) var remainingSeconds: Int
+    @Published private(set) var mode: Mode = .work
 
-    private let workDuration: Int
-    private let breakDuration: Int
+    private var workDuration: Int
+    private var breakDuration: Int
+    private var longBreakDuration: Int
+    private var sessionsUntilLongBreak: Int
     private var timer: Timer?
+    private var completedWorkSessions: Int = 0
 
-    init(workDuration: Int = 25 * 60, breakDuration: Int = 5 * 60) {
+    init(
+        workDuration: Int = 25 * 60,
+        breakDuration: Int = 5 * 60,
+        longBreakDuration: Int = 15 * 60,
+        sessionsUntilLongBreak: Int = 4
+    ) {
         self.workDuration = workDuration
         self.breakDuration = breakDuration
+        self.longBreakDuration = longBreakDuration
+        self.sessionsUntilLongBreak = max(1, sessionsUntilLongBreak)
         self.remainingSeconds = workDuration
+    }
+
+    func updateConfiguration(
+        workDuration: Int,
+        breakDuration: Int,
+        longBreakDuration: Int,
+        sessionsUntilLongBreak: Int
+    ) {
+        self.workDuration = workDuration
+        self.breakDuration = breakDuration
+        self.longBreakDuration = longBreakDuration
+        self.sessionsUntilLongBreak = max(1, sessionsUntilLongBreak)
+
+        if state == .idle {
+            remainingSeconds = workDuration
+            mode = .work
+        }
     }
 
     func start() {
         guard state == .idle else { return }
         remainingSeconds = workDuration
         state = .running
+        mode = .work
         startTimer()
     }
 
@@ -70,6 +105,8 @@ final class PomodoroTimerEngine: ObservableObject {
         stopTimer()
         state = .idle
         remainingSeconds = workDuration
+        mode = .work
+        completedWorkSessions = 0
     }
 
     func skipBreak() {
@@ -77,13 +114,16 @@ final class PomodoroTimerEngine: ObservableObject {
         stopTimer()
         state = .idle
         remainingSeconds = workDuration
+        if mode == .longBreak {
+            completedWorkSessions = 0
+        }
+        mode = .work
     }
 
     func startBreak() {
         guard state == .running || state == .paused else { return }
         stopTimer()
-        state = .breakRunning
-        remainingSeconds = breakDuration
+        beginBreak(isLongBreak: false)
         startTimer()
     }
 
@@ -117,9 +157,23 @@ final class PomodoroTimerEngine: ObservableObject {
             stopTimer()
             state = .idle
             remainingSeconds = workDuration
+            if mode == .longBreak {
+                completedWorkSessions = 0
+            }
+            mode = .work
         } else {
-            state = .breakRunning
-            remainingSeconds = breakDuration
+            completedWorkSessions += 1
+            beginBreak(isLongBreak: isLongBreakDue())
         }
+    }
+
+    private func beginBreak(isLongBreak: Bool) {
+        state = .breakRunning
+        mode = isLongBreak ? .longBreak : .breakTime
+        remainingSeconds = isLongBreak ? longBreakDuration : breakDuration
+    }
+
+    private func isLongBreakDue() -> Bool {
+        completedWorkSessions >= sessionsUntilLongBreak
     }
 }

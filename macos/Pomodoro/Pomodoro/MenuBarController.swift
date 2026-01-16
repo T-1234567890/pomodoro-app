@@ -92,7 +92,7 @@ final class MenuBarController: NSObject, NSMenuDelegate {
         case .pomodoro:
             return "🍅 \(formattedTime(appState.pomodoro.remainingSeconds))"
         case .breakTime:
-            return "☕ \(formattedTime(appState.pomodoro.remainingSeconds))"
+            return "\(breakEmoji()) \(formattedTime(appState.pomodoro.remainingSeconds))"
         case .countdown:
             return "⏱ \(formattedTime(appState.countdown.remainingSeconds))"
         case .idle:
@@ -105,7 +105,7 @@ final class MenuBarController: NSObject, NSMenuDelegate {
         case .pomodoro:
             return "Pomodoro running"
         case .breakTime:
-            return "Break running"
+            return breakTooltip()
         case .countdown:
             return "Countdown running"
         case .idle:
@@ -141,7 +141,7 @@ final class MenuBarController: NSObject, NSMenuDelegate {
             menu.addItem(actionItem(title: "Open App", action: #selector(openApp)))
             menu.addItem(actionItem(title: "Quit", action: #selector(quitApp)))
         case .breakTime:
-            menu.addItem(sectionHeader(title: "Break Time"))
+            menu.addItem(sectionHeader(title: breakMenuTitle()))
             menu.addItem(.separator())
             menu.addItem(actionItem(title: pomodoroPauseTitle(), action: #selector(pausePomodoro)))
             menu.addItem(actionItem(title: "↺ Reset", action: #selector(resetPomodoro)))
@@ -191,6 +191,18 @@ final class MenuBarController: NSObject, NSMenuDelegate {
 
     private func pomodoroPauseTitle() -> String {
         appState.pomodoro.state.isPaused ? "▶ Resume" : "⏸ Pause"
+    }
+
+    private func breakMenuTitle() -> String {
+        appState.pomodoroMode == .longBreak ? "Long Break" : "Break Time"
+    }
+
+    private func breakTooltip() -> String {
+        appState.pomodoroMode == .longBreak ? "Long break running" : "Break running"
+    }
+
+    private func breakEmoji() -> String {
+        appState.pomodoroMode == .longBreak ? "🌙" : "☕"
     }
 
     private func countdownPauseTitle() -> String {

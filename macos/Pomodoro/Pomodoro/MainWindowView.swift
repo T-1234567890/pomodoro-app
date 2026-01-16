@@ -13,7 +13,7 @@ struct MainWindowView: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
             VStack(alignment: .leading, spacing: 8) {
-                Text(appState.pomodoro.state.isOnBreak ? "Break" : "Pomodoro")
+                Text(titleForPomodoroMode(appState.pomodoroMode))
                     .font(.headline)
                 Text(formattedTime(appState.pomodoro.remainingSeconds))
                     .font(.title)
@@ -88,6 +88,17 @@ struct MainWindowView: View {
             return "Break (Running)"
         case .breakPaused:
             return "Break (Paused)"
+        }
+    }
+
+    private func titleForPomodoroMode(_ mode: PomodoroTimerEngine.Mode) -> String {
+        switch mode {
+        case .work:
+            return "Pomodoro"
+        case .breakTime:
+            return "Break"
+        case .longBreak:
+            return "Long Break"
         }
     }
 }
