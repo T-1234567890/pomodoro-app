@@ -25,9 +25,7 @@ final class AppState: ObservableObject {
         didSet { updatePomodoroConfiguration() }
     }
 
-    var pomodoroMode: PomodoroTimerEngine.Mode {
-        pomodoro.mode
-    }
+    @Published private(set) var pomodoroMode: PomodoroTimerEngine.Mode
 
     private var cancellables: Set<AnyCancellable> = []
 
@@ -45,10 +43,18 @@ final class AppState: ObservableObject {
         self.breakDuration = breakDuration
         self.longBreakDuration = longBreakDuration
         self.sessionsUntilLongBreak = sessionsUntilLongBreak
+        self.pomodoroMode = pomodoro.mode
 
         pomodoro.objectWillChange
             .sink { [weak self] _ in
                 self?.objectWillChange.send()
+            }
+            .store(in: &cancellables)
+
+        pomodoro.$mode
+            .removeDuplicates()
+            .sink { [weak self] mode in
+                self?.pomodoroMode = mode
             }
             .store(in: &cancellables)
 
