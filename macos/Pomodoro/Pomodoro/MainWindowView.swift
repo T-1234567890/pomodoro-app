@@ -9,6 +9,10 @@ import SwiftUI
 
 struct MainWindowView: View {
     @EnvironmentObject private var appState: AppState
+    @State private var workMinutesText = ""
+    @State private var shortBreakMinutesText = ""
+    @State private var longBreakMinutesText = ""
+    @FocusState private var focusedField: DurationField?
 
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
@@ -60,14 +64,34 @@ struct MainWindowView: View {
             VStack(alignment: .leading, spacing: 8) {
                 Text("Durations")
                     .font(.headline)
-                Stepper(value: workMinutesBinding, in: 1...120, step: 1) {
-                    Text("Work: \(workMinutesValue) min")
+                DurationInputRow(
+                    title: "Work",
+                    text: $workMinutesText,
+                    field: .work,
+                    focusedField: $focusedField,
+                    isFocused: focusedField == .work
+                ) {
+                    commitDuration(.work)
                 }
-                Stepper(value: shortBreakMinutesBinding, in: 1...60, step: 1) {
-                    Text("Short Break: \(shortBreakMinutesValue) min")
+
+                DurationInputRow(
+                    title: "Short Break",
+                    text: $shortBreakMinutesText,
+                    field: .shortBreak,
+                    focusedField: $focusedField,
+                    isFocused: focusedField == .shortBreak
+                ) {
+                    commitDuration(.shortBreak)
                 }
-                Stepper(value: longBreakMinutesBinding, in: 1...90, step: 1) {
-                    Text("Long Break: \(longBreakMinutesValue) min")
+
+                DurationInputRow(
+                    title: "Long Break",
+                    text: $longBreakMinutesText,
+                    field: .longBreak,
+                    focusedField: $focusedField,
+                    isFocused: focusedField == .longBreak
+                ) {
+                    commitDuration(.longBreak)
                 }
             }
 
@@ -102,6 +126,60 @@ struct MainWindowView: View {
         }
         .padding()
         .frame(minWidth: 360)
+        .onAppear {
+            syncDurationTexts()
+        }
+        .onChange(of: appState.durationConfig) { _ in
+            syncDurationTexts()
+        }
+        .onChange(of: focusedField) { _, newValue in
+            guard newValue == nil else { return }
+            commitDuration(.work)
+            commitDuration(.shortBreak)
+            commitDuration(.longBreak)
+        }
+    }
+
+    private enum DurationField: Hashable {
+        case work
+        case shortBreak
+        case longBreak
+    }
+
+    private struct DurationInputRow: View {
+        let title: String
+        @Binding var text: String
+        let field: DurationField
+        let focusedField: FocusState<DurationField?>.Binding
+        let isFocused: Bool
+        let onCommit: () -> Void
+
+        var body: some View {
+            HStack {
+                Text(title)
+                Spacer()
+                HStack(spacing: 6) {
+                    TextField("", text: $text)
+                        .textFieldStyle(.roundedBorder)
+                        .frame(width: 64)
+                        .multilineTextAlignment(.trailing)
+                        .font(.system(.body, design: .rounded).monospacedDigit())
+                        .focused(focusedField, equals: field)
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 6)
+                                .stroke(isFocused ? Color.accentColor : Color.clear, lineWidth: 1)
+                        )
+                        .onSubmit {
+                            onCommit()
+                        }
+                    Text("min")
+                        .foregroundStyle(.secondary)
+                }
+            }
+            .accessibilityElement(children: .combine)
+            .accessibilityLabel("\(title) minutes")
+            .accessibilityHint("Enter a number and press return")
+        }
     }
 
     private func formattedTime(_ seconds: Int) -> String {
@@ -215,36 +293,15 @@ struct MainWindowView: View {
         max(1, appState.durationConfig.longBreakDuration / 60)
     }
 
-    private var workMinutesBinding: Binding<Int> {
-        Binding(
-            get: { workMinutesValue },
-            set: { updateDurationConfig(workMinutes: $0) }
-        )
-    }
-
-    private var shortBreakMinutesBinding: Binding<Int> {
-        Binding(
-            get: { shortBreakMinutesValue },
-            set: { updateDurationConfig(shortBreakMinutes: $0) }
-        )
-    }
-
-    private var longBreakMinutesBinding: Binding<Int> {
-        Binding(
-            get: { longBreakMinutesValue },
-            set: { updateDurationConfig(longBreakMinutes: $0) }
-        )
-    }
-
     private func updateDurationConfig(
         workMinutes: Int? = nil,
         shortBreakMinutes: Int? = nil,
         longBreakMinutes: Int? = nil
     ) {
         let currentConfig = appState.durationConfig
-        let updatedWorkMinutes = max(1, workMinutes ?? currentConfig.workDuration / 60)
-        let updatedShortBreakMinutes = max(1, shortBreakMinutes ?? currentConfig.shortBreakDuration / 60)
-        let updatedLongBreakMinutes = max(1, longBreakMinutes ?? currentConfig.longBreakDuration / 60)
+        let updatedWorkMinutes = clamp(workMinutes ?? currentConfig.workDuration / 60, range: 1...120)
+        let updatedShortBreakMinutes = clamp(shortBreakMinutes ?? currentConfig.shortBreakDuration / 60, range: 1...60)
+        let updatedLongBreakMinutes = clamp(longBreakMinutes ?? currentConfig.longBreakDuration / 60, range: 1...90)
 
         appState.applyCustomDurationConfig(DurationConfig(
             workDuration: updatedWorkMinutes * 60,
@@ -259,6 +316,47 @@ struct MainWindowView: View {
             get: { appState.presetSelection },
             set: { appState.applyPresetSelection($0) }
         )
+    }
+
+    private func syncDurationTexts() {
+        if focusedField != .work {
+            workMinutesText = String(workMinutesValue)
+        }
+        if focusedField != .shortBreak {
+            shortBreakMinutesText = String(shortBreakMinutesValue)
+        }
+        if focusedField != .longBreak {
+            longBreakMinutesText = String(longBreakMinutesValue)
+        }
+    }
+
+    private func commitDuration(_ field: DurationField) {
+        switch field {
+        case .work:
+            let committed = parseMinutes(from: workMinutesText, fallback: workMinutesValue, range: 1...120)
+            workMinutesText = String(committed)
+            updateDurationConfig(workMinutes: committed)
+        case .shortBreak:
+            let committed = parseMinutes(from: shortBreakMinutesText, fallback: shortBreakMinutesValue, range: 1...60)
+            shortBreakMinutesText = String(committed)
+            updateDurationConfig(shortBreakMinutes: committed)
+        case .longBreak:
+            let committed = parseMinutes(from: longBreakMinutesText, fallback: longBreakMinutesValue, range: 1...90)
+            longBreakMinutesText = String(committed)
+            updateDurationConfig(longBreakMinutes: committed)
+        }
+    }
+
+    private func parseMinutes(from text: String, fallback: Int, range: ClosedRange<Int>) -> Int {
+        let trimmed = text.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard let value = Int(trimmed) else {
+            return clamp(fallback, range: range)
+        }
+        return clamp(value, range: range)
+    }
+
+    private func clamp(_ value: Int, range: ClosedRange<Int>) -> Int {
+        min(max(value, range.lowerBound), range.upperBound)
     }
 }
 
