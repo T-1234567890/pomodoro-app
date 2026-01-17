@@ -22,32 +22,7 @@ final class PomodoroTimerEngine: ObservableObject {
         case longBreak
     }
 
-    enum State: String {
-        case idle
-        case running
-        case paused
-        case breakRunning
-        case breakPaused
-
-        var isOnBreak: Bool {
-            switch self {
-            case .breakRunning, .breakPaused:
-                return true
-            case .idle, .running, .paused:
-                return false
-            }
-        }
-
-        var isRunning: Bool {
-            self == .running || self == .breakRunning
-        }
-
-        var isPaused: Bool {
-            self == .paused || self == .breakPaused
-        }
-    }
-
-    @Published private(set) var state: State = .idle
+    @Published private(set) var state: TimerState = .idle
     @Published private(set) var remainingSeconds: Int
     @Published private(set) var mode: Mode = .work
     @Published private(set) var currentMode: CurrentMode = .idle
@@ -101,15 +76,27 @@ final class PomodoroTimerEngine: ObservableObject {
     }
 
     func pause() {
-        guard state.isRunning else { return }
-        state = state.isOnBreak ? .breakPaused : .paused
+        switch state {
+        case .running:
+            state = .paused
+        case .breakRunning:
+            state = .breakPaused
+        case .idle, .paused, .breakPaused:
+            return
+        }
         updateCurrentMode()
         stopTimer()
     }
 
     func resume() {
-        guard state.isPaused else { return }
-        state = state.isOnBreak ? .breakRunning : .running
+        switch state {
+        case .paused:
+            state = .running
+        case .breakPaused:
+            state = .breakRunning
+        case .idle, .running, .breakRunning:
+            return
+        }
         updateCurrentMode()
         startTimer()
     }
@@ -124,7 +111,12 @@ final class PomodoroTimerEngine: ObservableObject {
     }
 
     func skipBreak() {
-        guard state.isOnBreak else { return }
+        switch state {
+        case .breakRunning, .breakPaused:
+            break
+        case .idle, .running, .paused:
+            return
+        }
         stopTimer()
         state = .idle
         remainingSeconds = workDuration
@@ -136,7 +128,12 @@ final class PomodoroTimerEngine: ObservableObject {
     }
 
     func startBreak() {
-        guard state == .running || state == .paused else { return }
+        switch state {
+        case .running, .paused:
+            break
+        case .idle, .breakRunning, .breakPaused:
+            return
+        }
         stopTimer()
         beginBreak(isLongBreak: isLongBreakDue())
         startTimer()
@@ -168,7 +165,8 @@ final class PomodoroTimerEngine: ObservableObject {
     }
 
     private func handleCompletion() {
-        if state.isOnBreak {
+        switch state {
+        case .breakRunning, .breakPaused:
             stopTimer()
             state = .idle
             remainingSeconds = workDuration
@@ -177,9 +175,11 @@ final class PomodoroTimerEngine: ObservableObject {
             }
             mode = .work
             updateCurrentMode()
-        } else {
+        case .running, .paused:
             completedWorkSessions += 1
             beginBreak(isLongBreak: isLongBreakDue())
+        case .idle:
+            break
         }
     }
 
@@ -198,11 +198,12 @@ final class PomodoroTimerEngine: ObservableObject {
     }
 
     private func updateCurrentMode() {
-        if state == .idle {
+        switch state {
+        case .idle:
             currentMode = .idle
-        } else if state.isOnBreak {
+        case .breakRunning, .breakPaused:
             currentMode = mode == .longBreak ? .longBreak : .break
-        } else {
+        case .running, .paused:
             currentMode = .work
         }
     }

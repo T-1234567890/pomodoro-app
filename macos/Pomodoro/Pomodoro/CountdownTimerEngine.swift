@@ -9,16 +9,7 @@ import Combine
 import Foundation
 
 final class CountdownTimerEngine: ObservableObject {
-    enum State: String {
-        case idle
-        case running
-        case paused
-
-        var isRunning: Bool { self == .running }
-        var isPaused: Bool { self == .paused }
-    }
-
-    @Published private(set) var state: State = .idle
+    @Published private(set) var state: TimerState = .idle
     @Published private(set) var remainingSeconds: Int
 
     private let duration: Int
@@ -37,15 +28,23 @@ final class CountdownTimerEngine: ObservableObject {
     }
 
     func pause() {
-        guard state == .running else { return }
-        state = .paused
-        stopTimer()
+        switch state {
+        case .running:
+            state = .paused
+            stopTimer()
+        case .idle, .paused, .breakRunning, .breakPaused:
+            return
+        }
     }
 
     func resume() {
-        guard state == .paused else { return }
-        state = .running
-        startTimer()
+        switch state {
+        case .paused:
+            state = .running
+            startTimer()
+        case .idle, .running, .breakRunning, .breakPaused:
+            return
+        }
     }
 
     func reset() {
