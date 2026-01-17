@@ -32,12 +32,12 @@ final class AppState: ObservableObject {
     private var cancellables: Set<AnyCancellable> = []
 
     init(
-        pomodoro: PomodoroTimerEngine = PomodoroTimerEngine(),
-        countdown: CountdownTimerEngine = CountdownTimerEngine(),
-        workDuration: Int = 25 * 60,
-        breakDuration: Int = 5 * 60,
-        longBreakDuration: Int = 15 * 60,
-        sessionsUntilLongBreak: Int = 4
+        pomodoro: PomodoroTimerEngine,
+        countdown: CountdownTimerEngine,
+        workDuration: Int,
+        breakDuration: Int,
+        longBreakDuration: Int,
+        sessionsUntilLongBreak: Int
     ) {
         self.pomodoro = pomodoro
         self.countdown = countdown
@@ -59,6 +59,17 @@ final class AppState: ObservableObject {
             .store(in: &cancellables)
 
         updatePomodoroConfiguration()
+    }
+
+    convenience init() {
+        self.init(
+            pomodoro: PomodoroTimerEngine(),
+            countdown: CountdownTimerEngine(),
+            workDuration: 25 * 60,
+            breakDuration: 5 * 60,
+            longBreakDuration: 15 * 60,
+            sessionsUntilLongBreak: 4
+        )
     }
 
     private func updatePomodoroConfiguration() {
