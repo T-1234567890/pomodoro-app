@@ -7,7 +7,7 @@
 
 import Foundation
 
-struct DurationConfig: Equatable {
+struct DurationConfig: Equatable, Hashable {
     private enum DefaultsKey {
         static let workDuration = "durationConfig.workDuration"
         static let shortBreakDuration = "durationConfig.shortBreakDuration"

@@ -13,7 +13,6 @@ final class AppState: ObservableObject {
     let countdown: CountdownTimerEngine
 
     @Published var durationConfig: DurationConfig {
-        didSet { updatePomodoroConfiguration() }
         didSet {
             updatePomodoroConfiguration()
             durationConfig.save(to: userDefaults)
@@ -32,7 +31,6 @@ final class AppState: ObservableObject {
     init(
         pomodoro: PomodoroTimerEngine,
         countdown: CountdownTimerEngine,
-        durationConfig: DurationConfig
         durationConfig: DurationConfig,
         userDefaults: UserDefaults
     ) {
@@ -83,7 +81,6 @@ final class AppState: ObservableObject {
         self.init(
             pomodoro: pomodoro,
             countdown: countdown,
-            durationConfig: .standard
             durationConfig: storedConfig,
             userDefaults: userDefaults
         )
