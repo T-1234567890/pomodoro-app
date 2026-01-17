@@ -13,24 +13,30 @@ final class AppState: ObservableObject {
     let countdown: CountdownTimerEngine
 
     @Published var durationConfig: DurationConfig {
-        didSet { updatePomodoroConfiguration() }
+        didSet {
+            updatePomodoroConfiguration()
+            durationConfig.save(to: userDefaults)
+        }
     }
 
     @Published private(set) var pomodoroMode: PomodoroTimerEngine.Mode
     @Published private(set) var pomodoroCurrentMode: PomodoroTimerEngine.CurrentMode
 
     private var cancellables: Set<AnyCancellable> = []
+    private let userDefaults: UserDefaults
 
     init(
         pomodoro: PomodoroTimerEngine,
         countdown: CountdownTimerEngine,
-        durationConfig: DurationConfig
+        durationConfig: DurationConfig,
+        userDefaults: UserDefaults = .standard
     ) {
         self.pomodoro = pomodoro
         self.countdown = countdown
         self.durationConfig = durationConfig
         self.pomodoroMode = pomodoro.mode
         self.pomodoroCurrentMode = pomodoro.currentMode
+        self.userDefaults = userDefaults
 
         pomodoro.objectWillChange
             .sink { [weak self] _ in
@@ -63,17 +69,23 @@ final class AppState: ObservableObject {
 
     convenience init(
         pomodoro: PomodoroTimerEngine = PomodoroTimerEngine(),
-        countdown: CountdownTimerEngine = CountdownTimerEngine()
+        countdown: CountdownTimerEngine = CountdownTimerEngine(),
+        userDefaults: UserDefaults = .standard
     ) {
+        let storedConfig = DurationConfig.load(from: userDefaults)
         self.init(
             pomodoro: pomodoro,
             countdown: countdown,
-            durationConfig: .standard
+            durationConfig: storedConfig,
+            userDefaults: userDefaults
         )
     }
 
     convenience init() {
-        self.init(pomodoro: PomodoroTimerEngine(), countdown: CountdownTimerEngine())
+        self.init(
+            pomodoro: PomodoroTimerEngine(),
+            countdown: CountdownTimerEngine()
+        )
     }
 
     private func updatePomodoroConfiguration() {
