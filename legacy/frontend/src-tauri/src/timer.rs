@@ -90,8 +90,10 @@ struct PomodoroState {
     awaiting_next_session: bool,
     auto_start_remaining: u32,
     cycle_work_sessions: u32,
+    completed_work_sessions: u32,
     total_work_sessions: u32,
     total_sessions_completed: u32,
+    long_break_interval: u32,
     settings: PomodoroSettings,
 }
 
@@ -124,8 +126,10 @@ impl TimerEngine {
                 awaiting_next_session: false,
                 auto_start_remaining: 0,
                 cycle_work_sessions: 0,
+                completed_work_sessions: 0,
                 total_work_sessions: 0,
                 total_sessions_completed: 0,
+                long_break_interval: settings.sessions_before_long_break,
                 settings,
             },
             countdown: CountdownState {
@@ -200,9 +204,13 @@ impl TimerEngine {
                         PomodoroMode::Work => {
                             pomodoro.total_work_sessions += 1;
                             pomodoro.cycle_work_sessions += 1;
+                            pomodoro.completed_work_sessions += 1;
+                            // Use the completed work session count to choose the break type.
                             let should_long_break = pomodoro.settings.auto_long_break
-                                && pomodoro.cycle_work_sessions
-                                    >= pomodoro.settings.sessions_before_long_break;
+                                && pomodoro.long_break_interval > 0
+                                && pomodoro.completed_work_sessions > 0
+                                && pomodoro.completed_work_sessions % pomodoro.long_break_interval
+                                    == 0;
                             pomodoro.mode = if should_long_break {
                                 PomodoroMode::LongBreak
                             } else {
@@ -262,6 +270,7 @@ impl TimerEngine {
     pub fn update_settings(&self, settings: PomodoroSettings) {
         let mut state = self.state.lock().expect("timer state lock");
         state.pomodoro.settings = settings.clone();
+        state.pomodoro.long_break_interval = settings.sessions_before_long_break;
         let total_seconds = self.duration_for_mode(state.pomodoro.mode, &settings) * 60;
         state.pomodoro.total_seconds = total_seconds;
         if !state.pomodoro.running && !state.pomodoro.awaiting_next_session {
@@ -290,7 +299,16 @@ impl TimerEngine {
     pub fn start_break(&self) {
         let mut state = self.state.lock().expect("timer state lock");
         let pomodoro = &mut state.pomodoro;
-        pomodoro.mode = PomodoroMode::ShortBreak;
+        // Pick break type based on completed work sessions and interval.
+        let should_long_break = pomodoro.settings.auto_long_break
+            && pomodoro.long_break_interval > 0
+            && pomodoro.completed_work_sessions > 0
+            && pomodoro.completed_work_sessions % pomodoro.long_break_interval == 0;
+        pomodoro.mode = if should_long_break {
+            PomodoroMode::LongBreak
+        } else {
+            PomodoroMode::ShortBreak
+        };
         pomodoro.total_seconds =
             self.duration_for_mode(pomodoro.mode, &pomodoro.settings) * 60;
         pomodoro.remaining_seconds = pomodoro.total_seconds;
@@ -327,6 +345,8 @@ impl TimerEngine {
         pomodoro.running = false;
         pomodoro.awaiting_next_session = false;
         pomodoro.auto_start_remaining = 0;
+        pomodoro.cycle_work_sessions = 0;
+        pomodoro.completed_work_sessions = 0;
         pomodoro.total_seconds =
             self.duration_for_mode(pomodoro.mode, &pomodoro.settings) * 60;
         pomodoro.remaining_seconds = pomodoro.total_seconds;
