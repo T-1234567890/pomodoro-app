@@ -12,12 +12,26 @@ final class CountdownTimerEngine: ObservableObject {
     @Published private(set) var state: TimerState = .idle
     @Published private(set) var remainingSeconds: Int
 
-    private let duration: Int
+    private var durationConfig: DurationConfig
+    private let durationProvider: (DurationConfig) -> Int
     private var timer: Timer?
 
-    init(duration: Int = 10 * 60) {
-        self.duration = duration
-        self.remainingSeconds = duration
+    init(
+        durationConfig: DurationConfig = .standard,
+        durationProvider: @escaping (DurationConfig) -> Int = { $0.shortBreakDuration * 2 }
+    ) {
+        self.durationConfig = durationConfig
+        self.durationProvider = durationProvider
+        let resolvedDuration = durationProvider(durationConfig)
+        self.remainingSeconds = resolvedDuration
+    }
+
+    func updateConfiguration(durationConfig: DurationConfig) {
+        self.durationConfig = durationConfig
+
+        if state == .idle {
+            remainingSeconds = duration
+        }
     }
 
     func start() {
@@ -82,5 +96,9 @@ final class CountdownTimerEngine: ObservableObject {
         stopTimer()
         state = .idle
         remainingSeconds = duration
+    }
+
+    private var duration: Int {
+        durationProvider(durationConfig)
     }
 }

@@ -80,6 +80,7 @@ final class AppState: ObservableObject {
         pomodoro.updateConfiguration(
             durationConfig: durationConfig
         )
+        countdown.updateConfiguration(durationConfig: durationConfig)
     }
 
     func startPomodoro() {
