@@ -68,9 +68,9 @@ final class AppState: ObservableObject {
     }
 
     convenience init(
-        pomodoro: PomodoroTimerEngine = PomodoroTimerEngine(),
-        countdown: CountdownTimerEngine = CountdownTimerEngine(),
-        userDefaults: UserDefaults = .standard
+        pomodoro: PomodoroTimerEngine,
+        countdown: CountdownTimerEngine,
+        userDefaults: UserDefaults
     ) {
         let storedConfig = DurationConfig.load(from: userDefaults)
         self.init(
@@ -78,6 +78,17 @@ final class AppState: ObservableObject {
             countdown: countdown,
             durationConfig: storedConfig,
             userDefaults: userDefaults
+        )
+    }
+
+    convenience init(
+        pomodoro: PomodoroTimerEngine,
+        countdown: CountdownTimerEngine
+    ) {
+        self.init(
+            pomodoro: pomodoro,
+            countdown: countdown,
+            userDefaults: .standard
         )
     }
 
