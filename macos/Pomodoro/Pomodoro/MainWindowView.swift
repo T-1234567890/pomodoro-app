@@ -76,7 +76,7 @@ struct MainWindowView: View {
         return String(format: "%02d:%02d", minutes, remaining)
     }
 
-    private func labelForPomodoroState(_ state: PomodoroTimerEngine.State) -> String {
+    private func labelForPomodoroState(_ state: TimerState) -> String {
         switch state {
         case .idle:
             return "Idle"

@@ -114,16 +114,19 @@ final class MenuBarController: NSObject, NSMenuDelegate {
     }
 
     private func currentMenuMode() -> MenuMode {
-        if appState.pomodoro.state == .running || appState.pomodoro.state == .paused {
+        switch appState.pomodoro.state {
+        case .running, .paused:
             return .pomodoro
-        }
-        if appState.pomodoro.state == .breakRunning || appState.pomodoro.state == .breakPaused {
+        case .breakRunning, .breakPaused:
             return .breakTime
+        case .idle:
+            switch appState.countdown.state {
+            case .running, .paused:
+                return .countdown
+            case .idle, .breakRunning, .breakPaused:
+                return .idle
+            }
         }
-        if appState.countdown.state != .idle {
-            return .countdown
-        }
-        return .idle
     }
 
     private func rebuildMenu() {
@@ -190,7 +193,12 @@ final class MenuBarController: NSObject, NSMenuDelegate {
     }
 
     private func pomodoroPauseTitle() -> String {
-        appState.pomodoro.state.isPaused ? "▶ Resume" : "⏸ Pause"
+        switch appState.pomodoro.state {
+        case .paused, .breakPaused:
+            return "▶ Resume"
+        case .running, .breakRunning, .idle:
+            return "⏸ Pause"
+        }
     }
 
     private func breakMenuTitle() -> String {
@@ -206,7 +214,12 @@ final class MenuBarController: NSObject, NSMenuDelegate {
     }
 
     private func countdownPauseTitle() -> String {
-        appState.countdown.state.isPaused ? "▶ Resume" : "⏸ Pause"
+        switch appState.countdown.state {
+        case .paused:
+            return "▶ Resume"
+        case .running, .idle, .breakRunning, .breakPaused:
+            return "⏸ Pause"
+        }
     }
 
     @objc private func startPomodoro() {

@@ -108,10 +108,13 @@ final class AppState: ObservableObject {
     }
 
     func togglePomodoroPause() {
-        if pomodoro.state.isRunning {
+        switch pomodoro.state {
+        case .running, .breakRunning:
             pomodoro.pause()
-        } else if pomodoro.state.isPaused {
+        case .paused, .breakPaused:
             pomodoro.resume()
+        case .idle:
+            break
         }
     }
 
@@ -132,10 +135,13 @@ final class AppState: ObservableObject {
     }
 
     func toggleCountdownPause() {
-        if countdown.state.isRunning {
+        switch countdown.state {
+        case .running:
             countdown.pause()
-        } else if countdown.state.isPaused {
+        case .paused:
             countdown.resume()
+        case .idle, .breakRunning, .breakPaused:
+            break
         }
     }
 
