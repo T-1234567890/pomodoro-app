@@ -25,11 +25,12 @@ final class AppState: ObservableObject {
     private var cancellables: Set<AnyCancellable> = []
     private let userDefaults: UserDefaults
 
+    // Designated initializer - no default arguments to avoid linker symbol issues
     init(
         pomodoro: PomodoroTimerEngine,
         countdown: CountdownTimerEngine,
         durationConfig: DurationConfig,
-        userDefaults: UserDefaults = .standard
+        userDefaults: UserDefaults
     ) {
         self.pomodoro = pomodoro
         self.countdown = countdown
@@ -67,6 +68,7 @@ final class AppState: ObservableObject {
         updatePomodoroConfiguration()
     }
 
+    // Convenience initializer with explicit UserDefaults forwarding
     convenience init(
         pomodoro: PomodoroTimerEngine,
         countdown: CountdownTimerEngine,
@@ -81,6 +83,7 @@ final class AppState: ObservableObject {
         )
     }
 
+    // Convenience initializer with explicit standard UserDefaults
     convenience init(
         pomodoro: PomodoroTimerEngine,
         countdown: CountdownTimerEngine
@@ -92,6 +95,7 @@ final class AppState: ObservableObject {
         )
     }
 
+    // Parameterless convenience initializer with explicit defaults
     convenience init() {
         self.init(
             pomodoro: PomodoroTimerEngine(),
