@@ -7,6 +7,7 @@ struct MainWindowView: View {
                 .font(.largeTitle)
             Text("Ready to focus.")
                 .foregroundStyle(.secondary)
+            DebugStateView()
         }
         .frame(minWidth: 480, minHeight: 320)
         .padding(32)
@@ -15,4 +16,5 @@ struct MainWindowView: View {
 
 #Preview {
     MainWindowView()
+        .environmentObject(AppState())
 }
