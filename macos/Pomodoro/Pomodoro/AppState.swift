@@ -19,6 +19,8 @@ final class AppState: ObservableObject {
         }
     }
 
+    @Published var presetSelection: PresetSelection
+
     @Published private(set) var pomodoroMode: PomodoroTimerEngine.Mode
     @Published private(set) var pomodoroCurrentMode: PomodoroTimerEngine.CurrentMode
 
@@ -35,6 +37,7 @@ final class AppState: ObservableObject {
         self.pomodoro = pomodoro
         self.countdown = countdown
         self.durationConfig = durationConfig
+        self.presetSelection = PresetSelection.selection(for: durationConfig)
         self.pomodoroMode = pomodoro.mode
         self.pomodoroCurrentMode = pomodoro.currentMode
         self.userDefaults = userDefaults
@@ -108,6 +111,25 @@ final class AppState: ObservableObject {
             durationConfig: durationConfig
         )
         countdown.updateConfiguration(durationConfig: durationConfig)
+    }
+
+    func applyPresetSelection(_ selection: PresetSelection) {
+        switch selection {
+        case .preset(let preset):
+            selectPreset(preset)
+        case .custom:
+            presetSelection = .custom
+        }
+    }
+
+    func selectPreset(_ preset: Preset) {
+        presetSelection = .preset(preset)
+        durationConfig = preset.durationConfig
+    }
+
+    func applyCustomDurationConfig(_ config: DurationConfig) {
+        presetSelection = .custom
+        durationConfig = config
     }
 
     func startPomodoro() {

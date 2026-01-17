@@ -21,6 +21,20 @@ struct MainWindowView: View {
                     .font(.subheadline)
             }
 
+            VStack(alignment: .leading, spacing: 8) {
+                Text("Preset")
+                    .font(.headline)
+                Picker("Preset", selection: presetSelectionBinding) {
+                    ForEach(Preset.builtIn) { preset in
+                        Text(preset.name)
+                            .tag(PresetSelection.preset(preset))
+                    }
+                    Text("Custom")
+                        .tag(PresetSelection.custom)
+                }
+                .pickerStyle(.segmented)
+            }
+
             HStack(spacing: 12) {
                 Button("Start") {
                     appState.pomodoro.start()
@@ -232,11 +246,18 @@ struct MainWindowView: View {
         let updatedShortBreakMinutes = max(1, shortBreakMinutes ?? currentConfig.shortBreakDuration / 60)
         let updatedLongBreakMinutes = max(1, longBreakMinutes ?? currentConfig.longBreakDuration / 60)
 
-        appState.durationConfig = DurationConfig(
+        appState.applyCustomDurationConfig(DurationConfig(
             workDuration: updatedWorkMinutes * 60,
             shortBreakDuration: updatedShortBreakMinutes * 60,
             longBreakDuration: updatedLongBreakMinutes * 60,
             longBreakInterval: currentConfig.longBreakInterval
+        ))
+    }
+
+    private var presetSelectionBinding: Binding<PresetSelection> {
+        Binding(
+            get: { appState.presetSelection },
+            set: { appState.applyPresetSelection($0) }
         )
     }
 }
