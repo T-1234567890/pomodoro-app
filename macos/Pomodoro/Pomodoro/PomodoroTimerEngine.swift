@@ -28,39 +28,22 @@ final class PomodoroTimerEngine: ObservableObject {
     @Published private(set) var currentMode: CurrentMode = .idle
     @Published private(set) var completedWorkSessions: Int = 0
 
-    private var workDuration: Int
-    private var breakDuration: Int
-    private var longBreakDuration: Int
-    private var sessionsUntilLongBreak: Int
+    private var durationConfig: DurationConfig
     private var timer: Timer?
 
     init(
-        workDuration: Int = 25 * 60,
-        breakDuration: Int = 5 * 60,
-        longBreakDuration: Int = 15 * 60,
-        sessionsUntilLongBreak: Int = 4
+        durationConfig: DurationConfig = .standard
     ) {
-        self.workDuration = workDuration
-        self.breakDuration = breakDuration
-        self.longBreakDuration = longBreakDuration
-        self.sessionsUntilLongBreak = max(1, sessionsUntilLongBreak)
-        self.remainingSeconds = workDuration
+        self.durationConfig = durationConfig
+        self.remainingSeconds = durationConfig.workDuration
         updateCurrentMode()
     }
 
-    func updateConfiguration(
-        workDuration: Int,
-        breakDuration: Int,
-        longBreakDuration: Int,
-        sessionsUntilLongBreak: Int
-    ) {
-        self.workDuration = workDuration
-        self.breakDuration = breakDuration
-        self.longBreakDuration = longBreakDuration
-        self.sessionsUntilLongBreak = max(1, sessionsUntilLongBreak)
+    func updateConfiguration(durationConfig: DurationConfig) {
+        self.durationConfig = durationConfig
 
         if state == .idle {
-            remainingSeconds = workDuration
+            remainingSeconds = durationConfig.workDuration
             mode = .work
             updateCurrentMode()
         }
@@ -68,7 +51,7 @@ final class PomodoroTimerEngine: ObservableObject {
 
     func start() {
         guard state == .idle else { return }
-        remainingSeconds = workDuration
+        remainingSeconds = durationConfig.workDuration
         state = .running
         mode = .work
         updateCurrentMode()
@@ -104,7 +87,7 @@ final class PomodoroTimerEngine: ObservableObject {
     func reset() {
         stopTimer()
         state = .idle
-        remainingSeconds = workDuration
+        remainingSeconds = durationConfig.workDuration
         mode = .work
         completedWorkSessions = 0
         updateCurrentMode()
@@ -119,7 +102,7 @@ final class PomodoroTimerEngine: ObservableObject {
         }
         stopTimer()
         state = .idle
-        remainingSeconds = workDuration
+        remainingSeconds = durationConfig.workDuration
         if mode == .longBreak {
             completedWorkSessions = 0
         }
@@ -169,7 +152,7 @@ final class PomodoroTimerEngine: ObservableObject {
         case .breakRunning, .breakPaused:
             stopTimer()
             state = .idle
-            remainingSeconds = workDuration
+            remainingSeconds = durationConfig.workDuration
             if mode == .longBreak {
                 completedWorkSessions = 0
             }
@@ -186,7 +169,7 @@ final class PomodoroTimerEngine: ObservableObject {
     private func beginBreak(isLongBreak: Bool) {
         state = .breakRunning
         mode = isLongBreak ? .longBreak : .breakTime
-        remainingSeconds = isLongBreak ? longBreakDuration : breakDuration
+        remainingSeconds = isLongBreak ? durationConfig.longBreakDuration : durationConfig.shortBreakDuration
         if isLongBreak {
             completedWorkSessions = 0
         }
@@ -194,7 +177,7 @@ final class PomodoroTimerEngine: ObservableObject {
     }
 
     private func isLongBreakDue() -> Bool {
-        completedWorkSessions >= sessionsUntilLongBreak
+        completedWorkSessions >= durationConfig.longBreakInterval
     }
 
     private func updateCurrentMode() {

@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		7C360D572F191F17007313D3 /* AppState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C360D502F191F17007313D3 /* AppState.swift */; };
+		7C360D6D2F191F17007313D3 /* DurationConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C360D6E2F191F17007313D3 /* DurationConfig.swift */; };
 		7C360D582F191F17007313D3 /* CountdownTimerEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C360D512F191F17007313D3 /* CountdownTimerEngine.swift */; };
 		7C360D592F191F17007313D3 /* PomodoroTimerEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C360D522F191F17007313D3 /* PomodoroTimerEngine.swift */; };
 		7C360D5A2F191F17007313D3 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C360D532F191F17007313D3 /* ContentView.swift */; };
@@ -21,6 +22,7 @@
 /* Begin PBXFileReference section */
 		7C360D382F191F17007313D3 /* Pomodoro.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Pomodoro.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		7C360D502F191F17007313D3 /* AppState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppState.swift; sourceTree = "<group>"; };
+		7C360D6E2F191F17007313D3 /* DurationConfig.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DurationConfig.swift; sourceTree = "<group>"; };
 		7C360D512F191F17007313D3 /* CountdownTimerEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CountdownTimerEngine.swift; sourceTree = "<group>"; };
 		7C360D522F191F17007313D3 /* PomodoroTimerEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PomodoroTimerEngine.swift; sourceTree = "<group>"; };
 		7C360D532F191F17007313D3 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
@@ -84,6 +86,7 @@
 			isa = PBXGroup;
 			children = (
 				7C360D502F191F17007313D3 /* AppState.swift */,
+				7C360D6E2F191F17007313D3 /* DurationConfig.swift */,
 			);
 			name = State;
 			sourceTree = "<group>";
@@ -192,6 +195,7 @@
 				7C360D6B2F191F17007313D3 /* AppDelegate.swift in Sources */,
 				7C360D6A2F191F17007313D3 /* MenuBarController.swift in Sources */,
 				7C360D572F191F17007313D3 /* AppState.swift in Sources */,
+				7C360D6D2F191F17007313D3 /* DurationConfig.swift in Sources */,
 				7C360D582F191F17007313D3 /* CountdownTimerEngine.swift in Sources */,
 				7C360D592F191F17007313D3 /* PomodoroTimerEngine.swift in Sources */,
 			);
