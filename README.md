@@ -13,7 +13,7 @@ The 0.5.x branch introduces a new glass-panel layout system with separate tiles 
 ## Version status
 
 Current Version: <br>
-🧪 0.7.0 Beta → ✅ 1.0.0
+✅ 1.0.0
 
 Update history: see history_versions/ for archived notes.
 
