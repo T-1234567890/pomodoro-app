@@ -25,18 +25,22 @@ struct MainWindowView: View {
                 Button("Start") {
                     appState.pomodoro.start()
                 }
+                .disabled(!pomodoroActions(for: appState.pomodoro.state).canStart)
                 Button("Pause") {
                     appState.pomodoro.pause()
                 }
+                .disabled(!pomodoroActions(for: appState.pomodoro.state).canPause)
                 Button("Resume") {
                     appState.pomodoro.resume()
                 }
+                .disabled(!pomodoroActions(for: appState.pomodoro.state).canResume)
                 Button("Reset") {
                     appState.pomodoro.reset()
                 }
                 Button("Skip Break") {
                     appState.pomodoro.skipBreak()
                 }
+                .disabled(!pomodoroActions(for: appState.pomodoro.state).canSkipBreak)
             }
 
             Divider()
@@ -54,12 +58,15 @@ struct MainWindowView: View {
                 Button("Start") {
                     appState.countdown.start()
                 }
+                .disabled(!countdownActions(for: appState.countdown.state).canStart)
                 Button("Pause") {
                     appState.countdown.pause()
                 }
+                .disabled(!countdownActions(for: appState.countdown.state).canPause)
                 Button("Resume") {
                     appState.countdown.resume()
                 }
+                .disabled(!countdownActions(for: appState.countdown.state).canResume)
                 Button("Reset") {
                     appState.countdown.reset()
                 }
@@ -99,6 +106,72 @@ struct MainWindowView: View {
             return "Break"
         case .longBreak:
             return "Long Break"
+        }
+    }
+
+    private struct PomodoroActionAvailability {
+        let canStart: Bool
+        let canPause: Bool
+        let canResume: Bool
+        let canSkipBreak: Bool
+    }
+
+    private struct CountdownActionAvailability {
+        let canStart: Bool
+        let canPause: Bool
+        let canResume: Bool
+    }
+
+    private func pomodoroActions(for state: TimerState) -> PomodoroActionAvailability {
+        switch state {
+        case .idle:
+            return PomodoroActionAvailability(
+                canStart: true,
+                canPause: false,
+                canResume: false,
+                canSkipBreak: false
+            )
+        case .running:
+            return PomodoroActionAvailability(
+                canStart: false,
+                canPause: true,
+                canResume: false,
+                canSkipBreak: false
+            )
+        case .paused:
+            return PomodoroActionAvailability(
+                canStart: false,
+                canPause: false,
+                canResume: true,
+                canSkipBreak: false
+            )
+        case .breakRunning:
+            return PomodoroActionAvailability(
+                canStart: false,
+                canPause: true,
+                canResume: false,
+                canSkipBreak: true
+            )
+        case .breakPaused:
+            return PomodoroActionAvailability(
+                canStart: false,
+                canPause: false,
+                canResume: true,
+                canSkipBreak: true
+            )
+        }
+    }
+
+    private func countdownActions(for state: TimerState) -> CountdownActionAvailability {
+        switch state {
+        case .idle:
+            return CountdownActionAvailability(canStart: true, canPause: false, canResume: false)
+        case .running:
+            return CountdownActionAvailability(canStart: false, canPause: true, canResume: false)
+        case .paused:
+            return CountdownActionAvailability(canStart: false, canPause: false, canResume: true)
+        case .breakRunning, .breakPaused:
+            return CountdownActionAvailability(canStart: false, canPause: false, canResume: false)
         }
     }
 }
