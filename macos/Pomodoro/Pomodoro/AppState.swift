@@ -61,15 +61,22 @@ final class AppState: ObservableObject {
         updatePomodoroConfiguration()
     }
 
-    convenience init() {
+    convenience init(
+        pomodoro: PomodoroTimerEngine = PomodoroTimerEngine(),
+        countdown: CountdownTimerEngine = CountdownTimerEngine()
+    ) {
         self.init(
-            pomodoro: PomodoroTimerEngine(),
-            countdown: CountdownTimerEngine(),
+            pomodoro: pomodoro,
+            countdown: countdown,
             workDuration: 25 * 60,
             breakDuration: 5 * 60,
             longBreakDuration: 15 * 60,
             sessionsUntilLongBreak: 4
         )
+    }
+
+    convenience init() {
+        self.init(pomodoro: PomodoroTimerEngine(), countdown: CountdownTimerEngine())
     }
 
     private func updatePomodoroConfiguration() {
