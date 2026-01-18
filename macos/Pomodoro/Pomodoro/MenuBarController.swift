@@ -341,21 +341,22 @@ final class MenuBarController: NSObject, NSMenuDelegate {
     private func musicMenuItem() -> NSMenuItem {
         let musicMenu = NSMenu()
         musicMenu.addItem(actionItem(title: musicPlayPauseTitle(), action: #selector(toggleMusicPlayback)))
-        musicMenu.addItem(actionItem(title: "⏮ Previous", action: #selector(previousTrack)))
-        musicMenu.addItem(actionItem(title: "⏭ Next", action: #selector(nextTrack)))
         musicMenu.addItem(.separator())
 
-        let focusSoundMenu = NSMenu()
+        let ambientSoundMenu = NSMenu()
         for sound in FocusSoundType.allCases {
             let item = NSMenuItem(title: sound.displayName, action: #selector(selectFocusSound(_:)), keyEquivalent: "")
             item.target = self
             item.state = sound == musicController.currentFocusSound ? .on : .off
             item.representedObject = sound
-            focusSoundMenu.addItem(item)
+            ambientSoundMenu.addItem(item)
         }
-        let focusSoundItem = NSMenuItem(title: "Focus Sound", action: nil, keyEquivalent: "")
-        focusSoundItem.submenu = focusSoundMenu
-        musicMenu.addItem(focusSoundItem)
+        let ambientSoundItem = NSMenuItem(title: "Ambient Sound", action: nil, keyEquivalent: "")
+        ambientSoundItem.submenu = ambientSoundMenu
+        musicMenu.addItem(ambientSoundItem)
+        musicMenu.addItem(.separator())
+        musicMenu.addItem(actionItem(title: "⏮ Previous", action: #selector(previousTrack)))
+        musicMenu.addItem(actionItem(title: "⏭ Next", action: #selector(nextTrack)))
         musicMenu.addItem(.separator())
         musicMenu.addItem(actionItem(title: "Open Music Panel", action: #selector(openMusicPanelAction)))
 

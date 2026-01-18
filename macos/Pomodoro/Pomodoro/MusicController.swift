@@ -176,101 +176,18 @@ final class MusicController: ObservableObject {
     }
 
     private func makeFocusPlayer(for type: FocusSoundType) -> AVAudioPlayer? {
-        if let resourceName = type.resourceName,
-           let url = Bundle.main.url(forResource: resourceName, withExtension: "wav") {
-            do {
-                let player = try AVAudioPlayer(contentsOf: url)
-                player.prepareToPlay()
-                return player
-            } catch {
-                return nil
-            }
-        }
-
-        guard let data = makeSynthesizedWavData(for: type) else {
+        guard let resourceName = type.resourceName,
+              let url = Bundle.main.url(forResource: resourceName, withExtension: "wav") else {
             return nil
         }
 
         do {
-            let player = try AVAudioPlayer(data: data)
+            let player = try AVAudioPlayer(contentsOf: url)
             player.prepareToPlay()
             return player
         } catch {
             return nil
         }
-    }
-
-    private func makeSynthesizedWavData(for type: FocusSoundType) -> Data? {
-        guard type != .off else { return nil }
-
-        let sampleRate = 44_100
-        let durationSeconds = 5
-        let frameCount = sampleRate * durationSeconds
-        let channelCount = 1
-        let bitsPerSample = 16
-        let bytesPerSample = bitsPerSample / 8
-        let blockAlign = channelCount * bytesPerSample
-        let byteRate = sampleRate * blockAlign
-        let dataByteCount = frameCount * blockAlign
-
-        var samples = [Int16]()
-        samples.reserveCapacity(frameCount)
-
-        var brownAccumulator: Double = 0
-        var rainDropEnvelope: Double = 0
-        var windModulationPhase: Double = 0
-
-        for _ in 0..<frameCount {
-            let white = Double.random(in: -1...1)
-            var sample: Double
-
-            switch type {
-            case .white:
-                sample = white
-            case .brown:
-                brownAccumulator = (brownAccumulator + white * 0.02).clamped(to: -1...1)
-                sample = brownAccumulator * 1.2
-            case .rain:
-                rainDropEnvelope = max(rainDropEnvelope - 0.003, 0)
-                if Double.random(in: 0...1) > 0.995 {
-                    rainDropEnvelope = Double.random(in: 0.4...1.0)
-                }
-                let hiss = white * 0.3
-                let drops = rainDropEnvelope * Double.random(in: -1...1) * 0.7
-                sample = hiss + drops
-            case .wind:
-                windModulationPhase += 0.0008
-                let modulator = (sin(windModulationPhase * .pi * 2) + 1) * 0.5
-                sample = white * (0.2 + 0.8 * modulator)
-            case .off:
-                sample = 0
-            }
-
-            let clipped = max(-1.0, min(1.0, sample))
-            samples.append(Int16(clipped * Double(Int16.max)))
-        }
-
-        var data = Data()
-        data.reserveCapacity(44 + dataByteCount)
-        data.append(contentsOf: "RIFF".utf8)
-        data.append(contentsOf: UInt32(36 + dataByteCount).littleEndianBytes)
-        data.append(contentsOf: "WAVE".utf8)
-        data.append(contentsOf: "fmt ".utf8)
-        data.append(contentsOf: UInt32(16).littleEndianBytes)
-        data.append(contentsOf: UInt16(1).littleEndianBytes)
-        data.append(contentsOf: UInt16(channelCount).littleEndianBytes)
-        data.append(contentsOf: UInt32(sampleRate).littleEndianBytes)
-        data.append(contentsOf: UInt32(byteRate).littleEndianBytes)
-        data.append(contentsOf: UInt16(blockAlign).littleEndianBytes)
-        data.append(contentsOf: UInt16(bitsPerSample).littleEndianBytes)
-        data.append(contentsOf: "data".utf8)
-        data.append(contentsOf: UInt32(dataByteCount).littleEndianBytes)
-
-        for sample in samples {
-            data.append(contentsOf: sample.littleEndianBytes)
-        }
-
-        return data
     }
 
     private func pauseSystemIfNeeded() {
@@ -293,17 +210,5 @@ final class MusicController: ObservableObject {
         default:
             return .idle
         }
-    }
-}
-
-private extension Double {
-    func clamped(to range: ClosedRange<Double>) -> Double {
-        min(max(self, range.lowerBound), range.upperBound)
-    }
-}
-
-private extension FixedWidthInteger {
-    var littleEndianBytes: [UInt8] {
-        withUnsafeBytes(of: self.littleEndian, Array.init)
     }
 }

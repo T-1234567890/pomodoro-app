@@ -9,6 +9,7 @@ import SwiftUI
 
 struct MainWindowView: View {
     @EnvironmentObject private var appState: AppState
+    @EnvironmentObject private var musicController: MusicController
     @State private var workMinutesText = ""
     @State private var shortBreakMinutesText = ""
     @State private var longBreakMinutesText = ""
@@ -117,6 +118,19 @@ struct MainWindowView: View {
                 .pickerStyle(.segmented)
             }
 
+            VStack(alignment: .leading, spacing: 8) {
+                Text("Ambient Sound")
+                    .font(.system(.headline, design: .rounded))
+                    .foregroundStyle(.secondary)
+                Picker("Ambient Sound", selection: ambientSoundBinding) {
+                    ForEach(FocusSoundType.allCases) { sound in
+                        Text(sound.displayName)
+                            .tag(sound)
+                    }
+                }
+                .pickerStyle(.segmented)
+            }
+
             Divider()
 
             VStack(alignment: .leading, spacing: 8) {
@@ -169,6 +183,19 @@ struct MainWindowView: View {
             commitDuration(.shortBreak)
             commitDuration(.longBreak)
         }
+    }
+
+    private var ambientSoundBinding: Binding<FocusSoundType> {
+        Binding(
+            get: { musicController.currentFocusSound },
+            set: { newValue in
+                if newValue == .off {
+                    musicController.stopFocusSound()
+                } else {
+                    musicController.startFocusSound(newValue)
+                }
+            }
+        )
     }
 
     private enum DurationField: Hashable {

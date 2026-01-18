@@ -33,10 +33,10 @@ struct MusicPanelView: View {
             .font(.system(size: 18, weight: .semibold))
 
             VStack(alignment: .leading, spacing: 6) {
-                Text("Focus Sound")
+                Text("Ambient Sound")
                     .font(.system(.subheadline, design: .rounded))
                     .foregroundStyle(.secondary)
-                Picker("Focus Sound", selection: focusSoundBinding) {
+                Picker("Ambient Sound", selection: focusSoundBinding) {
                     ForEach(FocusSoundType.allCases) { sound in
                         Text(sound.displayName)
                             .tag(sound)
