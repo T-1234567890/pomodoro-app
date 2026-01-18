@@ -63,6 +63,13 @@ final class AppState: ObservableObject, DynamicProperty {
     }
 
     private func bindMediaUpdates() {
+        systemMedia.$isActive
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] isActive in
+                self?.handleSystemActivityChange(isActive: isActive)
+            }
+            .store(in: &cancellables)
+
         systemMedia.$isPlaying
             .receive(on: DispatchQueue.main)
             .sink { [weak self] isPlaying in
@@ -85,27 +92,33 @@ final class AppState: ObservableObject, DynamicProperty {
             .store(in: &cancellables)
     }
 
-    private func handleSystemPlaybackChange(isPlaying: Bool) {
-        if isPlaying {
+    private func handleSystemActivityChange(isActive: Bool) {
+        if isActive {
             if localMedia.isPlaying {
                 shouldResumeLocalAfterSystem = true
                 localMedia.pause()
-            } else {
-                shouldResumeLocalAfterSystem = false
             }
             setActiveMediaSource(.system)
-        } else if activeMediaSource == .system {
-            if localMedia.hasLoaded {
-                setActiveMediaSource(.local)
-                if shouldResumeLocalAfterSystem {
-                    localMedia.play()
-                }
-            } else {
-                activeMediaSource = .none
-            }
         } else {
+            if activeMediaSource == .system, shouldResumeLocalAfterSystem, localMedia.hasLoaded {
+                localMedia.play()
+            }
+            shouldResumeLocalAfterSystem = false
             updateActiveMediaSource()
         }
+    }
+
+    private func handleSystemPlaybackChange(isPlaying: Bool) {
+        guard systemMedia.isActive else {
+            updateActiveMediaSource()
+            return
+        }
+
+        if isPlaying, localMedia.isPlaying {
+            shouldResumeLocalAfterSystem = true
+            localMedia.pause()
+        }
+        setActiveMediaSource(.system)
     }
 
     private func handleLocalPlaybackChange(isPlaying: Bool) {
@@ -118,12 +131,12 @@ final class AppState: ObservableObject, DynamicProperty {
     }
 
     private func updateActiveMediaSource() {
-        if systemMedia.isPlaying {
+        if systemMedia.isActive {
             setActiveMediaSource(.system)
         } else if localMedia.hasLoaded {
             setActiveMediaSource(.local)
         } else {
-            activeMediaSource = .none
+            activeMediaSource = lastActiveMediaSource
         }
     }
 
@@ -138,6 +151,7 @@ final class AppState: ObservableObject, DynamicProperty {
         if let storedValue = UserDefaults.standard.string(forKey: lastActiveSourceKey),
            let restoredSource = ActiveMediaSource(rawValue: storedValue) {
             lastActiveMediaSource = restoredSource
+            activeMediaSource = restoredSource
         }
     }
 }

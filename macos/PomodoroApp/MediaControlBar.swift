@@ -17,7 +17,7 @@ struct MediaControlBar: View {
     private var trackTitle: String {
         switch appState.activeMediaSource {
         case .system:
-            return appState.systemMedia.trackTitle
+            return appState.systemMedia.title
         case .local:
             return appState.localMedia.currentTrackTitle
         case .none:
