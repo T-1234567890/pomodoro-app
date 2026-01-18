@@ -25,6 +25,7 @@
 		7C360D912F191F17007313D3 /* SystemMediaController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C360D972F191F17007313D3 /* SystemMediaController.swift */; };
 		7C360D922F191F17007313D3 /* MusicPanelView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C360D982F191F17007313D3 /* MusicPanelView.swift */; };
 		EC7658622FEE47D78BFEA957 /* DailyStats.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0D409152AD794BA998253C35 /* DailyStats.swift */; };
+		E7FB0168DAB22D17FF66223F /* AmbientNoiseEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = C67603580DB6C7C7A08CA894 /* AmbientNoiseEngine.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -47,6 +48,7 @@
 		7C360D972F191F17007313D3 /* SystemMediaController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SystemMediaController.swift; sourceTree = "<group>"; };
 		7C360D982F191F17007313D3 /* MusicPanelView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MusicPanelView.swift; sourceTree = "<group>"; };
 		0D409152AD794BA998253C35 /* DailyStats.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DailyStats.swift; sourceTree = "<group>"; };
+		C67603580DB6C7C7A08CA894 /* AmbientNoiseEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AmbientNoiseEngine.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -137,6 +139,7 @@
 			children = (
 				7C360D962F191F17007313D3 /* MusicController.swift */,
 				7C360D972F191F17007313D3 /* SystemMediaController.swift */,
+				C67603580DB6C7C7A08CA894 /* AmbientNoiseEngine.swift */,
 			);
 			name = Music;
 			sourceTree = "<group>";
@@ -230,6 +233,7 @@
 				7C360D6A2F191F17007313D3 /* MenuBarController.swift in Sources */,
 				7C360D902F191F17007313D3 /* MusicController.swift in Sources */,
 				7C360D912F191F17007313D3 /* SystemMediaController.swift in Sources */,
+				E7FB0168DAB22D17FF66223F /* AmbientNoiseEngine.swift in Sources */,
 				7C360D572F191F17007313D3 /* AppState.swift in Sources */,
 				EC7658622FEE47D78BFEA957 /* DailyStats.swift in Sources */,
 				7C360D6D2F191F17007313D3 /* DurationConfig.swift in Sources */,
