@@ -40,17 +40,27 @@ final class MenuBarController: NSObject, NSMenuDelegate {
     }
 
     private unowned let appState: AppState
+    private let musicController: MusicController
     private let statusItem: NSStatusItem
     private let menu: NSMenu
     private let openMainWindow: () -> Void
+    private let openMusicPanel: () -> Void
     private let quitHandler: () -> Void
     private var titleTimer: Timer?
     private var lastTitleUpdateSecond: Int?
     private var cancellables: Set<AnyCancellable> = []
 
-    init(appState: AppState, openMainWindow: @escaping () -> Void, quitApp: @escaping () -> Void) {
+    init(
+        appState: AppState,
+        musicController: MusicController,
+        openMainWindow: @escaping () -> Void,
+        openMusicPanel: @escaping () -> Void,
+        quitApp: @escaping () -> Void
+    ) {
         self.appState = appState
+        self.musicController = musicController
         self.openMainWindow = openMainWindow
+        self.openMusicPanel = openMusicPanel
         self.quitHandler = quitApp
         statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
         menu = NSMenu()
@@ -89,6 +99,27 @@ final class MenuBarController: NSObject, NSMenuDelegate {
             .sink { [weak self] _ in
                 self?.rebuildMenu()
                 self?.updateTitleIfNeeded()
+            }
+            .store(in: &cancellables)
+
+        musicController.$playbackState
+            .receive(on: RunLoop.main)
+            .sink { [weak self] _ in
+                self?.rebuildMenu()
+            }
+            .store(in: &cancellables)
+
+        musicController.$currentFocusSound
+            .receive(on: RunLoop.main)
+            .sink { [weak self] _ in
+                self?.rebuildMenu()
+            }
+            .store(in: &cancellables)
+
+        musicController.$activeSource
+            .receive(on: RunLoop.main)
+            .sink { [weak self] _ in
+                self?.rebuildMenu()
             }
             .store(in: &cancellables)
     }
@@ -234,6 +265,8 @@ final class MenuBarController: NSObject, NSMenuDelegate {
         countdownItem.submenu = countdownMenu
         menu.addItem(countdownItem)
         menu.addItem(.separator())
+        menu.addItem(musicMenuItem())
+        menu.addItem(.separator())
         menu.addItem(actionItem(title: "Open App", action: #selector(openApp)))
         menu.addItem(actionItem(title: "Quit", action: #selector(quitApp)))
 
@@ -302,6 +335,41 @@ final class MenuBarController: NSObject, NSMenuDelegate {
             return "▶ Resume"
         case .running, .idle, .breakRunning, .breakPaused:
             return "⏸ Pause"
+        }
+    }
+
+    private func musicMenuItem() -> NSMenuItem {
+        let musicMenu = NSMenu()
+        musicMenu.addItem(actionItem(title: musicPlayPauseTitle(), action: #selector(toggleMusicPlayback)))
+        musicMenu.addItem(actionItem(title: "⏮ Previous", action: #selector(previousTrack)))
+        musicMenu.addItem(actionItem(title: "⏭ Next", action: #selector(nextTrack)))
+        musicMenu.addItem(.separator())
+
+        let focusSoundMenu = NSMenu()
+        for sound in FocusSoundType.allCases {
+            let item = NSMenuItem(title: sound.displayName, action: #selector(selectFocusSound(_:)), keyEquivalent: "")
+            item.target = self
+            item.state = sound == musicController.currentFocusSound ? .on : .off
+            item.representedObject = sound
+            focusSoundMenu.addItem(item)
+        }
+        let focusSoundItem = NSMenuItem(title: "Focus Sound", action: nil, keyEquivalent: "")
+        focusSoundItem.submenu = focusSoundMenu
+        musicMenu.addItem(focusSoundItem)
+        musicMenu.addItem(.separator())
+        musicMenu.addItem(actionItem(title: "Open Music Panel", action: #selector(openMusicPanelAction)))
+
+        let musicItem = NSMenuItem(title: "Music", action: nil, keyEquivalent: "")
+        musicItem.submenu = musicMenu
+        return musicItem
+    }
+
+    private func musicPlayPauseTitle() -> String {
+        switch musicController.playbackState {
+        case .playing:
+            return "⏸ Pause"
+        case .paused, .idle:
+            return "▶ Play"
         }
     }
 
@@ -397,6 +465,35 @@ final class MenuBarController: NSObject, NSMenuDelegate {
 
     @objc private func openApp() {
         openMainWindow()
+    }
+
+    @objc private func toggleMusicPlayback() {
+        if musicController.playbackState == .playing {
+            musicController.pause()
+        } else {
+            musicController.play()
+        }
+    }
+
+    @objc private func previousTrack() {
+        musicController.previous()
+    }
+
+    @objc private func nextTrack() {
+        musicController.next()
+    }
+
+    @objc private func selectFocusSound(_ sender: NSMenuItem) {
+        guard let sound = sender.representedObject as? FocusSoundType else { return }
+        if sound == .off {
+            musicController.stopFocusSound()
+        } else {
+            musicController.startFocusSound(sound)
+        }
+    }
+
+    @objc private func openMusicPanelAction() {
+        openMusicPanel()
     }
 
     @objc private func quitApp() {

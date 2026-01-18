@@ -11,13 +11,16 @@ import SwiftUI
 struct PomodoroApp: App {
     @NSApplicationDelegateAdaptor(AppDelegate.self) private var appDelegate
     @StateObject private var appState = AppState()
+    @StateObject private var musicController = MusicController()
 
     var body: some Scene {
         WindowGroup {
             ContentView()
                 .environmentObject(appState)
+                .environmentObject(musicController)
                 .task(id: ObjectIdentifier(appState)) {
                     appDelegate.appState = appState
+                    appDelegate.musicController = musicController
                 }
         }
         .commands {
