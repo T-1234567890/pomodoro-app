@@ -61,6 +61,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         window.contentViewController = NSHostingController(
             rootView: ContentView()
                 .environmentObject(appState)
+                .environmentObject(appState.localMusicPlayer)
                 .environmentObject(musicController)
         )
         configureWindowPersistence(window)
@@ -70,7 +71,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     func openMusicPanel() {
-        guard let musicController else { return }
+        guard let appState else { return }
 
         if let window = musicWindow {
             focus(window: window)
@@ -86,7 +87,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         window.title = "Music"
         window.isReleasedWhenClosed = true
         window.contentViewController = NSHostingController(
-            rootView: MusicPanelView().environmentObject(musicController)
+            rootView: MusicPanelView().environmentObject(appState.localMusicPlayer)
         )
         configureWindowPersistence(window, autosaveName: musicWindowFrameAutosaveName)
         window.makeKeyAndOrderFront(nil)

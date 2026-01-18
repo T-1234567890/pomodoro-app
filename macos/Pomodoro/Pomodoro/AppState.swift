@@ -13,6 +13,7 @@ final class AppState: ObservableObject {
     let pomodoro: PomodoroTimerEngine
     let countdown: CountdownTimerEngine
     let ambientNoiseEngine: AmbientNoiseEngine
+    let localMusicPlayer: LocalMusicPlayer = LocalMusicPlayer()
 
     @Published var durationConfig: DurationConfig {
         didSet {

@@ -23,6 +23,7 @@ struct PomodoroApp: App {
         WindowGroup {
             ContentView()
                 .environmentObject(appState)
+                .environmentObject(appState.localMusicPlayer)
                 .environmentObject(musicController)
                 .task(id: ObjectIdentifier(appState)) {
                     appDelegate.appState = appState

@@ -8,65 +8,48 @@
 import SwiftUI
 
 struct MusicPanelView: View {
-    @EnvironmentObject private var musicController: MusicController
+    @EnvironmentObject private var localMusicPlayer: LocalMusicPlayer
 
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
-            HStack(spacing: 12) {
-                Button(action: { musicController.previous() }) {
-                    Image(systemName: "backward.fill")
-                }
-                .buttonStyle(.borderless)
-                .disabled(musicController.activeSource == .focusSound)
+            if localMusicPlayer.hasFiles {
+                HStack(spacing: 12) {
+                    Button(action: { localMusicPlayer.previous() }) {
+                        Image(systemName: "backward.fill")
+                    }
+                    .buttonStyle(.borderless)
 
-                Button(action: togglePlayback) {
-                    Image(systemName: musicController.playbackState == .playing ? "pause.fill" : "play.fill")
-                }
-                .buttonStyle(.borderless)
+                    Button(action: togglePlayback) {
+                        Image(systemName: localMusicPlayer.isPlaying ? "pause.fill" : "play.fill")
+                    }
+                    .buttonStyle(.borderless)
 
-                Button(action: { musicController.next() }) {
-                    Image(systemName: "forward.fill")
+                    Button(action: { localMusicPlayer.next() }) {
+                        Image(systemName: "forward.fill")
+                    }
+                    .buttonStyle(.borderless)
                 }
-                .buttonStyle(.borderless)
-                .disabled(musicController.activeSource == .focusSound)
-            }
-            .font(.system(size: 18, weight: .semibold))
+                .font(.system(size: 18, weight: .semibold))
 
-            VStack(alignment: .leading, spacing: 6) {
-                Text("Ambient Sound")
+                Text(localMusicPlayer.currentTrackName ?? "Unknown Track")
                     .font(.system(.subheadline, design: .rounded))
                     .foregroundStyle(.secondary)
-                Picker("Ambient Sound", selection: focusSoundBinding) {
-                    ForEach(FocusSoundType.allCases) { sound in
-                        Text(sound.displayName)
-                            .tag(sound)
-                    }
+            } else {
+                Button("Choose Music") {
+                    localMusicPlayer.loadFiles()
                 }
-                .pickerStyle(.segmented)
+                .buttonStyle(.borderedProminent)
             }
         }
         .padding(20)
         .frame(minWidth: 280)
     }
 
-    private var focusSoundBinding: Binding<FocusSoundType> {
-        Binding(
-            get: { musicController.currentFocusSound },
-            set: { newValue in
-                if newValue == .off {
-                    musicController.stopFocusSound()
-                } else {
-                    musicController.startFocusSound(newValue)
-                }
-            }
-        )
-    }
-
     private func togglePlayback() {
-        if musicController.playbackState == .playing {
-            musicController.pause()
+        if localMusicPlayer.isPlaying {
+            localMusicPlayer.pause()
         } else {
-            musicController.play()
+            localMusicPlayer.play()
         }
     }
 }
@@ -74,5 +57,5 @@ struct MusicPanelView: View {
 #Preview {
     let appState = AppState()
     MusicPanelView()
-        .environmentObject(MusicController(ambientNoiseEngine: appState.ambientNoiseEngine))
+        .environmentObject(appState.localMusicPlayer)
 }
