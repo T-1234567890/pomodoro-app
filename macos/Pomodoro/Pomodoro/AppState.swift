@@ -64,7 +64,7 @@ final class AppState: ObservableObject {
         self.presetSelection = PresetSelection.selection(for: durationConfig)
         self.pomodoroMode = pomodoro.mode
         self.pomodoroCurrentMode = pomodoro.currentMode
-        self.dailyStats = DailyStats()
+        self.dailyStats = Self.loadDailyStats(from: userDefaults)
         self.userDefaults = userDefaults
         self.notificationCenter = UNUserNotificationCenter.current()
         self.notificationPreference = NotificationPreference(
@@ -131,6 +131,7 @@ final class AppState: ObservableObject {
             .store(in: &cancellables)
 
         updatePomodoroConfiguration()
+        refreshDailyStatsForCurrentDay()
     }
 
     // Convenience initializer with explicit UserDefaults forwarding
@@ -243,6 +244,7 @@ final class AppState: ObservableObject {
     private enum DefaultsKey {
         static let notificationPreference = "notification.preference"
         static let reminderPreference = "notification.reminderPreference"
+        static let dailyStats = "dailyStats.current"
     }
 
     private func saveNotificationPreference() {
@@ -251,6 +253,25 @@ final class AppState: ObservableObject {
 
     private func saveReminderPreference() {
         userDefaults.set(reminderPreference.rawValue, forKey: DefaultsKey.reminderPreference)
+    }
+
+    private static func loadDailyStats(from userDefaults: UserDefaults) -> DailyStats {
+        guard let data = userDefaults.data(forKey: DefaultsKey.dailyStats) else {
+            return DailyStats()
+        }
+        let decoder = JSONDecoder()
+        decoder.dateDecodingStrategy = .iso8601
+        if let stats = try? decoder.decode(DailyStats.self, from: data) {
+            return stats
+        }
+        return DailyStats()
+    }
+
+    private func saveDailyStats(_ stats: DailyStats) {
+        let encoder = JSONEncoder()
+        encoder.dateEncodingStrategy = .iso8601
+        guard let data = try? encoder.encode(stats) else { return }
+        userDefaults.set(data, forKey: DefaultsKey.dailyStats)
     }
 
     private func requestNotificationAuthorizationIfNeeded() {
@@ -449,6 +470,7 @@ final class AppState: ObservableObject {
         var updatedStats = dailyStats
         update(&updatedStats)
         dailyStats = updatedStats
+        saveDailyStats(updatedStats)
     }
 
     private func breakDurationSeconds(for mode: PomodoroTimerEngine.CurrentMode) -> Int? {

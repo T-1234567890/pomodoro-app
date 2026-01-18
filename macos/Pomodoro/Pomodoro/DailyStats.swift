@@ -7,7 +7,7 @@
 
 import Foundation
 
-struct DailyStats: Equatable {
+struct DailyStats: Codable, Equatable {
     private(set) var dayStart: Date
     private(set) var totalFocusSeconds: Int
     private(set) var totalBreakSeconds: Int

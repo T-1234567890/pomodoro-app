@@ -143,6 +143,14 @@ struct MainWindowView: View {
                     appState.countdown.reset()
                 }
             }
+
+            Divider()
+
+            VStack(alignment: .leading, spacing: 8) {
+                Text("Today's Summary")
+                    .font(.headline)
+                summarySection
+            }
         }
         .padding()
         .frame(minWidth: 360)
@@ -202,11 +210,64 @@ struct MainWindowView: View {
         }
     }
 
+    private struct SummaryRow: View {
+        let title: String
+        let value: String
+
+        var body: some View {
+            HStack {
+                Text(title)
+                Spacer()
+                Text(value)
+                    .font(.system(.body, design: .rounded).monospacedDigit())
+            }
+        }
+    }
+
     private func formattedTime(_ seconds: Int) -> String {
         let clampedSeconds = max(0, seconds)
         let minutes = clampedSeconds / 60
         let remaining = clampedSeconds % 60
         return String(format: "%02d:%02d", minutes, remaining)
+    }
+
+    private func formattedDuration(_ seconds: Int) -> String {
+        let clampedSeconds = max(0, seconds)
+        let hours = clampedSeconds / 3600
+        let minutes = (clampedSeconds % 3600) / 60
+        if hours > 0 {
+            return "\(hours)h \(minutes)m"
+        }
+        return "\(minutes)m"
+    }
+
+    private enum SummaryState {
+        case empty
+        case stats(DailyStats)
+    }
+
+    private var summaryState: SummaryState {
+        let stats = appState.dailyStats
+        if stats.completedSessions == 0 && stats.totalFocusSeconds == 0 && stats.totalBreakSeconds == 0 {
+            return .empty
+        }
+        return .stats(stats)
+    }
+
+    private var summarySection: some View {
+        Group {
+            switch summaryState {
+            case .empty:
+                Text("No sessions logged yet today.")
+                    .foregroundStyle(.secondary)
+            case .stats(let stats):
+                VStack(alignment: .leading, spacing: 6) {
+                    SummaryRow(title: "Focus time", value: formattedDuration(stats.totalFocusSeconds))
+                    SummaryRow(title: "Break time", value: formattedDuration(stats.totalBreakSeconds))
+                    SummaryRow(title: "Sessions", value: "\(stats.completedSessions)")
+                }
+            }
+        }
     }
 
     private func labelForPomodoroState(_ state: TimerState) -> String {
