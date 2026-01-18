@@ -6,6 +6,7 @@ final class AppState: ObservableObject {
     @Published var workDuration: Int = 25 * 60
     @Published var breakDuration: Int = 5 * 60
     @Published var longBreakDuration: Int = 15 * 60
+    let mediaPlayer = LocalMediaPlayer()
 
     init() {}
 

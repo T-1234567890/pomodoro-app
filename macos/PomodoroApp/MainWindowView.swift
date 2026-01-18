@@ -1,18 +1,19 @@
 import SwiftUI
 
 struct MainWindowView: View {
-    @StateObject private var audioPlayer = LocalAudioPlayer()
+    @EnvironmentObject private var appState: AppState
 
     var body: some View {
-        VStack(spacing: 12) {
+        VStack(spacing: 16) {
             Text("Pomodoro")
                 .font(.largeTitle)
             Text("Ready to focus.")
                 .foregroundStyle(.secondary)
-            Button("▶ Play Test Sound") {
-                audioPlayer.playBundledAudio(named: "test_music", withExtension: "wav")
+            Button("Choose Music") {
+                appState.mediaPlayer.loadFiles()
             }
-            .buttonStyle(.borderedProminent)
+            .buttonStyle(.bordered)
+            MediaControlBar(player: appState.mediaPlayer)
             DebugStateView()
         }
         .frame(minWidth: 480, minHeight: 320)
