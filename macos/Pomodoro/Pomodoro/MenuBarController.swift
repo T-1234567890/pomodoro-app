@@ -22,6 +22,7 @@ final class MenuBarController: NSObject, NSMenuDelegate {
     private let openMainWindow: () -> Void
     private let quitHandler: () -> Void
     private var titleTimer: Timer?
+    private var lastTitleUpdateSecond: Int?
     private var cancellables: Set<AnyCancellable> = []
 
     init(appState: AppState, openMainWindow: @escaping () -> Void, quitApp: @escaping () -> Void) {
@@ -45,6 +46,7 @@ final class MenuBarController: NSObject, NSMenuDelegate {
         if let button = statusItem.button {
             button.attributedTitle = statusTitleAttributedString()
         }
+        updateStatusItemLength()
         menu.delegate = self
         statusItem.menu = menu
         rebuildMenu()
@@ -55,7 +57,7 @@ final class MenuBarController: NSObject, NSMenuDelegate {
             .receive(on: RunLoop.main)
             .sink { [weak self] _ in
                 self?.rebuildMenu()
-                self?.updateTitle()
+                self?.updateTitleIfNeeded()
             }
             .store(in: &cancellables)
 
@@ -63,19 +65,29 @@ final class MenuBarController: NSObject, NSMenuDelegate {
             .receive(on: RunLoop.main)
             .sink { [weak self] _ in
                 self?.rebuildMenu()
-                self?.updateTitle()
+                self?.updateTitleIfNeeded()
             }
             .store(in: &cancellables)
     }
 
     private func startTitleTimer() {
         titleTimer?.invalidate()
-        titleTimer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { [weak self] _ in
-            self?.updateTitle()
+        let nextSecond = ceil(Date().timeIntervalSince1970)
+        let fireDate = Date(timeIntervalSince1970: nextSecond)
+        let timer = Timer(fire: fireDate, interval: 1.0, repeats: true) { [weak self] _ in
+            self?.updateTitleIfNeeded()
         }
+        timer.tolerance = 0.05
+        RunLoop.main.add(timer, forMode: .common)
+        titleTimer = timer
     }
 
-    private func updateTitle() {
+    private func updateTitleIfNeeded() {
+        let currentSecond = Int(Date().timeIntervalSince1970)
+        if lastTitleUpdateSecond == currentSecond {
+            return
+        }
+        lastTitleUpdateSecond = currentSecond
         guard let button = statusItem.button else { return }
         button.attributedTitle = statusTitleAttributedString()
         button.toolTip = statusTooltip()
@@ -85,6 +97,25 @@ final class MenuBarController: NSObject, NSMenuDelegate {
         let title = statusTitle()
         let font = NSFont.monospacedDigitSystemFont(ofSize: NSFont.systemFontSize, weight: .regular)
         return NSAttributedString(string: title, attributes: [.font: font])
+    }
+
+    private func updateStatusItemLength() {
+        let font = NSFont.monospacedDigitSystemFont(ofSize: NSFont.systemFontSize, weight: .regular)
+        let sampleTitles = [
+            "🍅 00:00",
+            "☕ 00:00",
+            "🌙 00:00",
+            "⏱ 00:00",
+            "🍅 Ready"
+        ]
+        let maxWidth = sampleTitles
+            .map { title in
+                NSAttributedString(string: title, attributes: [.font: font]).size().width
+            }
+            .max() ?? 0
+        if maxWidth > 0 {
+            statusItem.length = ceil(maxWidth) + 6
+        }
     }
 
     private func statusTitle() -> String {
@@ -114,18 +145,23 @@ final class MenuBarController: NSObject, NSMenuDelegate {
     }
 
     private func currentMenuMode() -> MenuMode {
-        switch appState.pomodoro.state {
+        let pomodoroState = appState.pomodoro.state
+        let countdownState = appState.countdown.state
+
+        switch pomodoroState {
         case .running, .paused:
             return .pomodoro
         case .breakRunning, .breakPaused:
             return .breakTime
         case .idle:
-            switch appState.countdown.state {
-            case .running, .paused:
-                return .countdown
-            case .idle, .breakRunning, .breakPaused:
-                return .idle
-            }
+            break
+        }
+
+        switch countdownState {
+        case .running, .paused:
+            return .countdown
+        case .idle, .breakRunning, .breakPaused:
+            return .idle
         }
     }
 
@@ -263,7 +299,7 @@ final class MenuBarController: NSObject, NSMenuDelegate {
     }
 
     func menuWillOpen(_ menu: NSMenu) {
-        updateTitle()
+        updateTitleIfNeeded()
         rebuildMenu()
     }
 
