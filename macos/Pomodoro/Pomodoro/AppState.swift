@@ -24,6 +24,7 @@ final class AppState: ObservableObject {
 
     @Published private(set) var pomodoroMode: PomodoroTimerEngine.Mode
     @Published private(set) var pomodoroCurrentMode: PomodoroTimerEngine.CurrentMode
+    @Published private(set) var dailyStats: DailyStats
     @Published var notificationPreference: NotificationPreference {
         didSet {
             saveNotificationPreference()
@@ -47,6 +48,8 @@ final class AppState: ObservableObject {
     private var lastPomodoroState: TimerState?
     private var lastCountdownState: TimerState?
     private var lastBreakMode: PomodoroTimerEngine.CurrentMode?
+    private var currentFocusDurationSeconds: Int?
+    private var currentBreakDurationSeconds: Int?
 
     // Designated initializer - no default arguments to avoid linker symbol issues
     init(
@@ -61,6 +64,7 @@ final class AppState: ObservableObject {
         self.presetSelection = PresetSelection.selection(for: durationConfig)
         self.pomodoroMode = pomodoro.mode
         self.pomodoroCurrentMode = pomodoro.currentMode
+        self.dailyStats = DailyStats()
         self.userDefaults = userDefaults
         self.notificationCenter = UNUserNotificationCenter.current()
         self.notificationPreference = NotificationPreference(
@@ -280,26 +284,33 @@ final class AppState: ObservableObject {
             if previousState == .idle {
                 pomodoroDidReachZero = false
                 pomodoroReminderSent = false
+                currentFocusDurationSeconds = durationConfig.workDuration
+                refreshDailyStatsForCurrentDay()
             }
         case .breakRunning:
             if previousState == .running || previousState == .paused {
                 if pomodoroDidReachZero {
                     sendPomodoroCompletionNotification()
+                    logFocusSessionIfNeeded()
                 }
                 pomodoroDidReachZero = false
             }
 
             if previousState != .breakPaused {
                 pomodoroReminderSent = false
+                currentBreakDurationSeconds = breakDurationSeconds(for: pomodoro.currentMode)
             }
             lastBreakMode = pomodoro.currentMode
         case .idle:
             if previousState == .breakRunning || previousState == .breakPaused {
                 if pomodoroDidReachZero {
                     sendBreakCompletionNotification()
+                    logBreakSessionIfNeeded()
                 }
                 pomodoroDidReachZero = false
             }
+            currentBreakDurationSeconds = nil
+            currentFocusDurationSeconds = nil
         case .paused, .breakPaused:
             break
         }
@@ -411,6 +422,43 @@ final class AppState: ObservableObject {
             @unknown default:
                 break
             }
+        }
+    }
+
+    private func refreshDailyStatsForCurrentDay() {
+        updateDailyStats { stats in
+            stats.ensureCurrentDay()
+        }
+    }
+
+    private func logFocusSessionIfNeeded() {
+        guard let durationSeconds = currentFocusDurationSeconds else { return }
+        updateDailyStats { stats in
+            stats.logFocusSession(durationSeconds: durationSeconds)
+        }
+    }
+
+    private func logBreakSessionIfNeeded() {
+        guard let durationSeconds = currentBreakDurationSeconds else { return }
+        updateDailyStats { stats in
+            stats.logBreakSession(durationSeconds: durationSeconds)
+        }
+    }
+
+    private func updateDailyStats(_ update: (inout DailyStats) -> Void) {
+        var updatedStats = dailyStats
+        update(&updatedStats)
+        dailyStats = updatedStats
+    }
+
+    private func breakDurationSeconds(for mode: PomodoroTimerEngine.CurrentMode) -> Int? {
+        switch mode {
+        case .break:
+            return durationConfig.shortBreakDuration
+        case .longBreak:
+            return durationConfig.longBreakDuration
+        case .work, .idle:
+            return nil
         }
     }
 }
