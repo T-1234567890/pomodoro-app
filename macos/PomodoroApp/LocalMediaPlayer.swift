@@ -7,6 +7,7 @@ final class LocalMediaPlayer: NSObject, ObservableObject {
     @Published private(set) var isPlaying: Bool = false
     @Published private(set) var currentTrackTitle: String = "No Track Selected"
     @Published private(set) var currentArtwork: NSImage?
+    @Published private(set) var hasLoaded: Bool = false
 
     private let player = AVQueuePlayer()
     private var currentItems: [AVPlayerItem] = []
@@ -86,6 +87,7 @@ final class LocalMediaPlayer: NSObject, ObservableObject {
         currentIndex = 0
         rebuildQueue(startingAt: 0)
         updateNowPlaying(from: items[0])
+        hasLoaded = true
     }
 
     private func rebuildQueue(startingAt index: Int) {

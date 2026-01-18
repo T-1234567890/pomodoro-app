@@ -1,12 +1,56 @@
 import SwiftUI
 
 struct MediaControlBar: View {
-    @ObservedObject var player: LocalMediaPlayer
+    @EnvironmentObject private var appState: AppState
+
+    private var isPlaying: Bool {
+        switch appState.activeMediaSource {
+        case .system:
+            return appState.systemMedia.isPlaying
+        case .local:
+            return appState.localMedia.isPlaying
+        case .none:
+            return false
+        }
+    }
+
+    private var trackTitle: String {
+        switch appState.activeMediaSource {
+        case .system:
+            return appState.systemMedia.trackTitle
+        case .local:
+            return appState.localMedia.currentTrackTitle
+        case .none:
+            return appState.localMedia.currentTrackTitle
+        }
+    }
+
+    private var sourceLabel: String {
+        switch appState.activeMediaSource {
+        case .system:
+            return "System Audio"
+        case .local:
+            return "Local Audio"
+        case .none:
+            return "Local Audio"
+        }
+    }
+
+    private var artwork: NSImage? {
+        switch appState.activeMediaSource {
+        case .system:
+            return appState.systemMedia.currentArtwork
+        case .local:
+            return appState.localMedia.currentArtwork
+        case .none:
+            return appState.localMedia.currentArtwork
+        }
+    }
 
     var body: some View {
         HStack(spacing: 12) {
             Group {
-                if let artwork = player.currentArtwork {
+                if let artwork {
                     Image(nsImage: artwork)
                         .resizable()
                         .scaledToFill()
@@ -22,19 +66,29 @@ struct MediaControlBar: View {
             .frame(width: 44, height: 44)
             .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
 
-            Text(player.currentTrackTitle)
-                .font(.headline)
-                .lineLimit(1)
-                .truncationMode(.tail)
-                .frame(maxWidth: .infinity, alignment: .leading)
+            VStack(alignment: .leading, spacing: 2) {
+                Text(trackTitle)
+                    .font(.headline)
+                    .lineLimit(1)
+                    .truncationMode(.tail)
+                Text(sourceLabel)
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
 
             HStack(spacing: 12) {
-                Button(action: player.togglePlayPause) {
-                    Image(systemName: player.isPlaying ? "pause.fill" : "play.fill")
+                Button(action: appState.previousTrack) {
+                    Image(systemName: "backward.fill")
                 }
                 .buttonStyle(.plain)
 
-                Button(action: player.next) {
+                Button(action: appState.togglePlayPause) {
+                    Image(systemName: isPlaying ? "pause.fill" : "play.fill")
+                }
+                .buttonStyle(.plain)
+
+                Button(action: appState.nextTrack) {
                     Image(systemName: "forward.fill")
                 }
                 .buttonStyle(.plain)
@@ -55,6 +109,7 @@ struct MediaControlBar: View {
 }
 
 #Preview {
-    MediaControlBar(player: LocalMediaPlayer())
+    MediaControlBar()
+        .environmentObject(AppState())
         .padding()
 }

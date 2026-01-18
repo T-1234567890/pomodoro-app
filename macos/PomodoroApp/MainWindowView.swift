@@ -10,10 +10,10 @@ struct MainWindowView: View {
             Text("Ready to focus.")
                 .foregroundStyle(.secondary)
             Button("Choose Music") {
-                appState.mediaPlayer.loadFiles()
+                appState.localMedia.loadFiles()
             }
             .buttonStyle(.bordered)
-            MediaControlBar(player: appState.mediaPlayer)
+            MediaControlBar()
             DebugStateView()
         }
         .frame(minWidth: 480, minHeight: 320)
