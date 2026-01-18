@@ -18,16 +18,19 @@ struct MainWindowView: View {
         VStack(alignment: .leading, spacing: 16) {
             VStack(alignment: .leading, spacing: 8) {
                 Text(titleForPomodoroMode(appState.pomodoroMode))
-                    .font(.headline)
+                    .font(.system(.headline, design: .rounded))
+                    .foregroundStyle(.secondary)
                 Text(formattedTime(appState.pomodoro.remainingSeconds))
-                    .font(.title)
+                    .font(.system(size: 48, weight: .semibold, design: .rounded).monospacedDigit())
                 Text("State: \(labelForPomodoroState(appState.pomodoro.state))")
-                    .font(.subheadline)
+                    .font(.system(.subheadline, design: .rounded))
+                    .foregroundStyle(.secondary)
             }
 
             VStack(alignment: .leading, spacing: 8) {
                 Text("Preset")
-                    .font(.headline)
+                    .font(.system(.headline, design: .rounded))
+                    .foregroundStyle(.secondary)
                 Picker("Preset", selection: presetSelectionBinding) {
                     ForEach(Preset.builtIn) { preset in
                         Text(preset.name)
@@ -39,31 +42,29 @@ struct MainWindowView: View {
                 .pickerStyle(.segmented)
             }
 
-            HStack(spacing: 12) {
-                Button("Start") {
+            HStack(spacing: 10) {
+                let actions = pomodoroActions(for: appState.pomodoro.state)
+                ActionButton("Start", isEnabled: actions.canStart) {
                     appState.pomodoro.start()
                 }
-                .disabled(!pomodoroActions(for: appState.pomodoro.state).canStart)
-                Button("Pause") {
+                ActionButton("Pause", isEnabled: actions.canPause) {
                     appState.pomodoro.pause()
                 }
-                .disabled(!pomodoroActions(for: appState.pomodoro.state).canPause)
-                Button("Resume") {
+                ActionButton("Resume", isEnabled: actions.canResume) {
                     appState.pomodoro.resume()
                 }
-                .disabled(!pomodoroActions(for: appState.pomodoro.state).canResume)
-                Button("Reset") {
+                ActionButton("Reset") {
                     appState.pomodoro.reset()
                 }
-                Button("Skip Break") {
+                ActionButton("Skip Break", isEnabled: actions.canSkipBreak) {
                     appState.pomodoro.skipBreak()
                 }
-                .disabled(!pomodoroActions(for: appState.pomodoro.state).canSkipBreak)
             }
 
             VStack(alignment: .leading, spacing: 8) {
                 Text("Durations")
-                    .font(.headline)
+                    .font(.system(.headline, design: .rounded))
+                    .foregroundStyle(.secondary)
                 DurationInputRow(
                     title: "Work",
                     text: $workMinutesText,
@@ -97,7 +98,8 @@ struct MainWindowView: View {
 
             VStack(alignment: .leading, spacing: 8) {
                 Text("Notifications")
-                    .font(.headline)
+                    .font(.system(.headline, design: .rounded))
+                    .foregroundStyle(.secondary)
                 Picker("Notifications", selection: $appState.notificationPreference) {
                     ForEach(NotificationPreference.allCases) { preference in
                         Text(preference.title)
@@ -119,27 +121,27 @@ struct MainWindowView: View {
 
             VStack(alignment: .leading, spacing: 8) {
                 Text("Countdown")
-                    .font(.headline)
+                    .font(.system(.headline, design: .rounded))
+                    .foregroundStyle(.secondary)
                 Text(formattedTime(appState.countdown.remainingSeconds))
-                    .font(.title)
+                    .font(.system(size: 40, weight: .semibold, design: .rounded).monospacedDigit())
                 Text("State: \(appState.countdown.state.rawValue.capitalized)")
-                    .font(.subheadline)
+                    .font(.system(.subheadline, design: .rounded))
+                    .foregroundStyle(.secondary)
             }
 
-            HStack(spacing: 12) {
-                Button("Start") {
+            HStack(spacing: 10) {
+                let actions = countdownActions(for: appState.countdown.state)
+                ActionButton("Start", isEnabled: actions.canStart) {
                     appState.countdown.start()
                 }
-                .disabled(!countdownActions(for: appState.countdown.state).canStart)
-                Button("Pause") {
+                ActionButton("Pause", isEnabled: actions.canPause) {
                     appState.countdown.pause()
                 }
-                .disabled(!countdownActions(for: appState.countdown.state).canPause)
-                Button("Resume") {
+                ActionButton("Resume", isEnabled: actions.canResume) {
                     appState.countdown.resume()
                 }
-                .disabled(!countdownActions(for: appState.countdown.state).canResume)
-                Button("Reset") {
+                ActionButton("Reset") {
                     appState.countdown.reset()
                 }
             }
@@ -148,7 +150,8 @@ struct MainWindowView: View {
 
             VStack(alignment: .leading, spacing: 8) {
                 Text("Today's Summary")
-                    .font(.headline)
+                    .font(.system(.headline, design: .rounded))
+                    .foregroundStyle(.secondary)
                 summarySection
             }
         }
@@ -185,6 +188,7 @@ struct MainWindowView: View {
         var body: some View {
             HStack {
                 Text(title)
+                    .font(.system(.body, design: .rounded))
                 Spacer()
                 HStack(spacing: 6) {
                     TextField("", text: $text)
@@ -202,11 +206,40 @@ struct MainWindowView: View {
                         }
                     Text("min")
                         .foregroundStyle(.secondary)
+                        .font(.system(.callout, design: .rounded))
                 }
             }
             .accessibilityElement(children: .combine)
             .accessibilityLabel("\(title) minutes")
             .accessibilityHint("Enter a number and press return")
+        }
+    }
+
+    private struct ActionButton: View {
+        let title: String
+        let isEnabled: Bool
+        let action: () -> Void
+        @State private var isHovering = false
+
+        init(_ title: String, isEnabled: Bool = true, action: @escaping () -> Void) {
+            self.title = title
+            self.isEnabled = isEnabled
+            self.action = action
+        }
+
+        var body: some View {
+            Button(title, action: action)
+                .buttonStyle(.bordered)
+                .controlSize(.regular)
+                .disabled(!isEnabled)
+                .opacity(isEnabled ? 1.0 : 0.45)
+                .background(
+                    RoundedRectangle(cornerRadius: 6)
+                        .fill(isHovering && isEnabled ? Color.accentColor.opacity(0.08) : .clear)
+                )
+                .onHover { hovering in
+                    isHovering = hovering
+                }
         }
     }
 
@@ -260,6 +293,7 @@ struct MainWindowView: View {
             case .empty:
                 Text("No sessions logged yet today.")
                     .foregroundStyle(.secondary)
+                    .font(.system(.subheadline, design: .rounded))
             case .stats(let stats):
                 VStack(alignment: .leading, spacing: 6) {
                     SummaryRow(title: "Focus time", value: formattedDuration(stats.totalFocusSeconds))

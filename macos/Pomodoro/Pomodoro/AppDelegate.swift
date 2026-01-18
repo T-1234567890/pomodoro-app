@@ -12,6 +12,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     private weak var mainWindow: NSWindow?
     private var appStateConfigured = false
     private var menuBarController: MenuBarController?
+    private let mainWindowFrameAutosaveName = "PomodoroMainWindowFrame"
 
     var appState: AppState? {
         didSet {
@@ -38,6 +39,12 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         menuBarController?.shutdown()
     }
 
+    func applicationDidFinishLaunching(_ notification: Notification) {
+        if let window = existingWindow() {
+            configureWindowPersistence(window)
+        }
+    }
+
     func openMainWindow() {
         guard let appState else { return }
 
@@ -57,7 +64,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         window.contentViewController = NSHostingController(
             rootView: ContentView().environmentObject(appState)
         )
-        window.center()
+        configureWindowPersistence(window)
         window.makeKeyAndOrderFront(nil)
         focus(window: window)
         mainWindow = window
@@ -83,5 +90,12 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             window.deminiaturize(nil)
         }
         window.makeKeyAndOrderFront(nil)
+    }
+
+    private func configureWindowPersistence(_ window: NSWindow) {
+        window.setFrameAutosaveName(mainWindowFrameAutosaveName)
+        if !window.setFrameUsingName(mainWindowFrameAutosaveName) {
+            window.center()
+        }
     }
 }

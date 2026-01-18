@@ -20,5 +20,26 @@ struct PomodoroApp: App {
                     appDelegate.appState = appState
                 }
         }
+        .commands {
+            CommandMenu("Timer") {
+                Button("Start/Pause Pomodoro") {
+                    appState.startOrPausePomodoro()
+                }
+                .keyboardShortcut(.space, modifiers: [])
+
+                Button("Reset Pomodoro") {
+                    appState.resetPomodoro()
+                }
+                .keyboardShortcut("r", modifiers: [])
+
+                Divider()
+
+                Button("Start Countdown") {
+                    appState.startCountdown()
+                }
+                .keyboardShortcut("c", modifiers: [.command, .shift])
+                .disabled(appState.countdown.state != .idle)
+            }
+        }
     }
 }

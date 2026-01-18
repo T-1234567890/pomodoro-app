@@ -199,6 +199,17 @@ final class AppState: ObservableObject {
         pomodoro.start()
     }
 
+    func startOrPausePomodoro() {
+        switch pomodoro.state {
+        case .idle:
+            pomodoro.start()
+        case .running, .breakRunning:
+            pomodoro.pause()
+        case .paused, .breakPaused:
+            pomodoro.resume()
+        }
+    }
+
     func togglePomodoroPause() {
         switch pomodoro.state {
         case .running, .breakRunning:
