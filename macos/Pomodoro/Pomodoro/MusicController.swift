@@ -8,6 +8,7 @@
 import AVFoundation
 import Combine
 import MediaPlayer
+import SwiftUI
 
 enum MusicPlaybackState: String {
     case idle
