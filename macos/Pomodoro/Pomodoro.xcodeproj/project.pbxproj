@@ -21,6 +21,7 @@
 		7C360D6B2F191F17007313D3 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C360D6C2F191F17007313D3 /* AppDelegate.swift */; };
 		7C360D5D2F191F17007313D3 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 7C360D562F191F17007313D3 /* Assets.xcassets */; };
 		7C360D752F191F17007313D3 /* NotificationPreference.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C360D762F191F17007313D3 /* NotificationPreference.swift */; };
+		EC7658622FEE47D78BFEA957 /* DailyStats.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0D409152AD794BA998253C35 /* DailyStats.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -39,6 +40,7 @@
 		7C360D6C2F191F17007313D3 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		7C360D562F191F17007313D3 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		7C360D762F191F17007313D3 /* NotificationPreference.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationPreference.swift; sourceTree = "<group>"; };
+		0D409152AD794BA998253C35 /* DailyStats.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DailyStats.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -94,6 +96,7 @@
 			isa = PBXGroup;
 			children = (
 				7C360D502F191F17007313D3 /* AppState.swift */,
+				0D409152AD794BA998253C35 /* DailyStats.swift */,
 				7C360D6E2F191F17007313D3 /* DurationConfig.swift */,
 				7C360D762F191F17007313D3 /* NotificationPreference.swift */,
 				7C360D722F191F17007313D3 /* Preset.swift */,
@@ -207,6 +210,7 @@
 				7C360D6B2F191F17007313D3 /* AppDelegate.swift in Sources */,
 				7C360D6A2F191F17007313D3 /* MenuBarController.swift in Sources */,
 				7C360D572F191F17007313D3 /* AppState.swift in Sources */,
+				EC7658622FEE47D78BFEA957 /* DailyStats.swift in Sources */,
 				7C360D6D2F191F17007313D3 /* DurationConfig.swift in Sources */,
 				7C360D752F191F17007313D3 /* NotificationPreference.swift in Sources */,
 				7C360D712F191F17007313D3 /* Preset.swift in Sources */,
