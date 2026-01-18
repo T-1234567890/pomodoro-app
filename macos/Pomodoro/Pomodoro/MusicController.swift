@@ -253,21 +253,21 @@ final class MusicController: ObservableObject {
         var data = Data()
         data.reserveCapacity(44 + dataByteCount)
         data.append(contentsOf: "RIFF".utf8)
-        data.append(UInt32(36 + dataByteCount).littleEndianBytes)
+        data.append(contentsOf: UInt32(36 + dataByteCount).littleEndianBytes)
         data.append(contentsOf: "WAVE".utf8)
         data.append(contentsOf: "fmt ".utf8)
-        data.append(UInt32(16).littleEndianBytes)
-        data.append(UInt16(1).littleEndianBytes)
-        data.append(UInt16(channelCount).littleEndianBytes)
-        data.append(UInt32(sampleRate).littleEndianBytes)
-        data.append(UInt32(byteRate).littleEndianBytes)
-        data.append(UInt16(blockAlign).littleEndianBytes)
-        data.append(UInt16(bitsPerSample).littleEndianBytes)
+        data.append(contentsOf: UInt32(16).littleEndianBytes)
+        data.append(contentsOf: UInt16(1).littleEndianBytes)
+        data.append(contentsOf: UInt16(channelCount).littleEndianBytes)
+        data.append(contentsOf: UInt32(sampleRate).littleEndianBytes)
+        data.append(contentsOf: UInt32(byteRate).littleEndianBytes)
+        data.append(contentsOf: UInt16(blockAlign).littleEndianBytes)
+        data.append(contentsOf: UInt16(bitsPerSample).littleEndianBytes)
         data.append(contentsOf: "data".utf8)
-        data.append(UInt32(dataByteCount).littleEndianBytes)
+        data.append(contentsOf: UInt32(dataByteCount).littleEndianBytes)
 
         for sample in samples {
-            data.append(sample.littleEndianBytes)
+            data.append(contentsOf: sample.littleEndianBytes)
         }
 
         return data
