@@ -44,7 +44,6 @@ final class MenuBarController: NSObject, NSMenuDelegate {
     private let statusItem: NSStatusItem
     private let menu: NSMenu
     private let openMainWindow: () -> Void
-    private let openMusicPanel: () -> Void
     private let quitHandler: () -> Void
     private var titleTimer: Timer?
     private var lastTitleUpdateSecond: Int?
@@ -54,13 +53,11 @@ final class MenuBarController: NSObject, NSMenuDelegate {
         appState: AppState,
         musicController: MusicController,
         openMainWindow: @escaping () -> Void,
-        openMusicPanel: @escaping () -> Void,
         quitApp: @escaping () -> Void
     ) {
         self.appState = appState
         self.musicController = musicController
         self.openMainWindow = openMainWindow
-        self.openMusicPanel = openMusicPanel
         self.quitHandler = quitApp
         statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
         menu = NSMenu()
@@ -354,11 +351,6 @@ final class MenuBarController: NSObject, NSMenuDelegate {
         let ambientSoundItem = NSMenuItem(title: "Ambient Sound", action: nil, keyEquivalent: "")
         ambientSoundItem.submenu = ambientSoundMenu
         musicMenu.addItem(ambientSoundItem)
-        musicMenu.addItem(.separator())
-        musicMenu.addItem(actionItem(title: "⏮ Previous", action: #selector(previousTrack)))
-        musicMenu.addItem(actionItem(title: "⏭ Next", action: #selector(nextTrack)))
-        musicMenu.addItem(.separator())
-        musicMenu.addItem(actionItem(title: "Open Music Panel", action: #selector(openMusicPanelAction)))
 
         let musicItem = NSMenuItem(title: "Music", action: nil, keyEquivalent: "")
         musicItem.submenu = musicMenu
@@ -476,14 +468,6 @@ final class MenuBarController: NSObject, NSMenuDelegate {
         }
     }
 
-    @objc private func previousTrack() {
-        musicController.previous()
-    }
-
-    @objc private func nextTrack() {
-        musicController.next()
-    }
-
     @objc private func selectFocusSound(_ sender: NSMenuItem) {
         guard let sound = sender.representedObject as? FocusSoundType else { return }
         if sound == .off {
@@ -491,10 +475,6 @@ final class MenuBarController: NSObject, NSMenuDelegate {
         } else {
             musicController.startFocusSound(sound)
         }
-    }
-
-    @objc private func openMusicPanelAction() {
-        openMusicPanel()
     }
 
     @objc private func quitApp() {

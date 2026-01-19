@@ -10,11 +10,9 @@ import SwiftUI
 
 final class AppDelegate: NSObject, NSApplicationDelegate {
     private weak var mainWindow: NSWindow?
-    private weak var musicWindow: NSWindow?
     private var appStateConfigured = false
     private var menuBarController: MenuBarController?
     private let mainWindowFrameAutosaveName = "PomodoroMainWindowFrame"
-    private let musicWindowFrameAutosaveName = "PomodoroMusicWindowFrame"
 
     var appState: AppState? {
         didSet {
@@ -61,38 +59,13 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         window.contentViewController = NSHostingController(
             rootView: ContentView()
                 .environmentObject(appState)
-                .environmentObject(appState.localMusicPlayer)
+                .environmentObject(appState.nowPlayingRouter)
                 .environmentObject(musicController)
         )
         configureWindowPersistence(window)
         window.makeKeyAndOrderFront(nil)
         focus(window: window)
         mainWindow = window
-    }
-
-    func openMusicPanel() {
-        guard let appState else { return }
-
-        if let window = musicWindow {
-            focus(window: window)
-            return
-        }
-
-        let window = NSWindow(
-            contentRect: NSRect(x: 0, y: 0, width: 320, height: 220),
-            styleMask: [.titled, .closable],
-            backing: .buffered,
-            defer: false
-        )
-        window.title = "Music"
-        window.isReleasedWhenClosed = true
-        window.contentViewController = NSHostingController(
-            rootView: MusicPanelView().environmentObject(appState.localMusicPlayer)
-        )
-        configureWindowPersistence(window, autosaveName: musicWindowFrameAutosaveName)
-        window.makeKeyAndOrderFront(nil)
-        focus(window: window)
-        musicWindow = window
     }
 
     private func quitApp() {
@@ -137,9 +110,6 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             musicController: musicController,
             openMainWindow: { [weak self] in
                 self?.openMainWindow()
-            },
-            openMusicPanel: { [weak self] in
-                self?.openMusicPanel()
             },
             quitApp: { [weak self] in
                 self?.quitApp()

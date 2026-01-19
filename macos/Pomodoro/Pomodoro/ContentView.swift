@@ -17,6 +17,6 @@ struct ContentView: View {
     let appState = AppState()
     ContentView()
         .environmentObject(appState)
-        .environmentObject(appState.localMusicPlayer)
+        .environmentObject(appState.nowPlayingRouter)
         .environmentObject(MusicController(ambientNoiseEngine: appState.ambientNoiseEngine))
 }

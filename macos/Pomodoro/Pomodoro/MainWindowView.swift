@@ -170,7 +170,7 @@ struct MainWindowView: View {
             }
 
             MediaControlBar()
-                .environmentObject(appState.mediaPlayer)
+                .environmentObject(appState.nowPlayingRouter)
         }
         .padding()
         .frame(minWidth: 360)

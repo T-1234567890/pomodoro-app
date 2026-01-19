@@ -6,7 +6,6 @@
 //
 
 import Combine
-import MediaPlayer
 import SwiftUI
 
 enum MusicPlaybackState: String {
@@ -17,7 +16,6 @@ enum MusicPlaybackState: String {
 
 enum MusicSource {
     case none
-    case system
     case focusSound
 }
 
@@ -51,16 +49,13 @@ final class MusicController: ObservableObject {
     @Published private(set) var activeSource: MusicSource
     @Published var currentFocusSound: FocusSoundType
 
-    private let systemMediaController: SystemMediaController
     private let userDefaults: UserDefaults
     private let ambientNoiseEngine: AmbientNoiseEngine
 
     init(
-        systemMediaController: SystemMediaController = SystemMediaController(),
         userDefaults: UserDefaults = .standard,
         ambientNoiseEngine: AmbientNoiseEngine
     ) {
-        self.systemMediaController = systemMediaController
         self.userDefaults = userDefaults
         self.ambientNoiseEngine = ambientNoiseEngine
         let storedFocus = FocusSoundType(rawValue: userDefaults.string(forKey: "music.focusSound") ?? "") ?? .off
@@ -68,57 +63,33 @@ final class MusicController: ObservableObject {
         currentFocusSound = storedFocus
         playbackState = storedPlayback
         activeSource = storedFocus == .off ? .none : .focusSound
-        if storedFocus == .off {
-            let systemState = Self.mapSystemPlaybackState(MPNowPlayingInfoCenter.default().playbackState)
-            playbackState = systemState
-            activeSource = systemState == .idle ? .none : .system
-        } else if storedPlayback == .playing {
+        if storedFocus != .off, storedPlayback == .playing {
             startFocusSound(storedFocus)
         }
     }
 
     func play() {
-        if activeSource == .focusSound, currentFocusSound != .off {
-            startFocusSound(currentFocusSound)
+        guard currentFocusSound != .off else {
+            playbackState = .idle
+            activeSource = .none
+            persistState()
             return
         }
-        stopFocusSoundPlayback(keepSelection: true)
-        systemMediaController.playPause()
-        activeSource = .system
-        playbackState = .playing
-        persistState()
+        startFocusSound(currentFocusSound)
     }
 
     func pause() {
-        switch activeSource {
-        case .focusSound:
-            stopFocusSoundPlayback(keepSelection: true)
-            playbackState = .paused
-            persistState()
-        case .system:
-            pauseSystemIfNeeded()
-            playbackState = .paused
-            persistState()
-        case .none:
-            playbackState = .paused
-            persistState()
-        }
+        stopFocusSoundPlayback(keepSelection: true)
+        playbackState = activeSource == .focusSound ? .paused : .idle
+        persistState()
     }
 
     func next() {
         stopFocusSoundPlayback(keepSelection: true)
-        systemMediaController.nextTrack()
-        activeSource = .system
-        playbackState = .playing
-        persistState()
     }
 
     func previous() {
         stopFocusSoundPlayback(keepSelection: true)
-        systemMediaController.previousTrack()
-        activeSource = .system
-        playbackState = .playing
-        persistState()
     }
 
     func startFocusSound(_ type: FocusSoundType) {
@@ -126,7 +97,6 @@ final class MusicController: ObservableObject {
             stopFocusSound()
             return
         }
-        pauseSystemIfNeeded()
         currentFocusSound = type
         ambientNoiseEngine.play(type: type.ambientNoiseType)
         playbackState = .playing
@@ -152,27 +122,11 @@ final class MusicController: ObservableObject {
         }
     }
 
-    private func pauseSystemIfNeeded() {
-        if MPNowPlayingInfoCenter.default().playbackState == .playing {
-            systemMediaController.playPause()
-        }
-    }
-
     private func persistState() {
         userDefaults.set(currentFocusSound.rawValue, forKey: "music.focusSound")
         userDefaults.set(playbackState.rawValue, forKey: "music.playbackState")
     }
 
-    private static func mapSystemPlaybackState(_ state: MPNowPlayingPlaybackState) -> MusicPlaybackState {
-        switch state {
-        case .playing:
-            return .playing
-        case .paused:
-            return .paused
-        default:
-            return .idle
-        }
-    }
 }
 
 private extension FocusSoundType {

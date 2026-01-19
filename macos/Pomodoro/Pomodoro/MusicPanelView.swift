@@ -55,7 +55,6 @@ struct MusicPanelView: View {
 }
 
 #Preview {
-    let appState = AppState()
     MusicPanelView()
-        .environmentObject(appState.localMusicPlayer)
+        .environmentObject(LocalMusicPlayer())
 }
