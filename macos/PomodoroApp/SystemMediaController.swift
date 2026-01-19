@@ -1,114 +1,68 @@
 import AppKit
 import MediaPlayer
+import AVFoundation
 
 @MainActor
 final class SystemMediaController: ObservableObject {
-    @Published private(set) var isActive: Bool = false
+    @Published private(set) var isSessionActive: Bool = false
     @Published private(set) var isPlaying: Bool = false
     @Published private(set) var title: String = "No Track Selected"
     @Published private(set) var artist: String?
-    @Published private(set) var sourceApp: String?
-    @Published private(set) var currentArtwork: NSImage?
+    @Published private(set) var artwork: NSImage?
+    @Published private(set) var lastUpdatedAt: Date?
 
     private let commandCenter = MPRemoteCommandCenter.shared()
-    private var observers: [NSObjectProtocol] = []
-    private var refreshTimer: Timer?
-    private var nowPlayingObserver: NSKeyValueObservation?
-    private var playbackStateObserver: NSKeyValueObservation?
-    private var commandTargets: [(command: MPRemoteCommand, token: Any)] = []
-    private var lastSnapshot: NowPlayingSnapshot?
+    private let defaults: UserDefaults
 
-    init(notificationCenter: NotificationCenter = .default) {
-        registerRemoteCommandHandlers()
-        observeNowPlayingInfo(notificationCenter: notificationCenter)
-        startPolling()
-        refreshNowPlayingInfo()
+    private enum CacheKey {
+        static let title = "SystemMediaController.title"
+        static let artist = "SystemMediaController.artist"
+        static let artwork = "SystemMediaController.artwork"
+        static let lastUpdatedAt = "SystemMediaController.lastUpdatedAt"
     }
 
-    deinit {
-        observers.forEach(NotificationCenter.default.removeObserver)
-        refreshTimer?.invalidate()
-        commandTargets.forEach { entry in
-            entry.command.removeTarget(entry.token)
-        }
+    init(userDefaults: UserDefaults = .standard) {
+        self.defaults = userDefaults
+        restoreCachedMetadata()
     }
 
     func play() {
+        activateAudioSessionIfNeeded()
         sendCommand(commandCenter.playCommand)
+        refreshNowPlayingInfo()
     }
 
     func pause() {
         sendCommand(commandCenter.pauseCommand)
+        refreshNowPlayingInfo()
     }
 
     func togglePlayPause() {
-        sendCommand(commandCenter.togglePlayPauseCommand)
+        if isPlaying {
+            pause()
+        } else {
+            play()
+        }
     }
 
     func nextTrack() {
         sendCommand(commandCenter.nextTrackCommand)
+        refreshNowPlayingInfo()
     }
 
     func previousTrack() {
         sendCommand(commandCenter.previousTrackCommand)
+        refreshNowPlayingInfo()
     }
 
-    private func registerRemoteCommandHandlers() {
-        commandTargets.append((commandCenter.playCommand, commandCenter.playCommand.addTarget { [weak self] _ in
-            self?.play()
-            return .success
-        }))
-        commandTargets.append((commandCenter.pauseCommand, commandCenter.pauseCommand.addTarget { [weak self] _ in
-            self?.pause()
-            return .success
-        }))
-        commandTargets.append((commandCenter.togglePlayPauseCommand, commandCenter.togglePlayPauseCommand.addTarget { [weak self] _ in
-            self?.togglePlayPause()
-            return .success
-        }))
-        commandTargets.append((commandCenter.nextTrackCommand, commandCenter.nextTrackCommand.addTarget { [weak self] _ in
-            self?.nextTrack()
-            return .success
-        }))
-        commandTargets.append((commandCenter.previousTrackCommand, commandCenter.previousTrackCommand.addTarget { [weak self] _ in
-            self?.previousTrack()
-            return .success
-        }))
-    }
-
-    private func observeNowPlayingInfo(notificationCenter: NotificationCenter) {
-        observers.append(notificationCenter.addObserver(
-            forName: .MPNowPlayingInfoCenterNowPlayingInfoDidChange,
-            object: nil,
-            queue: .main
-        ) { [weak self] _ in
-            self?.refreshNowPlayingInfo()
-        })
-
-        observers.append(notificationCenter.addObserver(
-            forName: .MPNowPlayingInfoCenterPlaybackStateDidChange,
-            object: nil,
-            queue: .main
-        ) { [weak self] _ in
-            self?.refreshNowPlayingInfo()
-        })
-
-        let infoCenter = MPNowPlayingInfoCenter.default()
-        nowPlayingObserver = infoCenter.observe(\.nowPlayingInfo, options: [.initial, .new]) { [weak self] _, _ in
-            Task { @MainActor in
-                self?.refreshNowPlayingInfo()
-            }
-        }
-        playbackStateObserver = infoCenter.observe(\.playbackState, options: [.initial, .new]) { [weak self] _, _ in
-            Task { @MainActor in
-                self?.refreshNowPlayingInfo()
-            }
-        }
-    }
-
-    private func startPolling() {
-        refreshTimer = Timer.scheduledTimer(withTimeInterval: 0.75, repeats: true) { [weak self] _ in
-            self?.refreshNowPlayingInfo()
+    private func activateAudioSessionIfNeeded() {
+        guard !isSessionActive else { return }
+        let session = AVAudioSession.sharedInstance()
+        do {
+            try session.setActive(true)
+            isSessionActive = true
+        } catch {
+            isSessionActive = false
         }
     }
 
@@ -117,41 +71,26 @@ final class SystemMediaController: ObservableObject {
         let info = infoCenter.nowPlayingInfo ?? [:]
 
         let playbackState = resolvePlaybackState(infoCenter: infoCenter, info: info)
-        let isPlaying = playbackState == .playing
-        let hasNowPlaying = !info.isEmpty
-        let isActive = hasNowPlaying || playbackState == .playing || playbackState == .paused
-
-        let title = info[MPMediaItemPropertyTitle] as? String
-        let artist = info[MPMediaItemPropertyArtist] as? String
-        let artwork = info[MPMediaItemPropertyArtwork] as? MPMediaItemArtwork
-        let artworkImage = artwork?.image(at: NSSize(width: 64, height: 64))
-        let artworkData = artworkImage?.tiffRepresentation
-
-        let sourceApp = info[MPNowPlayingInfoPropertyServiceIdentifier] as? String
-            ?? info[MPNowPlayingInfoPropertyExternalContentIdentifier] as? String
-
-        let resolvedTitle = title ?? (hasNowPlaying ? "Unknown Title" : "No Track Selected")
-
-        let snapshot = NowPlayingSnapshot(
-            isActive: isActive,
-            isPlaying: isPlaying,
-            title: resolvedTitle,
-            artist: artist,
-            sourceApp: sourceApp,
-            artworkData: artworkData
-        )
-
-        guard snapshot != lastSnapshot else { return }
-        lastSnapshot = snapshot
-
-        self.isActive = snapshot.isActive
-        self.isPlaying = snapshot.isPlaying
-        self.title = snapshot.title
-        self.artist = snapshot.artist
-        self.sourceApp = snapshot.sourceApp
-        if snapshot.artworkData != currentArtwork?.tiffRepresentation {
-            self.currentArtwork = artworkImage
+        if playbackState != .unknown {
+            isPlaying = playbackState == .playing
         }
+
+        guard !info.isEmpty else { return }
+
+        let newTitle = info[MPMediaItemPropertyTitle] as? String ?? "Unknown Title"
+        let newArtist = info[MPMediaItemPropertyArtist] as? String
+        let newArtwork = (info[MPMediaItemPropertyArtwork] as? MPMediaItemArtwork)
+            .flatMap { $0.image(at: NSSize(width: 64, height: 64)) }
+        let updatedAt = Date()
+
+        title = newTitle
+        artist = newArtist
+        if newArtwork?.tiffRepresentation != artwork?.tiffRepresentation {
+            artwork = newArtwork
+        }
+        lastUpdatedAt = updatedAt
+
+        cacheMetadata(title: newTitle, artist: newArtist, artwork: newArtwork, lastUpdatedAt: updatedAt)
     }
 
     private func resolvePlaybackState(
@@ -174,13 +113,25 @@ final class SystemMediaController: ObservableObject {
         guard command.isEnabled else { return }
         command.sendAction()
     }
-}
 
-private struct NowPlayingSnapshot: Equatable {
-    let isActive: Bool
-    let isPlaying: Bool
-    let title: String
-    let artist: String?
-    let sourceApp: String?
-    let artworkData: Data?
+    private func cacheMetadata(title: String, artist: String?, artwork: NSImage?, lastUpdatedAt: Date) {
+        defaults.set(title, forKey: CacheKey.title)
+        defaults.set(artist, forKey: CacheKey.artist)
+        defaults.set(artwork?.tiffRepresentation, forKey: CacheKey.artwork)
+        defaults.set(lastUpdatedAt.timeIntervalSince1970, forKey: CacheKey.lastUpdatedAt)
+    }
+
+    private func restoreCachedMetadata() {
+        if let cachedTitle = defaults.string(forKey: CacheKey.title) {
+            title = cachedTitle
+        }
+        artist = defaults.string(forKey: CacheKey.artist)
+        if let artworkData = defaults.data(forKey: CacheKey.artwork) {
+            artwork = NSImage(data: artworkData)
+        }
+        if defaults.object(forKey: CacheKey.lastUpdatedAt) != nil {
+            let interval = defaults.double(forKey: CacheKey.lastUpdatedAt)
+            lastUpdatedAt = Date(timeIntervalSince1970: interval)
+        }
+    }
 }

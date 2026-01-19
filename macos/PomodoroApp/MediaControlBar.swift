@@ -28,7 +28,7 @@ struct MediaControlBar: View {
     private var sourceLabel: String {
         switch appState.activeMediaSource {
         case .system:
-            return "System Audio"
+            return appState.systemMedia.isSessionActive ? "System Audio" : "System Audio (Inactive)"
         case .local:
             return "Local Audio"
         case .none:
@@ -39,7 +39,7 @@ struct MediaControlBar: View {
     private var artwork: NSImage? {
         switch appState.activeMediaSource {
         case .system:
-            return appState.systemMedia.currentArtwork
+            return appState.systemMedia.artwork
         case .local:
             return appState.localMedia.currentArtwork
         case .none:
@@ -73,7 +73,7 @@ struct MediaControlBar: View {
                     .truncationMode(.tail)
                 Text(sourceLabel)
                     .font(.caption)
-                    .foregroundStyle(.secondary)
+                    .foregroundStyle(appState.activeMediaSource == .system && !appState.systemMedia.isSessionActive ? .orange : .secondary)
             }
             .frame(maxWidth: .infinity, alignment: .leading)
 

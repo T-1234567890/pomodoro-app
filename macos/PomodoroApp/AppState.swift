@@ -30,6 +30,7 @@ final class AppState: ObservableObject, DynamicProperty {
     func update() {}
 
     func togglePlayPause() {
+        ensureActiveSourceBeforeControl()
         switch activeMediaSource {
         case .system:
             systemMedia.togglePlayPause()
@@ -41,6 +42,7 @@ final class AppState: ObservableObject, DynamicProperty {
     }
 
     func nextTrack() {
+        ensureActiveSourceBeforeControl()
         switch activeMediaSource {
         case .system:
             systemMedia.nextTrack()
@@ -52,6 +54,7 @@ final class AppState: ObservableObject, DynamicProperty {
     }
 
     func previousTrack() {
+        ensureActiveSourceBeforeControl()
         switch activeMediaSource {
         case .system:
             systemMedia.previousTrack()
@@ -63,7 +66,7 @@ final class AppState: ObservableObject, DynamicProperty {
     }
 
     private func bindMediaUpdates() {
-        systemMedia.$isActive
+        systemMedia.$isSessionActive
             .receive(on: DispatchQueue.main)
             .sink { [weak self] isActive in
                 self?.handleSystemActivityChange(isActive: isActive)
@@ -109,7 +112,7 @@ final class AppState: ObservableObject, DynamicProperty {
     }
 
     private func handleSystemPlaybackChange(isPlaying: Bool) {
-        guard systemMedia.isActive else {
+        guard systemMedia.isSessionActive else {
             updateActiveMediaSource()
             return
         }
@@ -131,7 +134,7 @@ final class AppState: ObservableObject, DynamicProperty {
     }
 
     private func updateActiveMediaSource() {
-        if systemMedia.isActive {
+        if systemMedia.isSessionActive {
             setActiveMediaSource(.system)
         } else if localMedia.hasLoaded {
             setActiveMediaSource(.local)
@@ -145,6 +148,15 @@ final class AppState: ObservableObject, DynamicProperty {
         guard source != .none else { return }
         lastActiveMediaSource = source
         UserDefaults.standard.set(source.rawValue, forKey: lastActiveSourceKey)
+    }
+
+    private func ensureActiveSourceBeforeControl() {
+        guard activeMediaSource == .none else { return }
+        if lastActiveMediaSource == .none {
+            setActiveMediaSource(.system)
+        } else {
+            setActiveMediaSource(lastActiveMediaSource)
+        }
     }
 
     private func restoreLastActiveMediaSource() {
