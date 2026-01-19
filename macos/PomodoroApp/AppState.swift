@@ -24,7 +24,7 @@ final class AppState: ObservableObject, DynamicProperty {
         restoreLastActiveMediaSource()
         bindMediaUpdates()
         updateActiveMediaSource()
-        // systemMedia.connect() deferred to after first render to prevent main thread blocking
+        // systemMedia.connect() deferred to MainWindowView.task to prevent main thread blocking during init
         #if DEBUG
         print("[AppState] init completed")
         #endif

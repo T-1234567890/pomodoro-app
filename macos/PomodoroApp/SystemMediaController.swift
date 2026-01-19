@@ -163,7 +163,7 @@ final class SystemMediaController: ObservableObject {
                 self?.refreshNowPlayingInfo()
             }
         )
-        // Don't call refreshNowPlayingInfo() here - it will be called by connect() after first render
+        // refreshNowPlayingInfo() will be called by connect() when invoked from MainWindowView.task after first render completes
     }
 
     deinit {
