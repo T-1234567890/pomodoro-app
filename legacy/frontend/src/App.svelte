@@ -1,5 +1,6 @@
 <script lang="ts">
   import { onMount } from 'svelte';
+  import { getCurrentWindow } from '@tauri-apps/api/window';
   import CountdownTimer from './lib/CountdownTimer.svelte';
   import {
     countdownState,
@@ -755,6 +756,13 @@
             systemMediaPollId = setInterval(updateSystemMediaState, 4000);
           });
         }
+
+        // Show window after all initialization is complete
+        await runStartupStep('show window', async () => {
+          const window = getCurrentWindow();
+          await window.show();
+          await window.setFocus();
+        });
       })();
 
       const handleSystemThemeChange = (event: MediaQueryListEvent) => {
