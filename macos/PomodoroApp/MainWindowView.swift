@@ -14,6 +14,13 @@ struct MainWindowView: View {
         }
         .frame(minWidth: 480, minHeight: 320)
         .padding(32)
+        .task {
+            // Connect to system media after first render to prevent blocking main thread
+            #if DEBUG
+            print("[MainWindowView] First render complete, connecting to system media")
+            #endif
+            appState.systemMedia.connect()
+        }
     }
 }
 

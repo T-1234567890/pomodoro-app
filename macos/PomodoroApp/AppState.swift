@@ -18,10 +18,16 @@ final class AppState: ObservableObject, DynamicProperty {
     private var shouldResumeLocalAfterSystem = false
 
     init() {
+        #if DEBUG
+        print("[AppState] init started")
+        #endif
         restoreLastActiveMediaSource()
         bindMediaUpdates()
         updateActiveMediaSource()
-        systemMedia.connect()
+        // systemMedia.connect() deferred to after first render to prevent main thread blocking
+        #if DEBUG
+        print("[AppState] init completed")
+        #endif
     }
 
     func setWorkDuration(minutes: Int) {

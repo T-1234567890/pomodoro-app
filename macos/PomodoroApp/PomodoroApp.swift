@@ -6,7 +6,16 @@ struct PomodoroApp: App {
     @StateObject private var appState = AppState()
     @State private var menuBarController: MenuBarController?
 
+    init() {
+        #if DEBUG
+        print("[PomodoroApp] init started")
+        #endif
+    }
+
     var body: some Scene {
+        #if DEBUG
+        let _ = print("[PomodoroApp] body evaluated - first render beginning")
+        #endif
         WindowGroup {
             MainWindowView()
                 .environmentObject(appState)

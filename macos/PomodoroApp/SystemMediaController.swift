@@ -28,6 +28,9 @@ final class SystemMediaController: ObservableObject {
     }
 
     func connect() {
+        #if DEBUG
+        print("[SystemMediaController] connect() called - refreshing now playing info")
+        #endif
         refreshNowPlayingInfo()
     }
 
@@ -160,7 +163,7 @@ final class SystemMediaController: ObservableObject {
                 self?.refreshNowPlayingInfo()
             }
         )
-        refreshNowPlayingInfo()
+        // Don't call refreshNowPlayingInfo() here - it will be called by connect() after first render
     }
 
     deinit {
