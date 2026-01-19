@@ -76,7 +76,7 @@ final class AppState: ObservableObject {
         self.pomodoro = pomodoro
         self.countdown = countdown
         self.ambientNoiseEngine = ambientNoiseEngine
-        self.nowPlayingRouter = NowPlayingRouter()
+        self.nowPlayingRouter = NowPlayingRouter(startPolling: false)
         self.durationConfig = durationConfig
         self.presetSelection = Self.loadPresetSelection(from: userDefaults, durationConfig: durationConfig)
         self.pomodoroMode = pomodoro.mode

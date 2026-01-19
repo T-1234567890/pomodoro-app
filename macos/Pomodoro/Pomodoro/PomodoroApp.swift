@@ -31,6 +31,7 @@ struct PomodoroApp: App {
                 .task(id: ObjectIdentifier(appState)) {
                     appDelegate.appState = appState
                     appDelegate.musicController = musicController
+                    appState.nowPlayingRouter.startPollingIfNeeded()
                 }
         }
         .commands {

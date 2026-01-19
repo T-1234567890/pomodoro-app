@@ -28,7 +28,7 @@ final class NowPlayingRouter: ObservableObject {
         appleMusicProvider: NowPlayingProvider = AppleMusicProvider(),
         spotifyProvider: NowPlayingProvider = SpotifyProvider(),
         qqMusicProvider: NowPlayingProvider = QQMusicProvider(),
-        startPolling: Bool = true
+        startPolling: Bool = false
     ) {
         self.appleMusicProvider = appleMusicProvider
         self.spotifyProvider = spotifyProvider
@@ -62,6 +62,11 @@ final class NowPlayingRouter: ObservableObject {
         Task {
             await activeProvider.previousTrack()
         }
+    }
+
+    func startPollingIfNeeded() {
+        guard pollTask == nil else { return }
+        startPollingLoop()
     }
 
     private func startPollingLoop() {
