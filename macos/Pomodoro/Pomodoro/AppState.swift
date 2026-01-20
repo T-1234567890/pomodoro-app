@@ -22,7 +22,11 @@ final class AppState: ObservableObject {
         }
     }
 
-    @Published var presetSelection: PresetSelection
+    @Published var presetSelection: PresetSelection {
+        didSet {
+            savePresetSelection()
+        }
+    }
 
     @Published private(set) var pomodoroMode: PomodoroTimerEngine.Mode
     @Published private(set) var pomodoroCurrentMode: PomodoroTimerEngine.CurrentMode
@@ -67,7 +71,7 @@ final class AppState: ObservableObject {
         self.ambientNoiseEngine = ambientNoiseEngine
         self.nowPlayingRouter = NowPlayingRouter()
         self.durationConfig = durationConfig
-        self.presetSelection = PresetSelection.selection(for: durationConfig)
+        self.presetSelection = Self.loadPresetSelection(from: userDefaults, durationConfig: durationConfig)
         self.pomodoroMode = pomodoro.mode
         self.pomodoroCurrentMode = pomodoro.currentMode
         self.dailyStats = Self.loadDailyStats(from: userDefaults)
@@ -138,6 +142,7 @@ final class AppState: ObservableObject {
 
         updatePomodoroConfiguration()
         refreshDailyStatsForCurrentDay()
+        requestNotificationAuthorizationIfNeeded()
     }
 
     // Convenience initializer with explicit UserDefaults forwarding
@@ -265,6 +270,8 @@ final class AppState: ObservableObject {
         static let notificationPreference = "notification.preference"
         static let reminderPreference = "notification.reminderPreference"
         static let dailyStats = "dailyStats.current"
+        static let presetSelection = "durationConfig.presetSelection"
+        static let notificationAuthorizationRequested = "notification.authorizationRequested"
     }
 
     private func saveNotificationPreference() {
@@ -273,6 +280,35 @@ final class AppState: ObservableObject {
 
     private func saveReminderPreference() {
         userDefaults.set(reminderPreference.rawValue, forKey: DefaultsKey.reminderPreference)
+    }
+
+    private func savePresetSelection() {
+        let value: String
+        switch presetSelection {
+        case .preset(let preset):
+            value = preset.id
+        case .custom:
+            value = Self.customPresetSelectionValue
+        }
+        userDefaults.set(value, forKey: DefaultsKey.presetSelection)
+    }
+
+    private static let customPresetSelectionValue = "custom"
+
+    private static func loadPresetSelection(
+        from userDefaults: UserDefaults,
+        durationConfig: DurationConfig
+    ) -> PresetSelection {
+        guard let storedValue = userDefaults.string(forKey: DefaultsKey.presetSelection) else {
+            return PresetSelection.selection(for: durationConfig)
+        }
+        if storedValue == customPresetSelectionValue {
+            return .custom
+        }
+        if let preset = Preset.builtIn.first(where: { $0.id == storedValue }) {
+            return .preset(preset)
+        }
+        return PresetSelection.selection(for: durationConfig)
     }
 
     private static func loadDailyStats(from userDefaults: UserDefaults) -> DailyStats {
@@ -300,6 +336,8 @@ final class AppState: ObservableObject {
         notificationCenter.getNotificationSettings { [weak self] settings in
             guard let self = self else { return }
             guard settings.authorizationStatus == .notDetermined else { return }
+            guard !self.userDefaults.bool(forKey: DefaultsKey.notificationAuthorizationRequested) else { return }
+            self.userDefaults.set(true, forKey: DefaultsKey.notificationAuthorizationRequested)
 
             self.notificationCenter.requestAuthorization(options: [.alert, .sound]) { _, _ in
             }
@@ -417,24 +455,24 @@ final class AppState: ObservableObject {
     }
 
     private func sendPomodoroCompletionNotification() {
-        sendNotification(title: decoratedTitle("Pomodoro complete", emoji: "🍅"), body: "Time for a break.")
+        sendNotification(title: decoratedTitle("Focus complete", emoji: "🍅"), body: "Time for a break.")
     }
 
     private func sendBreakCompletionNotification() {
         let title: String
         switch lastBreakMode {
         case .longBreak:
-            title = decoratedTitle("Long break complete", emoji: "☕")
+            title = decoratedTitle("Long break complete", emoji: "☕️")
         case .break:
-            title = decoratedTitle("Break complete", emoji: "☕")
+            title = decoratedTitle("Break complete", emoji: "☕️")
         case .work, .idle, nil:
-            title = decoratedTitle("Break complete", emoji: "☕")
+            title = decoratedTitle("Break complete", emoji: "☕️")
         }
         sendNotification(title: title, body: "Ready to focus again?")
     }
 
     private func sendCountdownCompletionNotification() {
-        sendNotification(title: decoratedTitle("Countdown complete", emoji: "⏰"), body: "Time is up.")
+        sendNotification(title: decoratedTitle("Countdown complete", emoji: "⏳"), body: "Time is up.")
     }
 
     private func decoratedTitle(_ title: String, emoji: String?) -> String {
