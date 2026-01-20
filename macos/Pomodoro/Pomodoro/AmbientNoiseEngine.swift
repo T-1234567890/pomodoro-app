@@ -6,6 +6,7 @@
 //
 
 import AVFoundation
+import Foundation
 import os
 
 final class AmbientNoiseEngine {
@@ -34,6 +35,7 @@ final class AmbientNoiseEngine {
     }
 
     private let engine = AVAudioEngine()
+    private let audioQueue = DispatchQueue(label: "com.pomodoro.ambient-audio", qos: .userInitiated)
     private lazy var sourceNode: AVAudioSourceNode = {
         AVAudioSourceNode { [weak self] _, _, frameCount, audioBufferList in
             guard let self else { return noErr }
@@ -111,6 +113,7 @@ final class AmbientNoiseEngine {
     private let windLowAlpha: Float
     private let windHighAlpha: Float
     private let rainPhaseIncrement: Float
+    private var isEnginePrepared = false
     private var stateLock = os_unfair_lock_s()
     private var state: State
 
@@ -139,41 +142,67 @@ final class AmbientNoiseEngine {
             rainPhase: 0
         )
 
-        engine.attach(sourceNode)
-        engine.connect(sourceNode, to: engine.mainMixerNode, format: format)
-        engine.prepare()
+        audioQueue.async { [weak self] in
+            self?.prepareEngineIfNeeded()
+        }
     }
 
     func play(type: NoiseType) {
-        os_unfair_lock_lock(&stateLock)
-        state.type = type
-        os_unfair_lock_unlock(&stateLock)
-
-        guard type != .off else {
-            stop()
-            return
-        }
-
-        if !engine.isRunning {
-            do {
-                try engine.start()
-            } catch {
-                return
-            }
+        audioQueue.async { [weak self] in
+            guard let self else { return }
+            self.updateNoiseType(type)
+            self.startEngineIfNeeded(for: type)
         }
     }
 
     func stop() {
-        os_unfair_lock_lock(&stateLock)
-        state.type = .off
-        os_unfair_lock_unlock(&stateLock)
-        engine.stop()
+        audioQueue.async { [weak self] in
+            guard let self else { return }
+            self.updateNoiseType(.off)
+            self.engine.stop()
+        }
     }
 
     func setVolume(_ volume: Float) {
         let clamped = max(0, min(volume, 1))
+        audioQueue.async { [weak self] in
+            self?.updateVolume(clamped)
+        }
+    }
+
+    private func prepareEngineIfNeeded() {
+        guard !isEnginePrepared else { return }
+        engine.attach(sourceNode)
+        engine.connect(sourceNode, to: engine.mainMixerNode, format: format)
+        engine.prepare()
+        isEnginePrepared = true
+    }
+
+    private func startEngineIfNeeded(for type: NoiseType) {
+        guard type != .off else {
+            engine.stop()
+            return
+        }
+
+        prepareEngineIfNeeded()
+
+        guard !engine.isRunning else { return }
+        do {
+            try engine.start()
+        } catch {
+            return
+        }
+    }
+
+    private func updateNoiseType(_ type: NoiseType) {
         os_unfair_lock_lock(&stateLock)
-        state.volume = clamped
+        state.type = type
+        os_unfair_lock_unlock(&stateLock)
+    }
+
+    private func updateVolume(_ volume: Float) {
+        os_unfair_lock_lock(&stateLock)
+        state.volume = volume
         os_unfair_lock_unlock(&stateLock)
     }
 

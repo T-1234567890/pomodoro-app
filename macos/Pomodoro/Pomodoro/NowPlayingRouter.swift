@@ -81,15 +81,17 @@ final class NowPlayingRouter: ObservableObject {
     }
 
     private func refresh() async {
-        async let appleState = appleMusicProvider.fetchState()
-        async let spotifyState = spotifyProvider.fetchState()
-        _ = qqMusicProvider
+        let appleProvider = appleMusicProvider
+        let spotifyProvider = spotifyProvider
 
-        let apple = await appleState
-        let spotify = await spotifyState
+        let (apple, spotify) = await Task.detached(priority: .utility) {
+            async let appleState = appleProvider.fetchState()
+            async let spotifyState = spotifyProvider.fetchState()
+            return await (appleState, spotifyState)
+        }.value
 
         if apple.isPlaying {
-            apply(state: apple, provider: appleMusicProvider)
+            apply(state: apple, provider: appleProvider)
         } else if spotify.isPlaying {
             apply(state: spotify, provider: spotifyProvider)
         } else {
