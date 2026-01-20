@@ -5,8 +5,12 @@ struct MainWindowView: View {
 
     var body: some View {
         ZStack {
-            Rectangle()
-                .fill(.ultraThinMaterial)
+            // Real macOS wallpaper blur using NSVisualEffectView
+            // This replaces Rectangle().fill(.ultraThinMaterial) which failed because:
+            // - SwiftUI Material is a compositing effect, not true vibrancy
+            // - It cannot access the desktop wallpaper layer
+            // - NSVisualEffectView with .behindWindow blending is required for wallpaper blur
+            VisualEffectBlur(material: .hudWindow, blendingMode: .behindWindow)
                 .ignoresSafeArea()
 
             VStack(spacing: 16) {

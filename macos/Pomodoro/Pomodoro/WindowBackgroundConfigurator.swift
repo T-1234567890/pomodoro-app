@@ -1,3 +1,10 @@
+//
+//  WindowBackgroundConfigurator.swift
+//  Pomodoro
+//
+//  Configures the NSWindow to support wallpaper blur and vibrancy.
+//
+
 import AppKit
 import SwiftUI
 
