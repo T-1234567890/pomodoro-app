@@ -14,6 +14,7 @@ struct MainWindowView: View {
     @State private var shortBreakMinutesText = ""
     @State private var longBreakMinutesText = ""
     @FocusState private var focusedField: DurationField?
+    @State private var longBreakIntervalValue: Int = 4
 
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
@@ -94,6 +95,12 @@ struct MainWindowView: View {
                     isFocused: focusedField == .longBreak
                 ) {
                     commitDuration(.longBreak)
+                }
+
+                LongBreakIntervalRow(
+                    interval: $longBreakIntervalValue
+                ) {
+                    updateDurationConfig(longBreakInterval: longBreakIntervalValue)
                 }
             }
 
@@ -176,9 +183,11 @@ struct MainWindowView: View {
         .frame(minWidth: 360)
         .onAppear {
             syncDurationTexts()
+            syncLongBreakInterval()
         }
         .onChange(of: appState.durationConfig) { _ in
             syncDurationTexts()
+            syncLongBreakInterval()
         }
         .onChange(of: focusedField) { _, newValue in
             guard newValue == nil else { return }
@@ -242,6 +251,30 @@ struct MainWindowView: View {
             .accessibilityElement(children: .combine)
             .accessibilityLabel("\(title) minutes")
             .accessibilityHint("Enter a number and press return")
+        }
+    }
+
+    private struct LongBreakIntervalRow: View {
+        @Binding var interval: Int
+        let onCommit: () -> Void
+
+        var body: some View {
+            HStack {
+                Text("Long Break Interval")
+                    .font(.system(.body, design: .rounded))
+                Spacer()
+                Stepper(value: $interval, in: 1...12) {
+                    Text("Every \(interval) sessions")
+                        .font(.system(.body, design: .rounded).monospacedDigit())
+                        .foregroundStyle(.secondary)
+                }
+                .onChange(of: interval) { _, _ in
+                    onCommit()
+                }
+            }
+            .accessibilityElement(children: .combine)
+            .accessibilityLabel("Long break interval")
+            .accessibilityHint("Choose how many work sessions before a long break")
         }
     }
 
@@ -441,18 +474,20 @@ struct MainWindowView: View {
     private func updateDurationConfig(
         workMinutes: Int? = nil,
         shortBreakMinutes: Int? = nil,
-        longBreakMinutes: Int? = nil
+        longBreakMinutes: Int? = nil,
+        longBreakInterval: Int? = nil
     ) {
         let currentConfig = appState.durationConfig
         let updatedWorkMinutes = clamp(workMinutes ?? currentConfig.workDuration / 60, range: 1...120)
         let updatedShortBreakMinutes = clamp(shortBreakMinutes ?? currentConfig.shortBreakDuration / 60, range: 1...60)
         let updatedLongBreakMinutes = clamp(longBreakMinutes ?? currentConfig.longBreakDuration / 60, range: 1...90)
+        let updatedLongBreakInterval = clamp(longBreakInterval ?? currentConfig.longBreakInterval, range: 1...12)
 
         appState.applyCustomDurationConfig(DurationConfig(
             workDuration: updatedWorkMinutes * 60,
             shortBreakDuration: updatedShortBreakMinutes * 60,
             longBreakDuration: updatedLongBreakMinutes * 60,
-            longBreakInterval: currentConfig.longBreakInterval
+            longBreakInterval: updatedLongBreakInterval
         ))
     }
 
@@ -473,6 +508,10 @@ struct MainWindowView: View {
         if focusedField != .longBreak {
             longBreakMinutesText = String(longBreakMinutesValue)
         }
+    }
+
+    private func syncLongBreakInterval() {
+        longBreakIntervalValue = clamp(appState.durationConfig.longBreakInterval, range: 1...12)
     }
 
     private func commitDuration(_ field: DurationField) {
