@@ -762,9 +762,11 @@ struct MainWindowView: View {
     }
 }
 
+#if DEBUG && PREVIEWS_ENABLED
 #Preview {
     let appState = AppState()
     MainWindowView()
         .environmentObject(appState)
         .environmentObject(MusicController(ambientNoiseEngine: appState.ambientNoiseEngine))
 }
+#endif

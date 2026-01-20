@@ -54,7 +54,9 @@ struct MusicPanelView: View {
     }
 }
 
+#if DEBUG && PREVIEWS_ENABLED
 #Preview {
     MusicPanelView()
         .environmentObject(LocalMusicPlayer())
 }
+#endif

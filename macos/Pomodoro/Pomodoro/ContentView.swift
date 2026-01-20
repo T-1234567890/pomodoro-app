@@ -20,6 +20,7 @@ struct ContentView: View {
     }
 }
 
+#if DEBUG && PREVIEWS_ENABLED
 #Preview {
     let appState = AppState()
     ContentView()
@@ -28,3 +29,4 @@ struct ContentView: View {
         .environmentObject(MusicController(ambientNoiseEngine: appState.ambientNoiseEngine))
         .environmentObject(OnboardingState())
 }
+#endif

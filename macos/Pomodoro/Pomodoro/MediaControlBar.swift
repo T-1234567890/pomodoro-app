@@ -113,8 +113,10 @@ struct MediaControlBar: View {
     }
 }
 
+#if DEBUG && PREVIEWS_ENABLED
 #Preview {
     MediaControlBar()
         .environmentObject(NowPlayingRouter())
         .padding()
 }
+#endif
