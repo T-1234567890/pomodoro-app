@@ -9,6 +9,7 @@ struct MainWindowView: View {
                 .font(.largeTitle)
             Text("Ready to focus.")
                 .foregroundStyle(.secondary)
+            CountdownTimerView()
             MediaControlBar()
             DebugStateView()
         }

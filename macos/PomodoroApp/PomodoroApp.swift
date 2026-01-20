@@ -4,6 +4,7 @@ import SwiftUI
 @main
 struct PomodoroApp: App {
     @StateObject private var appState = AppState()
+    @StateObject private var countdownState = CountdownTimerState()
     @State private var menuBarController: MenuBarController?
 
     init() {
@@ -19,6 +20,7 @@ struct PomodoroApp: App {
         WindowGroup {
             MainWindowView()
                 .environmentObject(appState)
+                .environmentObject(countdownState)
                 .task {
                     if menuBarController == nil {
                         menuBarController = MenuBarController(
