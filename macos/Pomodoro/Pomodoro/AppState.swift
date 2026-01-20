@@ -39,6 +39,7 @@ final class AppState: ObservableObject {
             requestNotificationAuthorizationIfNeeded()
         }
     }
+    @Published private(set) var transitionPopup: TransitionPopup?
 
     private var cancellables: Set<AnyCancellable> = []
     private let userDefaults: UserDefaults
@@ -331,6 +332,7 @@ final class AppState: ObservableObject {
             if previousState == .running || previousState == .paused {
                 if pomodoroDidReachZero {
                     sendPomodoroCompletionNotification()
+                    showTransitionPopup(message: transitionMessageForBreakStart())
                     logFocusSessionIfNeeded()
                 }
                 pomodoroDidReachZero = false
@@ -415,24 +417,52 @@ final class AppState: ObservableObject {
     }
 
     private func sendPomodoroCompletionNotification() {
-        sendNotification(title: "Pomodoro complete", body: "Time for a break.")
+        sendNotification(title: decoratedTitle("Pomodoro complete", emoji: "🍅"), body: "Time for a break.")
     }
 
     private func sendBreakCompletionNotification() {
         let title: String
         switch lastBreakMode {
         case .longBreak:
-            title = "Long break complete"
+            title = decoratedTitle("Long break complete", emoji: "☕")
         case .break:
-            title = "Break complete"
+            title = decoratedTitle("Break complete", emoji: "☕")
         case .work, .idle, nil:
-            title = "Break complete"
+            title = decoratedTitle("Break complete", emoji: "☕")
         }
         sendNotification(title: title, body: "Ready to focus again?")
     }
 
     private func sendCountdownCompletionNotification() {
-        sendNotification(title: "Countdown complete", body: "Time is up.")
+        sendNotification(title: decoratedTitle("Countdown complete", emoji: "⏰"), body: "Time is up.")
+    }
+
+    private func decoratedTitle(_ title: String, emoji: String?) -> String {
+        guard let emoji else { return title }
+        return "\(emoji) \(title)"
+    }
+
+    private func transitionMessageForBreakStart() -> String {
+        switch pomodoro.currentMode {
+        case .longBreak:
+            return "Long break starting"
+        case .break:
+            return "Break starting"
+        case .work, .idle:
+            return "Break starting"
+        }
+    }
+
+    private func showTransitionPopup(message: String) {
+        let popup = TransitionPopup(id: UUID(), message: message)
+        DispatchQueue.main.async {
+            self.transitionPopup = popup
+        }
+        DispatchQueue.main.asyncAfter(deadline: .now() + 5) { [weak self] in
+            guard let self = self else { return }
+            guard self.transitionPopup?.id == popup.id else { return }
+            self.transitionPopup = nil
+        }
     }
 
     private func sendNotification(title: String, body: String) {
@@ -501,5 +531,12 @@ final class AppState: ObservableObject {
         case .work, .idle:
             return nil
         }
+    }
+}
+
+extension AppState {
+    struct TransitionPopup: Identifiable, Equatable {
+        let id: UUID
+        let message: String
     }
 }
