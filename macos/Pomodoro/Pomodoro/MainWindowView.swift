@@ -20,6 +20,16 @@ struct MainWindowView: View {
 
     var body: some View {
         ZStack(alignment: .top) {
+            // Real macOS wallpaper blur using NSVisualEffectView
+            // This replaces the failed Rectangle().fill(.ultraThinMaterial) approach because:
+            // - SwiftUI Material is a compositing effect, not true vibrancy
+            // - It cannot access the desktop wallpaper layer
+            // - NSVisualEffectView with .behindWindow blending is required for wallpaper blur
+            // Note: Individual UI components (popups, buttons) may still use .ultraThinMaterial
+            // for layered glass effects on top of this main background blur
+            VisualEffectBlur(material: .hudWindow, blendingMode: .behindWindow)
+                .ignoresSafeArea()
+            
             VStack(alignment: .leading, spacing: 16) {
                 VStack(alignment: .leading, spacing: 8) {
                     Text(titleForPomodoroMode(appState.pomodoroMode))
@@ -231,6 +241,7 @@ struct MainWindowView: View {
                 .allowsHitTesting(false)
             }
         }
+        .background(WindowBackgroundConfigurator())
         .animation(reduceMotion ? .linear(duration: 0.2) : .easeInOut(duration: 0.25),
                    value: appState.transitionPopup?.id)
         .animation(reduceMotion ? .linear(duration: 0.2) : .easeInOut(duration: 0.25),
