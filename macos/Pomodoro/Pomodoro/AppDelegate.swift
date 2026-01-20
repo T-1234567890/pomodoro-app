@@ -37,6 +37,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         if let window = existingWindow() {
+            window.applyPomodoroWindowChrome()
             configureWindowPersistence(window)
         }
     }
@@ -55,14 +56,6 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             backing: .buffered,
             defer: false
         )
-        window.title = ""
-        window.titleVisibility = .hidden
-        window.titlebarAppearsTransparent = true
-        window.toolbar = nil
-        window.isMovableByWindowBackground = true
-        window.standardWindowButton(.closeButton)?.isHidden = false
-        window.standardWindowButton(.miniaturizeButton)?.isHidden = false
-        window.standardWindowButton(.zoomButton)?.isHidden = false
         window.isReleasedWhenClosed = true
         window.contentViewController = NSHostingController(
             rootView: ContentView()
@@ -71,6 +64,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
                 .environmentObject(musicController)
                 .environmentObject(onboardingState ?? OnboardingState())
         )
+        window.applyPomodoroWindowChrome()
         configureWindowPersistence(window)
         window.makeKeyAndOrderFront(nil)
         focus(window: window)
