@@ -18,7 +18,7 @@ final class CountdownTimerEngine: ObservableObject {
 
     init(
         durationConfig: DurationConfig = .standard,
-        durationProvider: @escaping (DurationConfig) -> Int = { $0.shortBreakDuration * 2 }
+        durationProvider: @escaping (DurationConfig) -> Int = { $0.countdownDuration }
     ) {
         self.durationConfig = durationConfig
         self.durationProvider = durationProvider

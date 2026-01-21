@@ -15,6 +15,7 @@ struct MainWindowView: View {
     @State private var workMinutesText = ""
     @State private var shortBreakMinutesText = ""
     @State private var longBreakMinutesText = ""
+    @State private var countdownMinutesText = ""
     @FocusState private var focusedField: DurationField?
     @State private var longBreakIntervalValue: Int = 4
     @State private var sidebarSelection: SidebarItem = .pomodoro
@@ -51,6 +52,7 @@ struct MainWindowView: View {
                 commitDuration(.work)
                 commitDuration(.shortBreak)
                 commitDuration(.longBreak)
+                commitDuration(.countdown)
             }
 
             if appState.transitionPopup != nil || appState.notificationPopup != nil {
@@ -263,6 +265,16 @@ struct MainWindowView: View {
                     commitDuration(.longBreak)
                 }
 
+                DurationInputRow(
+                    title: "Countdown",
+                    text: $countdownMinutesText,
+                    field: .countdown,
+                    focusedField: $focusedField,
+                    isFocused: focusedField == .countdown
+                ) {
+                    commitDuration(.countdown)
+                }
+
                 LongBreakIntervalRow(
                     interval: $longBreakIntervalValue
                 ) {
@@ -332,6 +344,7 @@ struct MainWindowView: View {
         case work
         case shortBreak
         case longBreak
+        case countdown
     }
 
     private enum SidebarItem: String, CaseIterable, Identifiable {
@@ -662,23 +675,30 @@ struct MainWindowView: View {
         max(1, appState.durationConfig.longBreakDuration / 60)
     }
 
+    private var countdownMinutesValue: Int {
+        max(1, appState.durationConfig.countdownDuration / 60)
+    }
+
     private func updateDurationConfig(
         workMinutes: Int? = nil,
         shortBreakMinutes: Int? = nil,
         longBreakMinutes: Int? = nil,
-        longBreakInterval: Int? = nil
+        longBreakInterval: Int? = nil,
+        countdownMinutes: Int? = nil
     ) {
         let currentConfig = appState.durationConfig
         let updatedWorkMinutes = clamp(workMinutes ?? currentConfig.workDuration / 60, range: 1...120)
         let updatedShortBreakMinutes = clamp(shortBreakMinutes ?? currentConfig.shortBreakDuration / 60, range: 1...60)
         let updatedLongBreakMinutes = clamp(longBreakMinutes ?? currentConfig.longBreakDuration / 60, range: 1...90)
         let updatedLongBreakInterval = clamp(longBreakInterval ?? currentConfig.longBreakInterval, range: 1...12)
+        let updatedCountdownMinutes = clamp(countdownMinutes ?? currentConfig.countdownDuration / 60, range: 1...120)
 
         appState.applyCustomDurationConfig(DurationConfig(
             workDuration: updatedWorkMinutes * 60,
             shortBreakDuration: updatedShortBreakMinutes * 60,
             longBreakDuration: updatedLongBreakMinutes * 60,
-            longBreakInterval: updatedLongBreakInterval
+            longBreakInterval: updatedLongBreakInterval,
+            countdownDuration: updatedCountdownMinutes * 60
         ))
     }
 
@@ -698,6 +718,9 @@ struct MainWindowView: View {
         }
         if focusedField != .longBreak {
             longBreakMinutesText = String(longBreakMinutesValue)
+        }
+        if focusedField != .countdown {
+            countdownMinutesText = String(countdownMinutesValue)
         }
     }
 
@@ -719,6 +742,10 @@ struct MainWindowView: View {
             let committed = parseMinutes(from: longBreakMinutesText, fallback: longBreakMinutesValue, range: 1...90)
             longBreakMinutesText = String(committed)
             updateDurationConfig(longBreakMinutes: committed)
+        case .countdown:
+            let committed = parseMinutes(from: countdownMinutesText, fallback: countdownMinutesValue, range: 1...120)
+            countdownMinutesText = String(committed)
+            updateDurationConfig(countdownMinutes: committed)
         }
     }
 

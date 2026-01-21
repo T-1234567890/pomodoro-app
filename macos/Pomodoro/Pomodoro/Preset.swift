@@ -25,7 +25,8 @@ struct Preset: Identifiable, Hashable {
                 workDuration: 25 * 60,
                 shortBreakDuration: 5 * 60,
                 longBreakDuration: 15 * 60,
-                longBreakInterval: 4
+                longBreakInterval: 4,
+                countdownDuration: 10 * 60
             )
         ),
         Preset(
@@ -34,7 +35,8 @@ struct Preset: Identifiable, Hashable {
                 workDuration: 50 * 60,
                 shortBreakDuration: 10 * 60,
                 longBreakDuration: 30 * 60,
-                longBreakInterval: 4
+                longBreakInterval: 4,
+                countdownDuration: 20 * 60
             )
         ),
         Preset(
@@ -43,7 +45,8 @@ struct Preset: Identifiable, Hashable {
                 workDuration: 90 * 60,
                 shortBreakDuration: 15 * 60,
                 longBreakDuration: 45 * 60,
-                longBreakInterval: 4
+                longBreakInterval: 4,
+                countdownDuration: 30 * 60
             )
         )
     ]
