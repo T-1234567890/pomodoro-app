@@ -201,8 +201,8 @@ The stats file format remains the same (`backend/pomodoro_data.json`).
 
 ## 🏗️ Working on
 
-### 🖥️ Menu Bar support (In Progress)
-Showing the real time main timer on mac menu bar.
+### 🖥️ Native liquid glass UI/UX
+An upcoming release for the native liquid glass support (currently macOS 15 style)
 
 ---
 
