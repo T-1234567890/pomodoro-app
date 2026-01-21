@@ -106,12 +106,12 @@ struct MainWindowView: View {
         VStack(alignment: .leading, spacing: 16) {
             VStack(alignment: .leading, spacing: 8) {
                 Text(titleForPomodoroMode(appState.pomodoroMode))
-                    .font(.system(.headline, design: .rounded))
+                    .font(.system(.headline, design: .default))
                     .foregroundStyle(.secondary)
                 Text(formattedTime(appState.pomodoro.remainingSeconds))
-                    .font(.system(size: 48, weight: .semibold, design: .rounded).monospacedDigit())
+                    .font(.system(size: 72, weight: .heavy, design: .default).monospacedDigit())
                 Text("State: \(labelForPomodoroState(appState.pomodoro.state))")
-                    .font(.system(.subheadline, design: .rounded))
+                    .font(.system(size: 15, weight: .medium, design: .default))
                     .foregroundStyle(.secondary)
             }
 
@@ -128,6 +128,47 @@ struct MainWindowView: View {
                         .tag(PresetSelection.custom)
                 }
                 .pickerStyle(.segmented)
+            }
+
+            VStack(alignment: .leading, spacing: 8) {
+                Text("Durations")
+                    .font(.system(.headline, design: .rounded))
+                    .foregroundStyle(.secondary)
+                DurationInputRow(
+                    title: "Work",
+                    text: $workMinutesText,
+                    field: .work,
+                    focusedField: $focusedField,
+                    isFocused: focusedField == .work
+                ) {
+                    commitDuration(.work)
+                }
+
+                DurationInputRow(
+                    title: "Short Break",
+                    text: $shortBreakMinutesText,
+                    field: .shortBreak,
+                    focusedField: $focusedField,
+                    isFocused: focusedField == .shortBreak
+                ) {
+                    commitDuration(.shortBreak)
+                }
+
+                DurationInputRow(
+                    title: "Long Break",
+                    text: $longBreakMinutesText,
+                    field: .longBreak,
+                    focusedField: $focusedField,
+                    isFocused: focusedField == .longBreak
+                ) {
+                    commitDuration(.longBreak)
+                }
+
+                LongBreakIntervalRow(
+                    interval: $longBreakIntervalValue
+                ) {
+                    updateDurationConfig(longBreakInterval: longBreakIntervalValue)
+                }
             }
 
             HStack(spacing: 10) {
@@ -159,13 +200,28 @@ struct MainWindowView: View {
         VStack(alignment: .leading, spacing: 16) {
             VStack(alignment: .leading, spacing: 8) {
                 Text("Countdown")
-                    .font(.system(.headline, design: .rounded))
+                    .font(.system(.headline, design: .default))
                     .foregroundStyle(.secondary)
                 Text(formattedTime(appState.countdown.remainingSeconds))
-                    .font(.system(size: 40, weight: .semibold, design: .rounded).monospacedDigit())
+                    .font(.system(size: 72, weight: .heavy, design: .default).monospacedDigit())
                 Text("State: \(appState.countdown.state.rawValue.capitalized)")
-                    .font(.system(.subheadline, design: .rounded))
+                    .font(.system(size: 15, weight: .medium, design: .default))
                     .foregroundStyle(.secondary)
+            }
+
+            VStack(alignment: .leading, spacing: 8) {
+                Text("Duration")
+                    .font(.system(.headline, design: .rounded))
+                    .foregroundStyle(.secondary)
+                DurationInputRow(
+                    title: "Countdown",
+                    text: $countdownMinutesText,
+                    field: .countdown,
+                    focusedField: $focusedField,
+                    isFocused: focusedField == .countdown
+                ) {
+                    commitDuration(.countdown)
+                }
             }
 
             HStack(spacing: 10) {
@@ -216,12 +272,13 @@ struct MainWindowView: View {
 
     private var summaryView: some View {
         VStack(alignment: .leading, spacing: 16) {
-            VStack(alignment: .leading, spacing: 8) {
+            VStack(alignment: .center, spacing: 8) {
                 Text("Today's Summary")
-                    .font(.system(.headline, design: .rounded))
+                    .font(.system(size: 22, weight: .semibold, design: .default))
                     .foregroundStyle(.secondary)
                 summarySection
             }
+            .frame(maxWidth: .infinity, alignment: .center)
         }
         .padding(.top, 28)
         .padding(.horizontal)
@@ -231,57 +288,6 @@ struct MainWindowView: View {
 
     private var settingsView: some View {
         VStack(alignment: .leading, spacing: 16) {
-            VStack(alignment: .leading, spacing: 8) {
-                Text("Durations")
-                    .font(.system(.headline, design: .rounded))
-                    .foregroundStyle(.secondary)
-                DurationInputRow(
-                    title: "Work",
-                    text: $workMinutesText,
-                    field: .work,
-                    focusedField: $focusedField,
-                    isFocused: focusedField == .work
-                ) {
-                    commitDuration(.work)
-                }
-
-                DurationInputRow(
-                    title: "Short Break",
-                    text: $shortBreakMinutesText,
-                    field: .shortBreak,
-                    focusedField: $focusedField,
-                    isFocused: focusedField == .shortBreak
-                ) {
-                    commitDuration(.shortBreak)
-                }
-
-                DurationInputRow(
-                    title: "Long Break",
-                    text: $longBreakMinutesText,
-                    field: .longBreak,
-                    focusedField: $focusedField,
-                    isFocused: focusedField == .longBreak
-                ) {
-                    commitDuration(.longBreak)
-                }
-
-                DurationInputRow(
-                    title: "Countdown",
-                    text: $countdownMinutesText,
-                    field: .countdown,
-                    focusedField: $focusedField,
-                    isFocused: focusedField == .countdown
-                ) {
-                    commitDuration(.countdown)
-                }
-
-                LongBreakIntervalRow(
-                    interval: $longBreakIntervalValue
-                ) {
-                    updateDurationConfig(longBreakInterval: longBreakIntervalValue)
-                }
-            }
-
             VStack(alignment: .leading, spacing: 8) {
                 Text("Notifications")
                     .font(.system(.headline, design: .rounded))

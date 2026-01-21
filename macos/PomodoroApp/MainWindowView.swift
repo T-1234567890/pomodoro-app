@@ -74,52 +74,57 @@ struct MainWindowView: View {
             MediaControlBar()
             DebugStateView()
         }
-        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
         .frame(minWidth: 520, minHeight: 360)
-        .padding(32)
+        .padding(.top, 64)
+        .padding(.horizontal, 32)
+        .padding(.bottom, 28)
     }
 
     private var countdownView: some View {
-        VStack(alignment: .leading, spacing: 16) {
+        VStack(alignment: .center, spacing: 16) {
             Text("Countdown")
                 .font(.largeTitle)
             Text("One-off timers for tasks that do not need full Pomodoro cycles.")
                 .foregroundStyle(.secondary)
             CountdownTimerView()
-            Spacer()
         }
-        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
-        .padding(32)
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
+        .padding(.top, 64)
+        .padding(.horizontal, 32)
+        .padding(.bottom, 28)
     }
 
     private var audioMusicView: some View {
-        VStack(alignment: .leading, spacing: 16) {
+        VStack(alignment: .center, spacing: 16) {
             Text("Audio & Music")
                 .font(.largeTitle)
             Text("Control what's playing while you work.")
                 .foregroundStyle(.secondary)
             MediaControlBar()
-            Spacer()
         }
-        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
-        .padding(32)
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
+        .padding(.top, 64)
+        .padding(.horizontal, 32)
+        .padding(.bottom, 28)
     }
 
     private var summaryView: some View {
-        VStack(alignment: .leading, spacing: 16) {
+        VStack(alignment: .center, spacing: 16) {
             Text("Summary")
                 .font(.largeTitle)
             Text("Session state and diagnostics.")
                 .foregroundStyle(.secondary)
             DebugStateView()
-            Spacer()
         }
-        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
-        .padding(32)
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
+        .padding(.top, 64)
+        .padding(.horizontal, 32)
+        .padding(.bottom, 28)
     }
 
     private var settingsView: some View {
-        VStack(alignment: .leading, spacing: 16) {
+        VStack(alignment: .center, spacing: 16) {
             Text("Settings")
                 .font(.largeTitle)
             Text("Customize your focus experience.")
@@ -136,10 +141,11 @@ struct MainWindowView: View {
                             .foregroundStyle(.secondary)
                     }
                 )
-            Spacer()
         }
-        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
-        .padding(32)
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
+        .padding(.top, 64)
+        .padding(.horizontal, 32)
+        .padding(.bottom, 28)
     }
 
     private enum SidebarItem: String, CaseIterable, Identifiable {

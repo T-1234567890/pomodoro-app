@@ -11,11 +11,10 @@ struct CountdownTimerView: View {
         VStack(alignment: .leading, spacing: 12) {
             HStack {
                 Text("Countdown Timer")
-                    .font(.headline)
+                    .font(.system(.headline, design: .default))
                 Spacer()
                 Text(timeString(from: countdownState.remainingTime))
-                    .font(.title3)
-                    .monospacedDigit()
+                    .font(.system(size: 72, weight: .heavy, design: .default).monospacedDigit())
             }
 
             HStack(spacing: 12) {
