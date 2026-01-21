@@ -25,3 +25,8 @@
 - Improved Dark Mode contrast for text, disabled buttons, and dividers
 - Expanded glass theme depth with layered panels, gradients, and softer shadows
 - No changes to timer logic or settings behavior in this update
+
+## 0.7.x
+- General UI improvements
+- New navigation bar
+- New pop up reminders when timer season ends
