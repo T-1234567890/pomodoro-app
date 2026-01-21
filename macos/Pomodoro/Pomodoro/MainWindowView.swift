@@ -19,6 +19,8 @@ struct MainWindowView: View {
     @FocusState private var focusedField: DurationField?
     @State private var longBreakIntervalValue: Int = 4
     @State private var sidebarSelection: SidebarItem = .pomodoro
+    @State private var pomodoroStatePulse = false
+    @State private var countdownStatePulse = false
 
     var body: some View {
         ZStack(alignment: .top) {
@@ -54,6 +56,12 @@ struct MainWindowView: View {
                 commitDuration(.longBreak)
                 commitDuration(.countdown)
             }
+            .onChange(of: appState.pomodoro.state) { oldValue, newValue in
+                triggerPomodoroStateAnimation(from: oldValue, to: newValue)
+            }
+            .onChange(of: appState.countdown.state) { oldValue, newValue in
+                triggerCountdownStateAnimation(from: oldValue, to: newValue)
+            }
 
             if appState.transitionPopup != nil || appState.notificationPopup != nil {
                 VStack(spacing: 8) {
@@ -86,20 +94,24 @@ struct MainWindowView: View {
         .listStyle(.sidebar)
     }
 
-    @ViewBuilder
     private var detailView: some View {
-        switch sidebarSelection {
-        case .pomodoro:
-            pomodoroView
-        case .countdown:
-            countdownView
-        case .audioAndMusic:
-            audioAndMusicView
-        case .summary:
-            summaryView
-        case .settings:
-            settingsView
+        ZStack {
+            switch sidebarSelection {
+            case .pomodoro:
+                pomodoroView
+            case .countdown:
+                countdownView
+            case .audioAndMusic:
+                audioAndMusicView
+            case .summary:
+                summaryView
+            case .settings:
+                settingsView
+            }
         }
+        .id(sidebarSelection)
+        .transition(sectionTransition)
+        .animation(sectionTransitionAnimation, value: sidebarSelection)
     }
 
     private var pomodoroView: some View {
@@ -110,6 +122,9 @@ struct MainWindowView: View {
                     .foregroundStyle(.secondary)
                 Text(formattedTime(appState.pomodoro.remainingSeconds))
                     .font(.system(size: 72, weight: .heavy, design: .default).monospacedDigit())
+                    .scaleEffect(pomodoroStatePulse ? 1.0 : 0.98)
+                    .opacity(pomodoroStatePulse ? 1.0 : 0.94)
+                    .animation(timerStateAnimation, value: pomodoroStatePulse)
                 Text("State: \(labelForPomodoroState(appState.pomodoro.state))")
                     .font(.system(size: 15, weight: .medium, design: .default))
                     .foregroundStyle(.secondary)
@@ -204,6 +219,9 @@ struct MainWindowView: View {
                     .foregroundStyle(.secondary)
                 Text(formattedTime(appState.countdown.remainingSeconds))
                     .font(.system(size: 72, weight: .heavy, design: .default).monospacedDigit())
+                    .scaleEffect(countdownStatePulse ? 1.0 : 0.98)
+                    .opacity(countdownStatePulse ? 1.0 : 0.94)
+                    .animation(timerStateAnimation, value: countdownStatePulse)
                 Text("State: \(appState.countdown.state.rawValue.capitalized)")
                     .font(.system(size: 15, weight: .medium, design: .default))
                     .foregroundStyle(.secondary)
@@ -765,6 +783,50 @@ struct MainWindowView: View {
 
     private func clamp(_ value: Int, range: ClosedRange<Int>) -> Int {
         min(max(value, range.lowerBound), range.upperBound)
+    }
+
+    private var timerStateAnimation: Animation? {
+        reduceMotion ? nil : .easeInOut(duration: 0.18)
+    }
+
+    private var sectionTransition: AnyTransition {
+        guard !reduceMotion else { return .identity }
+        let insertion = AnyTransition.opacity.combined(with: .offset(x: 8, y: 0))
+        let removal = AnyTransition.opacity.combined(with: .offset(x: -8, y: 0))
+        return .asymmetric(insertion: insertion, removal: removal)
+    }
+
+    private var sectionTransitionAnimation: Animation? {
+        reduceMotion ? nil : .easeInOut(duration: 0.15)
+    }
+
+    private func shouldAnimateTimerTransition(from oldValue: TimerState, to newValue: TimerState) -> Bool {
+        if oldValue == .idle && newValue == .running {
+            return true
+        }
+        if oldValue == .running && newValue == .paused {
+            return true
+        }
+        if oldValue == .running && (newValue == .breakRunning || newValue == .breakPaused) {
+            return true
+        }
+        if (oldValue == .breakRunning || oldValue == .breakPaused) && newValue == .idle {
+            return true
+        }
+        if oldValue != .idle && newValue == .idle {
+            return true
+        }
+        return false
+    }
+
+    private func triggerPomodoroStateAnimation(from oldValue: TimerState, to newValue: TimerState) {
+        guard shouldAnimateTimerTransition(from: oldValue, to: newValue), !reduceMotion else { return }
+        pomodoroStatePulse.toggle()
+    }
+
+    private func triggerCountdownStateAnimation(from oldValue: TimerState, to newValue: TimerState) {
+        guard shouldAnimateTimerTransition(from: oldValue, to: newValue), !reduceMotion else { return }
+        countdownStatePulse.toggle()
     }
 }
 

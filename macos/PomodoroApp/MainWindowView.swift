@@ -2,6 +2,7 @@ import SwiftUI
 
 struct MainWindowView: View {
     @EnvironmentObject private var appState: AppState
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @State private var selectedItem: SidebarItem? = .pomodoro
     @State private var columnVisibility: NavigationSplitViewVisibility = .all
 
@@ -18,7 +19,7 @@ struct MainWindowView: View {
             NavigationSplitView(columnVisibility: $columnVisibility) {
                 sidebar
             } detail: {
-                detail(for: selectedItem ?? .pomodoro)
+                detailContainer
             }
             .navigationSplitViewStyle(.balanced)
             .navigationSplitViewColumnWidth(min: 200, ideal: 220, max: 260)
@@ -36,6 +37,15 @@ struct MainWindowView: View {
             #endif
             appState.systemMedia.connect()
         }
+    }
+
+    private var detailContainer: some View {
+        ZStack {
+            detail(for: selectedItem ?? .pomodoro)
+        }
+        .id(selectedItem ?? .pomodoro)
+        .transition(sectionTransition)
+        .animation(sectionAnimation, value: selectedItem)
     }
 
     private var sidebar: some View {
@@ -146,6 +156,17 @@ struct MainWindowView: View {
         .padding(.top, 64)
         .padding(.horizontal, 32)
         .padding(.bottom, 28)
+    }
+
+    private var sectionTransition: AnyTransition {
+        guard !reduceMotion else { return .identity }
+        let insertion = AnyTransition.opacity.combined(with: .offset(x: 8, y: 0))
+        let removal = AnyTransition.opacity.combined(with: .offset(x: -8, y: 0))
+        return .asymmetric(insertion: insertion, removal: removal)
+    }
+
+    private var sectionAnimation: Animation? {
+        reduceMotion ? nil : .easeInOut(duration: 0.15)
     }
 
     private enum SidebarItem: String, CaseIterable, Identifiable {

@@ -2,8 +2,10 @@ import SwiftUI
 
 struct CountdownTimerView: View {
     @EnvironmentObject private var countdownState: CountdownTimerState
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @State private var selectedMinutes: Int = 10
     @State private var customMinutesText: String = "10"
+    @State private var statePulse = false
 
     private let minuteOptions = Array(stride(from: 1, through: 120, by: 1))
 
@@ -15,6 +17,9 @@ struct CountdownTimerView: View {
                 Spacer()
                 Text(timeString(from: countdownState.remainingTime))
                     .font(.system(size: 72, weight: .heavy, design: .default).monospacedDigit())
+                    .scaleEffect(statePulse ? 1.0 : 0.98)
+                    .opacity(statePulse ? 1.0 : 0.94)
+                    .animation(timerAnimation, value: statePulse)
             }
 
             HStack(spacing: 12) {
@@ -82,6 +87,9 @@ struct CountdownTimerView: View {
                 customMinutesText = "\(newMinutes)"
             }
         }
+        .onChange(of: computedViewState) { oldValue, newValue in
+            handleStateTransition(from: oldValue, to: newValue)
+        }
         .padding()
         .background(.quaternary.opacity(0.2), in: RoundedRectangle(cornerRadius: 12))
     }
@@ -108,6 +116,44 @@ struct CountdownTimerView: View {
         }
         selectedMinutes = value
         countdownState.setDuration(minutes: value)
+    }
+
+    private var timerAnimation: Animation? {
+        reduceMotion ? nil : .easeInOut(duration: 0.18)
+    }
+
+    private var computedViewState: CountdownViewState {
+        if countdownState.isRunning {
+            return .running
+        }
+        if countdownState.isPaused {
+            return .paused
+        }
+        return .idle
+    }
+
+    private func handleStateTransition(from oldValue: CountdownViewState, to newValue: CountdownViewState) {
+        guard shouldAnimateTransition(from: oldValue, to: newValue), !reduceMotion else { return }
+        statePulse.toggle()
+    }
+
+    private func shouldAnimateTransition(from oldValue: CountdownViewState, to newValue: CountdownViewState) -> Bool {
+        if oldValue == .idle && newValue == .running {
+            return true
+        }
+        if oldValue == .running && newValue == .paused {
+            return true
+        }
+        if oldValue != .idle && newValue == .idle {
+            return true
+        }
+        return false
+    }
+
+    private enum CountdownViewState: Equatable {
+        case idle
+        case running
+        case paused
     }
 }
 
