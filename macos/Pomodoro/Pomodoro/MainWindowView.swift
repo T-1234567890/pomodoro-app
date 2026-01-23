@@ -5,12 +5,12 @@
 //  Created by Zhengyang Hu on 1/15/26.
 //
 
+import AppKit
 import SwiftUI
 
 struct MainWindowView: View {
     @EnvironmentObject private var appState: AppState
     @EnvironmentObject private var musicController: MusicController
-    @EnvironmentObject private var onboardingState: OnboardingState
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @State private var workMinutesText = ""
     @State private var shortBreakMinutesText = ""
@@ -336,13 +336,93 @@ struct MainWindowView: View {
             }
 
             VStack(alignment: .leading, spacing: 8) {
-                Text("Setup")
+                Text("Quick Actions")
                     .font(.system(.headline, design: .rounded))
                     .foregroundStyle(.secondary)
-                Button("Open Onboarding") {
-                    onboardingState.reopen()
+                HStack(spacing: 12) {
+                    Button("Request Notifications") {
+                        appState.requestSystemNotificationAuthorization { _ in }
+                    }
+                    .buttonStyle(.bordered)
+
+                    Button("Open Notification Settings") {
+                        openNotificationSettings()
+                    }
+                    .buttonStyle(.bordered)
                 }
-                .buttonStyle(.bordered)
+            }
+
+            VStack(alignment: .leading, spacing: 8) {
+                Text("Preferences")
+                    .font(.system(.headline, design: .rounded))
+                    .foregroundStyle(.secondary)
+                Picker("Default Preset", selection: presetSelectionBinding) {
+                    ForEach(Preset.builtIn) { preset in
+                        Text(preset.name)
+                            .tag(PresetSelection.preset(preset))
+                    }
+                    Text("Custom")
+                        .tag(PresetSelection.custom)
+                }
+                .pickerStyle(.segmented)
+
+                Picker("Focus Sound", selection: ambientSoundBinding) {
+                    ForEach(FocusSoundType.allCases) { sound in
+                        Text(sound.displayName)
+                            .tag(sound)
+                    }
+                }
+                .pickerStyle(.segmented)
+            }
+
+            VStack(alignment: .leading, spacing: 8) {
+                Text("Session Defaults")
+                    .font(.system(.headline, design: .rounded))
+                    .foregroundStyle(.secondary)
+                Stepper(value: workMinutesBinding, in: 1...120) {
+                    HStack {
+                        Text("Work")
+                        Spacer()
+                        Text("\(workMinutesValue) min")
+                            .foregroundStyle(.secondary)
+                    }
+                }
+
+                Stepper(value: shortBreakMinutesBinding, in: 1...60) {
+                    HStack {
+                        Text("Short Break")
+                        Spacer()
+                        Text("\(shortBreakMinutesValue) min")
+                            .foregroundStyle(.secondary)
+                    }
+                }
+
+                Stepper(value: longBreakMinutesBinding, in: 1...90) {
+                    HStack {
+                        Text("Long Break")
+                        Spacer()
+                        Text("\(longBreakMinutesValue) min")
+                            .foregroundStyle(.secondary)
+                    }
+                }
+
+                Stepper(value: longBreakIntervalBinding, in: 1...12) {
+                    HStack {
+                        Text("Long Break Interval")
+                        Spacer()
+                        Text("Every \(appState.durationConfig.longBreakInterval) sessions")
+                            .foregroundStyle(.secondary)
+                    }
+                }
+
+                Stepper(value: countdownMinutesBinding, in: 1...120) {
+                    HStack {
+                        Text("Countdown")
+                        Spacer()
+                        Text("\(countdownMinutesValue) min")
+                            .foregroundStyle(.secondary)
+                    }
+                }
             }
         }
         .padding(.top, 28)
@@ -362,6 +442,56 @@ struct MainWindowView: View {
                 }
             }
         )
+    }
+
+    private var workMinutesBinding: Binding<Int> {
+        Binding(
+            get: { workMinutesValue },
+            set: { newValue in
+                updateDurationConfig(workMinutes: newValue)
+            }
+        )
+    }
+
+    private var shortBreakMinutesBinding: Binding<Int> {
+        Binding(
+            get: { shortBreakMinutesValue },
+            set: { newValue in
+                updateDurationConfig(shortBreakMinutes: newValue)
+            }
+        )
+    }
+
+    private var longBreakMinutesBinding: Binding<Int> {
+        Binding(
+            get: { longBreakMinutesValue },
+            set: { newValue in
+                updateDurationConfig(longBreakMinutes: newValue)
+            }
+        )
+    }
+
+    private var countdownMinutesBinding: Binding<Int> {
+        Binding(
+            get: { countdownMinutesValue },
+            set: { newValue in
+                updateDurationConfig(countdownMinutes: newValue)
+            }
+        )
+    }
+
+    private var longBreakIntervalBinding: Binding<Int> {
+        Binding(
+            get: { appState.durationConfig.longBreakInterval },
+            set: { newValue in
+                updateDurationConfig(longBreakInterval: newValue)
+            }
+        )
+    }
+
+    private func openNotificationSettings() {
+        guard let url = URL(string: "x-apple.systempreferences:com.apple.preference.notifications") else { return }
+        NSWorkspace.shared.open(url)
     }
 
     private enum DurationField: Hashable {
