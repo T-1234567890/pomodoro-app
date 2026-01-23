@@ -14,9 +14,19 @@ struct OnboardingFlowView: View {
     @EnvironmentObject private var onboardingState: OnboardingState
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
-    @State private var step: OnboardingStep = .welcome
+    @State private var flow: [OnboardingStep] = []
+    @State private var index: Int = 0
     @State private var authorizationStatus: UNAuthorizationStatus = .notDetermined
     @State private var isRequestingAuthorization = false
+
+    private var step: OnboardingStep {
+        guard index < flow.count else { return .welcome }
+        return flow[index]
+    }
+
+    private var isLastStep: Bool {
+        index == flow.count - 1
+    }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 20) {
@@ -35,13 +45,13 @@ struct OnboardingFlowView: View {
             Spacer()
 
             HStack {
-                if step != .welcome {
+                if index > 0 {
                     Button("Back") {
-                        step = step.previous(using: appState.notificationDeliveryStyle)
+                        back()
                     }
                 }
                 Spacer()
-                Button(step == .media ? "Finish" : "Continue") {
+                Button(isLastStep ? "Finish" : "Continue") {
                     advance()
                 }
                 .buttonStyle(.borderedProminent)
@@ -51,6 +61,7 @@ struct OnboardingFlowView: View {
         .frame(width: 520, height: 360)
         .animation(reduceMotion ? nil : .easeInOut(duration: 0.2), value: step)
         .onAppear {
+            rebuildFlow()
             refreshAuthorizationStatusIfNeeded()
         }
         .onChange(of: step) { _, _ in
@@ -120,6 +131,52 @@ struct OnboardingFlowView: View {
                     .font(.system(.body, design: .rounded))
                     .foregroundStyle(.secondary)
             }
+        case .systemPermissions:
+            VStack(alignment: .leading, spacing: 12) {
+                Text("Calendar & Reminders")
+                    .font(.system(.headline, design: .rounded))
+                Text("Enable read-only calendar context and optional reminders to link with focus sessions. You can skip and enable later.")
+                    .font(.system(.body, design: .rounded))
+                    .foregroundStyle(.secondary)
+
+                HStack(spacing: 12) {
+                    Button("Enable Access") {
+                        Task {
+                            isRequestingAuthorization = true
+                            await appState.requestCalendarAndReminderAccessIfNeeded()
+                            isRequestingAuthorization = false
+                            onboardingState.markPermissionsPrompted()
+                            advance()
+                        }
+                    }
+                    .buttonStyle(.borderedProminent)
+                    .disabled(isRequestingAuthorization)
+
+                    Button("Not Now") {
+                        onboardingState.markPermissionsPrompted()
+                        advance()
+                    }
+                    .buttonStyle(.bordered)
+                }
+
+                Text(appState.calendarReminderPermissionStatusText)
+                    .font(.system(.callout, design: .rounded))
+                    .foregroundStyle(.secondary)
+            }
+        case .menuBarTip:
+            VStack(alignment: .leading, spacing: 12) {
+                Text("Menu Bar Tip")
+                    .font(.system(.headline, design: .rounded))
+                Text("Pomodoro lives in your macOS menu bar. Hold Command (⌘) and drag icons to reorder, including Pomodoro.")
+                    .font(.system(.body, design: .rounded))
+                    .foregroundStyle(.secondary)
+
+                Button("Got it") {
+                    onboardingState.markMenuBarTipSeen()
+                    advance()
+                }
+                .buttonStyle(.borderedProminent)
+            }
         }
     }
 
@@ -188,11 +245,34 @@ struct OnboardingFlowView: View {
     }
 
     private func advance() {
-        if let next = step.next(using: appState.notificationDeliveryStyle) {
-            step = next
+        guard !flow.isEmpty else {
+            onboardingState.markCompleted()
+            return
+        }
+        if index + 1 < flow.count {
+            index += 1
         } else {
             onboardingState.markCompleted()
         }
+    }
+
+    private func back() {
+        guard index > 0 else { return }
+        index -= 1
+    }
+
+    private func rebuildFlow() {
+        flow = OnboardingStep.baseFlow(deliveryStyle: appState.notificationDeliveryStyle)
+        if onboardingState.needsSystemPermissions {
+            flow.append(.systemPermissions)
+        }
+        if onboardingState.needsMenuBarTip {
+            flow.append(.menuBarTip)
+        }
+        if flow.isEmpty {
+            flow = [.welcome]
+        }
+        index = 0
     }
 }
 
@@ -201,6 +281,8 @@ private enum OnboardingStep: Int, CaseIterable {
     case notificationStyle
     case notificationPermission
     case media
+    case systemPermissions
+    case menuBarTip
 
     var title: String {
         switch self {
@@ -212,32 +294,18 @@ private enum OnboardingStep: Int, CaseIterable {
             return "Enable Notifications"
         case .media:
             return "Audio & Music"
+        case .systemPermissions:
+            return "Calendar & Reminders"
+        case .menuBarTip:
+            return "Menu Bar Tip"
         }
     }
 
-    func next(using deliveryStyle: NotificationDeliveryStyle) -> OnboardingStep? {
-        switch self {
-        case .welcome:
-            return .notificationStyle
-        case .notificationStyle:
-            return deliveryStyle == .system ? .notificationPermission : .media
-        case .notificationPermission:
-            return .media
-        case .media:
-            return nil
-        }
-    }
-
-    func previous(using deliveryStyle: NotificationDeliveryStyle) -> OnboardingStep {
-        switch self {
-        case .welcome:
-            return .welcome
-        case .notificationStyle:
-            return .welcome
-        case .notificationPermission:
-            return .notificationStyle
-        case .media:
-            return deliveryStyle == .system ? .notificationPermission : .notificationStyle
+    static func baseFlow(deliveryStyle: NotificationDeliveryStyle) -> [OnboardingStep] {
+        if deliveryStyle == .system {
+            return [.welcome, .notificationStyle, .notificationPermission, .media]
+        } else {
+            return [.welcome, .notificationStyle, .media]
         }
     }
 }

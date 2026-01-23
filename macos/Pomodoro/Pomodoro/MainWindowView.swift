@@ -103,6 +103,8 @@ struct MainWindowView: View {
                 countdownView
             case .audioAndMusic:
                 audioAndMusicView
+            case .calendar:
+                calendarView
             case .summary:
                 summaryView
             case .settings:
@@ -288,6 +290,33 @@ struct MainWindowView: View {
         .frame(minWidth: 360, alignment: .leading)
     }
 
+    private var calendarView: some View {
+        VStack(alignment: .leading, spacing: 16) {
+            VStack(alignment: .leading, spacing: 8) {
+                Text("Calendar Context")
+                    .font(.system(size: 22, weight: .semibold, design: .default))
+                    .foregroundStyle(.secondary)
+                Text("Glance at today's events and anchor a focus session to one. Events stay read-only - edit them in Calendar.")
+                    .font(.system(.body, design: .rounded))
+                    .foregroundStyle(.secondary)
+            }
+
+            VStack(alignment: .leading, spacing: 10) {
+                Label("Reads title, time, location, attendees only", systemImage: "lock")
+                Label("Pick a single event as context; no event creation here", systemImage: "scope")
+                Label("Keep Reminders optional for quick task targets", systemImage: "checkmark.circle")
+            }
+            .labelStyle(.titleAndIcon)
+            .foregroundStyle(.primary)
+
+            Spacer()
+        }
+        .padding(.top, 28)
+        .padding(.horizontal)
+        .padding(.bottom)
+        .frame(minWidth: 360, alignment: .leading)
+    }
+
     private var summaryView: some View {
         VStack(alignment: .leading, spacing: 16) {
             VStack(alignment: .center, spacing: 8) {
@@ -375,6 +404,7 @@ struct MainWindowView: View {
         case pomodoro
         case countdown
         case audioAndMusic
+        case calendar
         case summary
         case settings
 
@@ -388,6 +418,8 @@ struct MainWindowView: View {
                 return "Countdown"
             case .audioAndMusic:
                 return "Audio&Music"
+            case .calendar:
+                return "Calendar"
             case .summary:
                 return "Summary"
             case .settings:
@@ -403,6 +435,8 @@ struct MainWindowView: View {
                 return "hourglass"
             case .audioAndMusic:
                 return "music.note.list"
+            case .calendar:
+                return "calendar"
             case .summary:
                 return "chart.bar"
             case .settings:

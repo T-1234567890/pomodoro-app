@@ -8,6 +8,7 @@
 import Combine
 import SwiftUI
 import UserNotifications
+import EventKit
 
 final class AppState: ObservableObject {
     let pomodoro: PomodoroTimerEngine
@@ -65,6 +66,7 @@ final class AppState: ObservableObject {
     private var currentFocusDurationSeconds: Int?
     private var currentBreakDurationSeconds: Int?
     private var hasRequestedNotificationAuthorization: Bool = false
+    private let eventStore = EKEventStore()
 
     // Designated initializer - no default arguments to avoid linker symbol issues
     @MainActor
@@ -389,6 +391,34 @@ final class AppState: ObservableObject {
                     completion(settings.authorizationStatus)
                 }
             }
+        }
+    }
+
+    @MainActor
+    func requestCalendarAndReminderAccessIfNeeded() async {
+        let calendarStatus = EKEventStore.authorizationStatus(for: .event)
+        let reminderStatus = EKEventStore.authorizationStatus(for: .reminder)
+
+        if calendarStatus == .notDetermined {
+            _ = try? await eventStore.requestAccess(to: .event)
+        }
+        if reminderStatus == .notDetermined {
+            _ = try? await eventStore.requestAccess(to: .reminder)
+        }
+    }
+
+    var calendarReminderPermissionStatusText: String {
+        let cal = EKEventStore.authorizationStatus(for: .event)
+        let rem = EKEventStore.authorizationStatus(for: .reminder)
+        switch (cal, rem) {
+        case (.authorized, .authorized):
+            return "Calendar and Reminders enabled."
+        case (.authorized, _):
+            return "Calendar enabled. Reminders optional."
+        case (_, .authorized):
+            return "Reminders enabled. Calendar optional."
+        default:
+            return "Access not granted. You can enable it later."
         }
     }
 
