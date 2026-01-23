@@ -6,6 +6,7 @@
 //
 
 import AppKit
+import EventKit
 import SwiftUI
 
 struct MainWindowView: View {
@@ -21,6 +22,7 @@ struct MainWindowView: View {
     @State private var sidebarSelection: SidebarItem = .pomodoro
     @State private var pomodoroStatePulse = false
     @State private var countdownStatePulse = false
+    private let eventStore = EKEventStore()
 
     var body: some View {
         ZStack(alignment: .top) {
@@ -350,6 +352,18 @@ struct MainWindowView: View {
                     }
                     .buttonStyle(.bordered)
                 }
+
+                HStack(spacing: 12) {
+                    Button("Get Calendar Access") {
+                        requestCalendarAccess()
+                    }
+                    .buttonStyle(.bordered)
+
+                    Button("Get Reminders Access") {
+                        requestRemindersAccess()
+                    }
+                    .buttonStyle(.bordered)
+                }
             }
 
         }
@@ -375,6 +389,14 @@ struct MainWindowView: View {
     private func openNotificationSettings() {
         guard let url = URL(string: "x-apple.systempreferences:com.apple.preference.notifications") else { return }
         NSWorkspace.shared.open(url)
+    }
+
+    private func requestCalendarAccess() {
+        eventStore.requestAccess(to: .event) { _, _ in }
+    }
+
+    private func requestRemindersAccess() {
+        eventStore.requestAccess(to: .reminder) { _, _ in }
     }
 
     private enum DurationField: Hashable {
