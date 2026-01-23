@@ -374,6 +374,56 @@ struct MainWindowView: View {
                 }
                 .pickerStyle(.segmented)
             }
+
+            VStack(alignment: .leading, spacing: 8) {
+                Text("Session Defaults")
+                    .font(.system(.headline, design: .rounded))
+                    .foregroundStyle(.secondary)
+                Stepper(value: workMinutesBinding, in: 1...120) {
+                    HStack {
+                        Text("Work")
+                        Spacer()
+                        Text("\(workMinutesValue) min")
+                            .foregroundStyle(.secondary)
+                    }
+                }
+
+                Stepper(value: shortBreakMinutesBinding, in: 1...60) {
+                    HStack {
+                        Text("Short Break")
+                        Spacer()
+                        Text("\(shortBreakMinutesValue) min")
+                            .foregroundStyle(.secondary)
+                    }
+                }
+
+                Stepper(value: longBreakMinutesBinding, in: 1...90) {
+                    HStack {
+                        Text("Long Break")
+                        Spacer()
+                        Text("\(longBreakMinutesValue) min")
+                            .foregroundStyle(.secondary)
+                    }
+                }
+
+                Stepper(value: longBreakIntervalBinding, in: 1...12) {
+                    HStack {
+                        Text("Long Break Interval")
+                        Spacer()
+                        Text("Every \(appState.durationConfig.longBreakInterval) sessions")
+                            .foregroundStyle(.secondary)
+                    }
+                }
+
+                Stepper(value: countdownMinutesBinding, in: 1...120) {
+                    HStack {
+                        Text("Countdown")
+                        Spacer()
+                        Text("\(countdownMinutesValue) min")
+                            .foregroundStyle(.secondary)
+                    }
+                }
+            }
         }
         .padding(.top, 28)
         .padding(.horizontal)
@@ -390,6 +440,51 @@ struct MainWindowView: View {
                 } else {
                     musicController.startFocusSound(newValue)
                 }
+            }
+        )
+    }
+
+    private var workMinutesBinding: Binding<Int> {
+        Binding(
+            get: { workMinutesValue },
+            set: { newValue in
+                updateDurationConfig(workMinutes: newValue)
+            }
+        )
+    }
+
+    private var shortBreakMinutesBinding: Binding<Int> {
+        Binding(
+            get: { shortBreakMinutesValue },
+            set: { newValue in
+                updateDurationConfig(shortBreakMinutes: newValue)
+            }
+        )
+    }
+
+    private var longBreakMinutesBinding: Binding<Int> {
+        Binding(
+            get: { longBreakMinutesValue },
+            set: { newValue in
+                updateDurationConfig(longBreakMinutes: newValue)
+            }
+        )
+    }
+
+    private var countdownMinutesBinding: Binding<Int> {
+        Binding(
+            get: { countdownMinutesValue },
+            set: { newValue in
+                updateDurationConfig(countdownMinutes: newValue)
+            }
+        )
+    }
+
+    private var longBreakIntervalBinding: Binding<Int> {
+        Binding(
+            get: { appState.durationConfig.longBreakInterval },
+            set: { newValue in
+                updateDurationConfig(longBreakInterval: newValue)
             }
         )
     }
