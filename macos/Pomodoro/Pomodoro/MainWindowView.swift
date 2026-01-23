@@ -5,12 +5,12 @@
 //  Created by Zhengyang Hu on 1/15/26.
 //
 
+import AppKit
 import SwiftUI
 
 struct MainWindowView: View {
     @EnvironmentObject private var appState: AppState
     @EnvironmentObject private var musicController: MusicController
-    @EnvironmentObject private var onboardingState: OnboardingState
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @State private var workMinutesText = ""
     @State private var shortBreakMinutesText = ""
@@ -365,13 +365,43 @@ struct MainWindowView: View {
             }
 
             VStack(alignment: .leading, spacing: 8) {
-                Text("Setup")
+                Text("Quick Actions")
                     .font(.system(.headline, design: .rounded))
                     .foregroundStyle(.secondary)
-                Button("Open Onboarding") {
-                    onboardingState.reopen()
+                HStack(spacing: 12) {
+                    Button("Request Notifications") {
+                        appState.requestSystemNotificationAuthorization { _ in }
+                    }
+                    .buttonStyle(.bordered)
+
+                    Button("Open Notification Settings") {
+                        openNotificationSettings()
+                    }
+                    .buttonStyle(.bordered)
                 }
-                .buttonStyle(.bordered)
+            }
+
+            VStack(alignment: .leading, spacing: 8) {
+                Text("Preferences")
+                    .font(.system(.headline, design: .rounded))
+                    .foregroundStyle(.secondary)
+                Picker("Default Preset", selection: presetSelectionBinding) {
+                    ForEach(Preset.builtIn) { preset in
+                        Text(preset.name)
+                            .tag(PresetSelection.preset(preset))
+                    }
+                    Text("Custom")
+                        .tag(PresetSelection.custom)
+                }
+                .pickerStyle(.segmented)
+
+                Picker("Focus Sound", selection: ambientSoundBinding) {
+                    ForEach(FocusSoundType.allCases) { sound in
+                        Text(sound.displayName)
+                            .tag(sound)
+                    }
+                }
+                .pickerStyle(.segmented)
             }
         }
         .padding(.top, 28)
@@ -391,6 +421,11 @@ struct MainWindowView: View {
                 }
             }
         )
+    }
+
+    private func openNotificationSettings() {
+        guard let url = URL(string: "x-apple.systempreferences:com.apple.preference.notifications") else { return }
+        NSWorkspace.shared.open(url)
     }
 
     private enum DurationField: Hashable {

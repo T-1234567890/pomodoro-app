@@ -7,6 +7,11 @@ Version **1.0.0** marks the first stable milestone after extensive UI, architect
 
 <img width="320" height="320" alt="Firefly_Gemini Flash_Make it in to normal white background 328819" src="https://github.com/user-attachments/assets/629e345e-5540-4439-8e47-30f3db8c6cad" />
 
+![License](https://img.shields.io/github/license/T-1234567890/pomodoro-app)
+![Platform](https://img.shields.io/badge/platform-macOS-blue?logo=apple)
+![Release](https://img.shields.io/github/v/release/T-1234567890/pomodoro-app)
+![Downloads](https://img.shields.io/github/downloads/T-1234567890/pomodoro-app/total)
+
 ## Screenshot
 <img width="1046" height="638" alt="Screenshot 2026-01-21 at 10 10 07 PM" src="https://github.com/user-attachments/assets/7135a578-4191-4aea-9629-cd7072180557" />
 
@@ -215,6 +220,9 @@ Current direction:
 The reminder system is intended to complement the Pomodoro workflow,
 not replace it or become distracting.
 
+## 📈 Star History
+
+[![Star History](https://api.star-history.com/svg?repos=T-1234567890/pomodoro-app&type=Date)](https://star-history.com/#T-1234567890/pomodoro-app)
 
 ## ⚠️ 说明
 本项目仍在持续改进中，部分功能或界面可能会发生变化。
