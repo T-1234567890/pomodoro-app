@@ -236,8 +236,7 @@ struct CalendarView: View {
     private func dayContent(maxWidth: CGFloat) -> some View {
         DayTimelineView(
             date: anchorDate,
-            events: events(for: anchorDate),
-            tasks: tasks(for: anchorDate)
+            events: events(for: anchorDate)
         )
         .frame(maxWidth: maxWidth, alignment: .leading)
         .padding(.horizontal, 8)
@@ -249,8 +248,7 @@ struct CalendarView: View {
         
         WeekTimelineView(
             days: days,
-            events: eventsGroupedByDay(for: days),
-            tasks: tasksGroupedByDay(for: days)
+            events: eventsGroupedByDay(for: days)
         )
         .frame(maxWidth: maxWidth, alignment: .leading)
         .padding(.horizontal, 8)
@@ -292,28 +290,6 @@ struct CalendarView: View {
         for event in calendarManager.events {
             if let match = days.first(where: { calendar.isDate(event.startDate, inSameDayAs: $0) }) {
                 dict[match, default: []].append(event)
-            }
-        }
-        return dict
-    }
-    
-    private func tasks(for day: Date) -> [TodoItem] {
-        let calendar = Calendar.current
-        return todoStore.items.filter { item in
-            if let due = item.dueDate {
-                return calendar.isDate(due, inSameDayAs: day)
-            }
-            return false
-        }
-    }
-    
-    private func tasksGroupedByDay(for days: [Date]) -> [Date: [TodoItem]] {
-        var dict: [Date: [TodoItem]] = [:]
-        let calendar = Calendar.current
-        for item in todoStore.items {
-            guard let due = item.dueDate else { continue }
-            if let match = days.first(where: { calendar.isDate(due, inSameDayAs: $0) }) {
-                dict[match, default: []].append(item)
             }
         }
         return dict
@@ -403,7 +379,6 @@ struct CalendarView: View {
             let calendar = Calendar.current
             let isToday = calendar.isDateInToday(day)
             let dayEvents = events(for: day)
-            let dayTasks = tasks(for: day)
             
             VStack(alignment: .leading, spacing: 6) {
                 HStack {
@@ -422,12 +397,6 @@ struct CalendarView: View {
                     ForEach(dayEvents.prefix(3), id: \.eventIdentifier) { event in
                         Text(event.title ?? "Untitled")
                             .font(.caption)
-                            .lineLimit(1)
-                    }
-                    ForEach(dayTasks.prefix(2), id: \.id) { task in
-                        Text(task.title)
-                            .font(.caption2)
-                            .foregroundStyle(.blue)
                             .lineLimit(1)
                     }
                 }
@@ -475,48 +444,6 @@ struct CalendarView: View {
         }
         .padding(12)
         .background(Color.primary.opacity(0.05))
-        .cornerRadius(8)
-    }
-    
-    @ViewBuilder
-    private func taskRow(_ task: TodoItem) -> some View {
-        VStack(alignment: .leading, spacing: 6) {
-            HStack {
-                Label("Task", systemImage: "checkmark.circle")
-                    .font(.caption)
-                    .foregroundStyle(.blue)
-                Spacer()
-                if let due = task.dueDate {
-                    Text(Self.eventTimeFormatter.string(from: due))
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                }
-            }
-            Text(task.title)
-                .font(.headline)
-            if let notes = task.notes, !notes.isEmpty {
-                Text(notes)
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-                    .lineLimit(2)
-            }
-            if !task.tags.isEmpty {
-                HStack(spacing: 6) {
-                    ForEach(task.tags, id: \.self) { tag in
-                        Text(tag)
-                            .font(.caption2)
-                            .padding(.horizontal, 6)
-                            .padding(.vertical, 2)
-                            .background(Color.blue.opacity(0.12))
-                            .foregroundStyle(.blue)
-                            .cornerRadius(4)
-                    }
-                }
-            }
-        }
-        .padding(12)
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .background(Color.blue.opacity(0.08))
         .cornerRadius(8)
     }
     
@@ -582,7 +509,6 @@ struct CalendarView: View {
 private struct DayTimelineView: View {
     let date: Date
     let events: [EKEvent]
-    let tasks: [TodoItem]
     
     var body: some View {
         ScrollView {
@@ -595,17 +521,13 @@ private struct DayTimelineView: View {
                         
                         VStack(alignment: .leading, spacing: 4) {
                             let hourEvents = eventsForHour(hour)
-                            let hourTasks = tasksForHour(hour)
                             
-                            if hourEvents.isEmpty && hourTasks.isEmpty {
+                            if hourEvents.isEmpty {
                                 Text(" ")
                                     .font(.caption2)
                             } else {
                                 ForEach(hourEvents, id: \.eventIdentifier) { event in
                                     eventChip(event)
-                                }
-                                ForEach(hourTasks, id: \.id) { task in
-                                    taskChip(task)
                                 }
                             }
                         }
@@ -627,14 +549,6 @@ private struct DayTimelineView: View {
         }
     }
     
-    private func tasksForHour(_ hour: Int) -> [TodoItem] {
-        let calendar = Calendar.current
-        return tasks.filter { item in
-            guard let due = item.dueDate else { return false }
-            return calendar.component(.hour, from: due) == hour
-        }
-    }
-    
     private func hourLabel(_ hour: Int) -> String {
         let date = Calendar.current.date(from: DateComponents(hour: hour)) ?? Date()
         let formatter = DateFormatter()
@@ -651,24 +565,12 @@ private struct DayTimelineView: View {
             .background(Color.primary.opacity(0.08))
             .cornerRadius(6)
     }
-    
-    @ViewBuilder
-    private func taskChip(_ task: TodoItem) -> some View {
-        Text(task.title)
-            .font(.caption2)
-            .padding(6)
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .background(Color.blue.opacity(0.12))
-            .foregroundStyle(.blue)
-            .cornerRadius(6)
-    }
 }
 
 /// Week timeline with hour rows and seven day columns.
 private struct WeekTimelineView: View {
     let days: [Date]
     let events: [Date: [EKEvent]]
-    let tasks: [Date: [TodoItem]]
     
     var body: some View {
         ScrollView {
@@ -684,17 +586,13 @@ private struct WeekTimelineView: View {
                         ForEach(days, id: \.self) { day in
                             VStack(alignment: .leading, spacing: 4) {
                                 let hourEvents = eventsForHour(day: day, hour: hour)
-                                let hourTasks = tasksForHour(day: day, hour: hour)
                                 
-                                if hourEvents.isEmpty && hourTasks.isEmpty {
+                                if hourEvents.isEmpty {
                                     Text(" ")
                                         .font(.caption2)
                                 } else {
                                     ForEach(hourEvents, id: \.eventIdentifier) { event in
                                         eventChip(event)
-                                    }
-                                    ForEach(hourTasks, id: \.id) { task in
-                                        taskChip(task)
                                     }
                                 }
                             }
@@ -736,15 +634,6 @@ private struct WeekTimelineView: View {
         }
     }
     
-    private func tasksForHour(day: Date, hour: Int) -> [TodoItem] {
-        let calendar = Calendar.current
-        let dayTasks = tasks[day] ?? []
-        return dayTasks.filter {
-            guard let due = $0.dueDate else { return false }
-            return calendar.component(.hour, from: due) == hour
-        }
-    }
-    
     private func hourLabel(_ hour: Int) -> String {
         let date = Calendar.current.date(from: DateComponents(hour: hour)) ?? Date()
         let formatter = DateFormatter()
@@ -771,17 +660,6 @@ private struct WeekTimelineView: View {
             .padding(6)
             .frame(maxWidth: .infinity, alignment: .leading)
             .background(Color.primary.opacity(0.08))
-            .cornerRadius(6)
-    }
-    
-    @ViewBuilder
-    private func taskChip(_ task: TodoItem) -> some View {
-        Text(task.title)
-            .font(.caption2)
-            .padding(6)
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .background(Color.blue.opacity(0.12))
-            .foregroundStyle(.blue)
             .cornerRadius(6)
     }
 }
