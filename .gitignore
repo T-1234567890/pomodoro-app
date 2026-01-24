@@ -14,8 +14,9 @@ yarn.lock
 *.log
 .cache/
 
-# IDE
+# JetBrains
 .idea/
+*.iml
 
 # Xcode
 DerivedData/
