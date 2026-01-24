@@ -116,14 +116,14 @@ struct SettingsPermissionsView: View {
             Spacer()
             
             if isAuthorized {
-                Button(action: {}) {
-                    Text("Authorized")
-                        .font(.subheadline)
-                        .fontWeight(.medium)
-                }
-                .buttonStyle(.borderedProminent)
-                .tint(.green)
-                .disabled(true)
+                Text("Authorized")
+                    .font(.subheadline)
+                    .fontWeight(.medium)
+                    .foregroundStyle(.green)
+                    .padding(.horizontal, 16)
+                    .padding(.vertical, 6)
+                    .background(Color.green.opacity(0.1))
+                    .cornerRadius(6)
             } else if isDenied {
                 Button(action: action) {
                     Text("Request Again")

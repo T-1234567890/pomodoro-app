@@ -73,8 +73,10 @@ final class PermissionsManager: ObservableObject {
             }
             
         case .denied:
-            // Already denied - inform user through system (handled in UI)
+            // Already denied - inform user via alert (handled in UI)
             print("[PermissionsManager] Notification permission already denied")
+            // Note: Notifications don't have a dedicated alert flag since they're handled differently in the UI
+            // but the pattern is consistent with Calendar/Reminders
             
         case .authorized, .provisional, .ephemeral:
             // Already authorized

@@ -121,7 +121,7 @@ struct CalendarView: View {
                     .multilineTextAlignment(.center)
                     .fixedSize(horizontal: false, vertical: true)
                 
-                Text("Tap the button below to request access.")
+                Text("Click the button below to request access.")
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
                     .multilineTextAlignment(.center)
