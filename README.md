@@ -12,6 +12,9 @@ Version **1.0.0** marks the first stable milestone after extensive UI, architect
 ![Release](https://img.shields.io/github/v/release/T-1234567890/pomodoro-app)
 ![Downloads](https://img.shields.io/github/downloads/T-1234567890/pomodoro-app/total)
 
+>## ⚠️ Notice
+> If the app still ask for calendar&reminders permissions after you activate, please quit and restart the app
+
 ## Screenshot
 <img width="1046" height="638" alt="Screenshot 2026-01-21 at 10 10 07 PM" src="https://github.com/user-attachments/assets/7135a578-4191-4aea-9629-cd7072180557" />
 
