@@ -6,12 +6,10 @@
 //
 
 import AppKit
-import EventKit
 import SwiftUI
 
 struct MainWindowView: View {
     @EnvironmentObject private var appState: AppState
-    @EnvironmentObject private var onboardingState: OnboardingState
     @EnvironmentObject private var musicController: MusicController
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @State private var workMinutesText = ""
@@ -23,11 +21,6 @@ struct MainWindowView: View {
     @State private var sidebarSelection: SidebarItem = .pomodoro
     @State private var pomodoroStatePulse = false
     @State private var countdownStatePulse = false
-    @State private var calendarStatus: EKAuthorizationStatus = EKEventStore.authorizationStatus(for: .event)
-    @State private var remindersStatus: EKAuthorizationStatus = EKEventStore.authorizationStatus(for: .reminder)
-    @State private var calendarRequestInFlight = false
-    @State private var remindersRequestInFlight = false
-    private let eventStore = EKEventStore()
 
     var body: some View {
         ZStack(alignment: .top) {
@@ -52,7 +45,7 @@ struct MainWindowView: View {
                 syncDurationTexts()
                 syncLongBreakInterval()
             }
-            .onChange(of: appState.durationConfig) { _, _ in
+            .onChange(of: appState.durationConfig) { _ in
                 syncDurationTexts()
                 syncLongBreakInterval()
             }
@@ -110,8 +103,6 @@ struct MainWindowView: View {
                 countdownView
             case .audioAndMusic:
                 audioAndMusicView
-            case .calendar:
-                calendarView
             case .summary:
                 summaryView
             case .settings:
@@ -297,33 +288,6 @@ struct MainWindowView: View {
         .frame(minWidth: 360, alignment: .leading)
     }
 
-    private var calendarView: some View {
-        VStack(alignment: .leading, spacing: 16) {
-            VStack(alignment: .leading, spacing: 8) {
-                Text("Calendar Context")
-                    .font(.system(size: 22, weight: .semibold, design: .default))
-                    .foregroundStyle(.secondary)
-                Text("Glance at today's events and anchor a focus session to one. Events stay read-only - edit them in Calendar.")
-                    .font(.system(.body, design: .rounded))
-                    .foregroundStyle(.secondary)
-            }
-
-            VStack(alignment: .leading, spacing: 10) {
-                Label("Reads title, time, location, attendees only", systemImage: "lock")
-                Label("Pick a single event as context; no event creation here", systemImage: "scope")
-                Label("Keep Reminders optional for quick task targets", systemImage: "checkmark.circle")
-            }
-            .labelStyle(.titleAndIcon)
-            .foregroundStyle(.primary)
-
-            Spacer()
-        }
-        .padding(.top, 28)
-        .padding(.horizontal)
-        .padding(.bottom)
-        .frame(minWidth: 360, alignment: .leading)
-    }
-
     private var summaryView: some View {
         VStack(alignment: .leading, spacing: 16) {
             VStack(alignment: .center, spacing: 8) {
@@ -388,27 +352,15 @@ struct MainWindowView: View {
                 }
 
                 HStack(spacing: 12) {
-                    Button(calendarRequestInFlight ? "Requesting…" : "Get Calendar Access") {
-                        requestCalendarAccess()
+                    Button("Get Calendar Access") {
+                        openCalendarSettings()
                     }
-                    .buttonStyle(.borderedProminent)
-                    .disabled(calendarRequestInFlight)
+                    .buttonStyle(.bordered)
 
-                    Button(remindersRequestInFlight ? "Requesting…" : "Get Reminders Access") {
-                        requestRemindersAccess()
+                    Button("Get Reminders Access") {
+                        openRemindersSettings()
                     }
-                    .buttonStyle(.borderedProminent)
-                    .disabled(remindersRequestInFlight)
-                }
-
-                VStack(alignment: .leading, spacing: 6) {
-                    permissionStatusRow(title: "Calendar", status: calendarStatus)
-                    permissionStatusRow(title: "Reminders", status: remindersStatus)
-                    if calendarStatus == .denied || calendarStatus == .restricted || remindersStatus == .denied || remindersStatus == .restricted {
-                        Text("Access denied or restricted. You can change this later in Privacy settings.")
-                            .font(.system(.footnote, design: .rounded))
-                            .foregroundStyle(.secondary)
-                    }
+                    .buttonStyle(.bordered)
                 }
             }
 
@@ -437,64 +389,14 @@ struct MainWindowView: View {
         NSWorkspace.shared.open(url)
     }
 
-    private func requestCalendarAccess() {
-        calendarRequestInFlight = true
-        let completion: () -> Void = {
-            DispatchQueue.main.async {
-                self.calendarStatus = EKEventStore.authorizationStatus(for: .event)
-                self.calendarRequestInFlight = false
-                onboardingState.markEventKitRequestCalled()
-            }
-        }
-
-        if #available(macOS 14, *) {
-            eventStore.requestFullAccessToEvents { _, _ in completion() }
-        } else {
-            eventStore.requestAccess(to: .event) { _, _ in completion() }
-        }
+    private func openCalendarSettings() {
+        guard let url = URL(string: "x-apple.systempreferences:com.apple.preference.security?Privacy_Calendars") else { return }
+        NSWorkspace.shared.open(url)
     }
 
-    private func requestRemindersAccess() {
-        remindersRequestInFlight = true
-        let completion: () -> Void = {
-            DispatchQueue.main.async {
-                self.remindersStatus = EKEventStore.authorizationStatus(for: .reminder)
-                self.remindersRequestInFlight = false
-                onboardingState.markEventKitRequestCalled()
-            }
-        }
-
-        if #available(macOS 14, *) {
-            eventStore.requestFullAccessToReminders { _, _ in completion() }
-        } else {
-            eventStore.requestAccess(to: .reminder) { _, _ in completion() }
-        }
-    }
-
-    private func permissionStatusRow(title: String, status: EKAuthorizationStatus) -> some View {
-        let text: String
-        let color: Color
-        switch status {
-        case .authorized:
-            text = "\(title): Enabled"
-            color = .green
-        case .denied, .restricted:
-            text = "\(title): Denied"
-            color = .red
-        case .notDetermined:
-            text = "\(title): Not requested"
-            color = .orange
-        @unknown default:
-            text = "\(title): Unknown"
-            color = .gray
-        }
-        return HStack(spacing: 8) {
-            Circle()
-                .fill(color)
-                .frame(width: 8, height: 8)
-            Text(text)
-                .foregroundStyle(.secondary)
-        }
+    private func openRemindersSettings() {
+        guard let url = URL(string: "x-apple.systempreferences:com.apple.preference.security?Privacy_Reminders") else { return }
+        NSWorkspace.shared.open(url)
     }
 
     private enum DurationField: Hashable {
@@ -508,7 +410,6 @@ struct MainWindowView: View {
         case pomodoro
         case countdown
         case audioAndMusic
-        case calendar
         case summary
         case settings
 
@@ -522,8 +423,6 @@ struct MainWindowView: View {
                 return "Countdown"
             case .audioAndMusic:
                 return "Audio&Music"
-            case .calendar:
-                return "Calendar"
             case .summary:
                 return "Summary"
             case .settings:
@@ -539,8 +438,6 @@ struct MainWindowView: View {
                 return "hourglass"
             case .audioAndMusic:
                 return "music.note.list"
-            case .calendar:
-                return "calendar"
             case .summary:
                 return "chart.bar"
             case .settings:
