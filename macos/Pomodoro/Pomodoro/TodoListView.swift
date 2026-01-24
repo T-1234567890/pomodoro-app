@@ -24,6 +24,14 @@ struct TodoListView: View {
         return formatter
     }()
     
+    private static let lastSyncFormatter: DateFormatter = {
+        let formatter = DateFormatter()
+        formatter.dateStyle = .short
+        formatter.timeStyle = .short
+        formatter.locale = .autoupdatingCurrent
+        return formatter
+    }()
+    
     var body: some View {
         VStack(spacing: 0) {
             // Header
@@ -51,6 +59,24 @@ struct TodoListView: View {
                 }
                 .buttonStyle(.borderedProminent)
                 
+                if permissionsManager.isRemindersAuthorized {
+                    Button {
+                        Task { await remindersSync.syncAllTasks() }
+                    } label: {
+                        if remindersSync.isSyncing {
+                            HStack {
+                                ProgressView()
+                                    .controlSize(.small)
+                                Text("Syncing…")
+                            }
+                        } else {
+                            Label("Sync All Tasks", systemImage: "arrow.triangle.2.circlepath")
+                        }
+                    }
+                    .buttonStyle(.borderedProminent)
+                    .disabled(remindersSync.isSyncing)
+                }
+                
                 Spacer()
                 
                 Toggle(isOn: $showCompleted) {
@@ -60,6 +86,17 @@ struct TodoListView: View {
             }
             .padding(.horizontal, 32)
             .padding(.vertical, 12)
+            
+            if let last = remindersSync.lastSyncDate {
+                HStack {
+                    Text("Last sync: \(Self.lastSyncFormatter.string(from: last))")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                    Spacer()
+                }
+                .padding(.horizontal, 32)
+                .padding(.bottom, 6)
+            }
             
             Divider()
             

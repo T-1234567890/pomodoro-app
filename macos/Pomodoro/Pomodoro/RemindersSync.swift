@@ -12,6 +12,7 @@ final class RemindersSync: ObservableObject {
     
     @Published var isSyncing: Bool = false
     @Published var lastSyncError: String?
+    @Published var lastSyncDate: Date?
     
     init(permissionsManager: PermissionsManager) {
         self.permissionsManager = permissionsManager
@@ -38,19 +39,33 @@ final class RemindersSync: ObservableObject {
         defer { isSyncing = false }
         
         do {
-            if let remindersId = item.remindersIdentifier {
-                // Update existing reminder
-                try await updateReminder(remindersId, with: item)
-            } else {
-                // Create new reminder
-                let reminderId = try await createReminder(from: item)
-                todoStore?.linkToReminder(itemId: item.id, remindersId: reminderId)
-            }
+            try await syncSingleItem(item)
             lastSyncError = nil
         } catch {
             lastSyncError = error.localizedDescription
             throw error
         }
+    }
+    
+    /// Sync all tasks (create/update only, never delete)
+    func syncAllTasks() async {
+        guard isSyncAvailable else {
+            lastSyncError = SyncError.notAuthorized.localizedDescription
+            return
+        }
+        guard let store = todoStore else { return }
+        
+        isSyncing = true
+        defer { isSyncing = false }
+        
+        for item in store.items {
+            do {
+                try await syncSingleItem(item)
+            } catch {
+                lastSyncError = error.localizedDescription
+            }
+        }
+        lastSyncDate = Date()
     }
     
     /// Remove sync for a TodoItem (does not delete the Reminder)
@@ -126,6 +141,17 @@ final class RemindersSync: ObservableObject {
             return 5
         case .high:
             return 1
+        }
+    }
+    
+    private func syncSingleItem(_ item: TodoItem) async throws {
+        if let remindersId = item.remindersIdentifier {
+            // Update existing reminder
+            try await updateReminder(remindersId, with: item)
+        } else {
+            // Create new reminder
+            let reminderId = try await createReminder(from: item)
+            todoStore?.linkToReminder(itemId: item.id, remindersId: reminderId)
         }
     }
     

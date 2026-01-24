@@ -39,6 +39,13 @@ struct CalendarView: View {
         return formatter
     }()
     
+    private static let weekdaySymbols: [String] = {
+        let calendar = Calendar.current
+        return calendar.shortStandaloneWeekdaySymbols
+    }()
+    
+    private let monthColumns: [GridItem] = Array(repeating: GridItem(.flexible(minimum: 70), spacing: 8), count: 7)
+    
     enum ViewType {
         case day
         case week
@@ -227,108 +234,49 @@ struct CalendarView: View {
     
     @ViewBuilder
     private func dayContent(maxWidth: CGFloat) -> some View {
-        let dayEvents = events(for: anchorDate)
-        let dayTasks = tasks(for: anchorDate)
-        
-        if dayEvents.isEmpty && dayTasks.isEmpty {
-            emptyState(message: "No events or tasks on this day", maxWidth: maxWidth)
-        } else {
-            LazyVStack(spacing: 12) {
-                if !dayEvents.isEmpty {
-                    Text("Calendar Events")
-                        .font(.headline)
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                }
-                ForEach(dayEvents, id: \.eventIdentifier) { event in
-                    eventRow(event)
-                }
-                
-                if !dayTasks.isEmpty {
-                    Text("Tasks")
-                        .font(.headline)
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                }
-                ForEach(dayTasks, id: \.id) { task in
-                    taskRow(task)
-                }
-            }
-            .padding(16)
-            .frame(maxWidth: maxWidth, alignment: .leading)
-        }
+        DayTimelineView(
+            date: anchorDate,
+            events: events(for: anchorDate),
+            tasks: tasks(for: anchorDate)
+        )
+        .frame(maxWidth: maxWidth, alignment: .leading)
+        .padding(.horizontal, 8)
     }
     
     @ViewBuilder
     private func weekContent(maxWidth: CGFloat) -> some View {
         let days = daysInWeek(from: anchorDate)
         
-        LazyVStack(alignment: .leading, spacing: 12) {
-            ForEach(days, id: \.self) { day in
-                VStack(alignment: .leading, spacing: 8) {
-                    Text(Self.shortDayFormatter.string(from: day))
-                        .font(.headline)
-                        .foregroundStyle(.secondary)
-                    
-                    let dayEvents = events(for: day)
-                    let dayTasks = tasks(for: day)
-                    if dayEvents.isEmpty && dayTasks.isEmpty {
-                        Text("No events")
-                            .font(.caption)
-                            .foregroundStyle(.tertiary)
-                    } else {
-                        VStack(spacing: 8) {
-                            ForEach(dayEvents, id: \.eventIdentifier) { event in
-                                eventRow(event)
-                            }
-                            ForEach(dayTasks, id: \.id) { task in
-                                taskRow(task)
-                            }
-                        }
-                    }
-                }
-                .padding(.vertical, 4)
-            }
-        }
-        .padding(16)
+        WeekTimelineView(
+            days: days,
+            events: eventsGroupedByDay(for: days),
+            tasks: tasksGroupedByDay(for: days)
+        )
         .frame(maxWidth: maxWidth, alignment: .leading)
+        .padding(.horizontal, 8)
     }
     
     @ViewBuilder
     private func monthContent(maxWidth: CGFloat) -> some View {
-        let days = daysInMonth(from: anchorDate)
+        let gridDays = monthGridDays(from: anchorDate)
         
-        if days.isEmpty {
-            emptyState(message: "No events this month", maxWidth: maxWidth)
-        } else {
-            LazyVStack(alignment: .leading, spacing: 12) {
-                ForEach(days, id: \.self) { day in
-                    VStack(alignment: .leading, spacing: 8) {
-                        Text(Self.dayHeaderFormatter.string(from: day))
-                            .font(.subheadline)
-                            .foregroundStyle(.secondary)
-                        
-                        let dayEvents = events(for: day)
-                        let dayTasks = tasks(for: day)
-                        if dayEvents.isEmpty && dayTasks.isEmpty {
-                            Text("No events")
-                                .font(.caption)
-                                .foregroundStyle(.tertiary)
-                        } else {
-                            VStack(spacing: 8) {
-                                ForEach(dayEvents, id: \.eventIdentifier) { event in
-                                    eventRow(event)
-                                }
-                                ForEach(dayTasks, id: \.id) { task in
-                                    taskRow(task)
-                                }
-                            }
-                        }
-                    }
-                    .padding(.vertical, 6)
+        VStack(alignment: .leading, spacing: 12) {
+            HStack {
+                ForEach(Self.weekdaySymbols, id: \.self) { symbol in
+                    Text(symbol)
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                        .frame(maxWidth: .infinity)
                 }
             }
-            .padding(16)
-            .frame(maxWidth: maxWidth, alignment: .leading)
+            LazyVGrid(columns: monthColumns, spacing: 8) {
+                ForEach(Array(gridDays.enumerated()), id: \.offset) { _, day in
+                    monthCell(for: day)
+                }
+            }
         }
+        .padding(.horizontal, 8)
+        .padding(.vertical, 4)
     }
     
     private func events(for day: Date) -> [EKEvent] {
@@ -336,6 +284,17 @@ struct CalendarView: View {
         return calendarManager.events.filter { event in
             calendar.isDate(event.startDate, inSameDayAs: day)
         }
+    }
+    
+    private func eventsGroupedByDay(for days: [Date]) -> [Date: [EKEvent]] {
+        var dict: [Date: [EKEvent]] = [:]
+        let calendar = Calendar.current
+        for event in calendarManager.events {
+            if let match = days.first(where: { calendar.isDate(event.startDate, inSameDayAs: $0) }) {
+                dict[match, default: []].append(event)
+            }
+        }
+        return dict
     }
     
     private func tasks(for day: Date) -> [TodoItem] {
@@ -346,6 +305,25 @@ struct CalendarView: View {
             }
             return false
         }
+    }
+    
+    private func tasksGroupedByDay(for days: [Date]) -> [Date: [TodoItem]] {
+        var dict: [Date: [TodoItem]] = [:]
+        let calendar = Calendar.current
+        for item in todoStore.items {
+            guard let due = item.dueDate else { continue }
+            if let match = days.first(where: { calendar.isDate(due, inSameDayAs: $0) }) {
+                dict[match, default: []].append(item)
+            }
+        }
+        return dict
+    }
+    
+    private func hourLabel(_ hour: Int) -> String {
+        let date = Calendar.current.date(from: DateComponents(hour: hour)) ?? Date()
+        let formatter = DateFormatter()
+        formatter.dateFormat = "ha"
+        return formatter.string(from: date)
     }
     
     private func daysInWeek(from date: Date) -> [Date] {
@@ -377,6 +355,29 @@ struct CalendarView: View {
         return days
     }
     
+    private func monthGridDays(from date: Date) -> [Date?] {
+        let calendar = Calendar.current
+        guard let startOfMonth = calendar.date(from: calendar.dateComponents([.year, .month], from: date)),
+              let range = calendar.range(of: .day, in: .month, for: date) else {
+            return []
+        }
+        
+        let firstWeekday = calendar.component(.weekday, from: startOfMonth)
+        let leadingBlanks = (firstWeekday - calendar.firstWeekday + 7) % 7
+        var days: [Date?] = Array(repeating: nil, count: leadingBlanks)
+        
+        for day in range {
+            if let date = calendar.date(byAdding: .day, value: day - 1, to: startOfMonth) {
+                days.append(date)
+            }
+        }
+        
+        while days.count % 7 != 0 {
+            days.append(nil)
+        }
+        return days
+    }
+    
     @ViewBuilder
     private func emptyState(message: String, maxWidth: CGFloat) -> some View {
         VStack(spacing: 12) {
@@ -394,6 +395,53 @@ struct CalendarView: View {
         }
         .frame(maxWidth: maxWidth, alignment: .center)
         .padding(48)
+    }
+    
+    @ViewBuilder
+    private func monthCell(for day: Date?) -> some View {
+        if let day {
+            let calendar = Calendar.current
+            let isToday = calendar.isDateInToday(day)
+            let dayEvents = events(for: day)
+            let dayTasks = tasks(for: day)
+            
+            VStack(alignment: .leading, spacing: 6) {
+                HStack {
+                    Text("\(calendar.component(.day, from: day))")
+                        .font(.headline)
+                        .foregroundStyle(isToday ? .blue : .primary)
+                    Spacer()
+                    if isToday {
+                        Text("Today")
+                            .font(.caption2)
+                            .foregroundStyle(.blue)
+                    }
+                }
+                
+                VStack(alignment: .leading, spacing: 4) {
+                    ForEach(dayEvents.prefix(3), id: \.eventIdentifier) { event in
+                        Text(event.title ?? "Untitled")
+                            .font(.caption)
+                            .lineLimit(1)
+                    }
+                    ForEach(dayTasks.prefix(2), id: \.id) { task in
+                        Text(task.title)
+                            .font(.caption2)
+                            .foregroundStyle(.blue)
+                            .lineLimit(1)
+                    }
+                }
+                Spacer(minLength: 0)
+            }
+            .padding(8)
+            .frame(minHeight: 72, alignment: .topLeading)
+            .background(isToday ? Color.blue.opacity(0.08) : Color.primary.opacity(0.05))
+            .cornerRadius(8)
+        } else {
+            Rectangle()
+                .fill(Color.clear)
+                .frame(minHeight: 72)
+        }
     }
     
     @ViewBuilder
@@ -527,6 +575,214 @@ struct CalendarView: View {
         } catch {
             addEventError = error.localizedDescription
         }
+    }
+}
+
+/// Single-day vertical timeline with hour rows.
+private struct DayTimelineView: View {
+    let date: Date
+    let events: [EKEvent]
+    let tasks: [TodoItem]
+    
+    var body: some View {
+        ScrollView {
+            LazyVStack(spacing: 0) {
+                ForEach(0..<24, id: \.self) { hour in
+                    HStack(alignment: .top, spacing: 8) {
+                        Text(hourLabel(hour))
+                            .font(.caption)
+                            .frame(width: 44, alignment: .trailing)
+                        
+                        VStack(alignment: .leading, spacing: 4) {
+                            let hourEvents = eventsForHour(hour)
+                            let hourTasks = tasksForHour(hour)
+                            
+                            if hourEvents.isEmpty && hourTasks.isEmpty {
+                                Text(" ")
+                                    .font(.caption2)
+                            } else {
+                                ForEach(hourEvents, id: \.eventIdentifier) { event in
+                                    eventChip(event)
+                                }
+                                ForEach(hourTasks, id: \.id) { task in
+                                    taskChip(task)
+                                }
+                            }
+                        }
+                        Spacer(minLength: 0)
+                    }
+                    .padding(.vertical, 6)
+                    
+                    Divider()
+                }
+            }
+            .padding(.vertical, 8)
+        }
+    }
+    
+    private func eventsForHour(_ hour: Int) -> [EKEvent] {
+        let calendar = Calendar.current
+        return events.filter {
+            calendar.component(.hour, from: $0.startDate) == hour
+        }
+    }
+    
+    private func tasksForHour(_ hour: Int) -> [TodoItem] {
+        let calendar = Calendar.current
+        return tasks.filter { item in
+            guard let due = item.dueDate else { return false }
+            return calendar.component(.hour, from: due) == hour
+        }
+    }
+    
+    private func hourLabel(_ hour: Int) -> String {
+        let date = Calendar.current.date(from: DateComponents(hour: hour)) ?? Date()
+        let formatter = DateFormatter()
+        formatter.dateFormat = "ha"
+        return formatter.string(from: date)
+    }
+    
+    @ViewBuilder
+    private func eventChip(_ event: EKEvent) -> some View {
+        Text(event.title ?? "Untitled")
+            .font(.caption2)
+            .padding(6)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .background(Color.primary.opacity(0.08))
+            .cornerRadius(6)
+    }
+    
+    @ViewBuilder
+    private func taskChip(_ task: TodoItem) -> some View {
+        Text(task.title)
+            .font(.caption2)
+            .padding(6)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .background(Color.blue.opacity(0.12))
+            .foregroundStyle(.blue)
+            .cornerRadius(6)
+    }
+}
+
+/// Week timeline with hour rows and seven day columns.
+private struct WeekTimelineView: View {
+    let days: [Date]
+    let events: [Date: [EKEvent]]
+    let tasks: [Date: [TodoItem]]
+    
+    var body: some View {
+        ScrollView {
+            LazyVStack(spacing: 0) {
+                header
+                Divider()
+                ForEach(0..<24, id: \.self) { hour in
+                    HStack(alignment: .top, spacing: 8) {
+                        Text(hourLabel(hour))
+                            .font(.caption)
+                            .frame(width: 44, alignment: .trailing)
+                        
+                        ForEach(days, id: \.self) { day in
+                            VStack(alignment: .leading, spacing: 4) {
+                                let hourEvents = eventsForHour(day: day, hour: hour)
+                                let hourTasks = tasksForHour(day: day, hour: hour)
+                                
+                                if hourEvents.isEmpty && hourTasks.isEmpty {
+                                    Text(" ")
+                                        .font(.caption2)
+                                } else {
+                                    ForEach(hourEvents, id: \.eventIdentifier) { event in
+                                        eventChip(event)
+                                    }
+                                    ForEach(hourTasks, id: \.id) { task in
+                                        taskChip(task)
+                                    }
+                                }
+                            }
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                        }
+                    }
+                    .padding(.vertical, 6)
+                    Divider()
+                }
+            }
+            .padding(.vertical, 8)
+        }
+    }
+    
+    private var header: some View {
+        HStack(spacing: 8) {
+            Text("")
+                .frame(width: 44)
+            ForEach(days, id: \.self) { day in
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(shortDayString(day))
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                    Text(dayNumberString(day))
+                        .font(.caption2)
+                        .foregroundStyle(.secondary)
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
+            }
+        }
+        .padding(.bottom, 4)
+    }
+    
+    private func eventsForHour(day: Date, hour: Int) -> [EKEvent] {
+        let calendar = Calendar.current
+        let dayEvents = events[day] ?? []
+        return dayEvents.filter {
+            calendar.component(.hour, from: $0.startDate) == hour
+        }
+    }
+    
+    private func tasksForHour(day: Date, hour: Int) -> [TodoItem] {
+        let calendar = Calendar.current
+        let dayTasks = tasks[day] ?? []
+        return dayTasks.filter {
+            guard let due = $0.dueDate else { return false }
+            return calendar.component(.hour, from: due) == hour
+        }
+    }
+    
+    private func hourLabel(_ hour: Int) -> String {
+        let date = Calendar.current.date(from: DateComponents(hour: hour)) ?? Date()
+        let formatter = DateFormatter()
+        formatter.dateFormat = "ha"
+        return formatter.string(from: date)
+    }
+    
+    private func shortDayString(_ date: Date) -> String {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "EEE"
+        return formatter.string(from: date)
+    }
+    
+    private func dayNumberString(_ date: Date) -> String {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "d"
+        return formatter.string(from: date)
+    }
+    
+    @ViewBuilder
+    private func eventChip(_ event: EKEvent) -> some View {
+        Text(event.title ?? "Untitled")
+            .font(.caption2)
+            .padding(6)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .background(Color.primary.opacity(0.08))
+            .cornerRadius(6)
+    }
+    
+    @ViewBuilder
+    private func taskChip(_ task: TodoItem) -> some View {
+        Text(task.title)
+            .font(.caption2)
+            .padding(6)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .background(Color.blue.opacity(0.12))
+            .foregroundStyle(.blue)
+            .cornerRadius(6)
     }
 }
 

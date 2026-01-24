@@ -4,48 +4,12 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="2909c215-f590-49b8-8f9e-264ead6228fc" name="Changes" comment="fix">
+    <list default="true" id="2909c215-f590-49b8-8f9e-264ead6228fc" name="Changes" comment="Calendar and todo list update">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/legacy/backend/app.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/legacy/backend/countdown.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/legacy/backend/music_player.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/legacy/backend/pomodoro.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/legacy/backend/ui_utils.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/legacy/frontend/index.html" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/legacy/frontend/package-lock.json" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/legacy/frontend/package.json" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/legacy/frontend/src-tauri/Cargo.lock" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/legacy/frontend/src-tauri/Cargo.toml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/legacy/frontend/src-tauri/build.rs" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/legacy/frontend/src-tauri/gen/schemas/acl-manifests.json" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/legacy/frontend/src-tauri/gen/schemas/capabilities.json" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/legacy/frontend/src-tauri/gen/schemas/desktop-schema.json" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/legacy/frontend/src-tauri/gen/schemas/macOS-schema.json" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/legacy/frontend/src-tauri/icons/icon.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/legacy/frontend/src-tauri/src/main.rs" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/legacy/frontend/src-tauri/src/status_bar.rs" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/legacy/frontend/src-tauri/src/system_media.rs" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/legacy/frontend/src-tauri/src/timer.rs" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/legacy/frontend/src-tauri/tauri.conf.json" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/legacy/frontend/src/App.module.css" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/legacy/frontend/src/App.svelte" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/legacy/frontend/src/lib/CountdownTimer.svelte" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/legacy/frontend/src/lib/MusicPlayer.svelte" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/legacy/frontend/src/lib/countdownStore.ts" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/legacy/frontend/src/lib/ipc.ts" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/legacy/frontend/src/lib/systemMedia.ts" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/legacy/frontend/src/lib/tauri.ts" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/legacy/frontend/src/main.ts" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/legacy/frontend/svelte.config.js" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/legacy/frontend/tsconfig.json" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/legacy/frontend/vite.config.ts" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/legacy/history/ui-tkinter-0.4.x/countdown.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/legacy/history/ui-tkinter-0.4.x/music_player.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/legacy/history/ui-tkinter-0.4.x/pomodoro.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/legacy/history/ui-tkinter-0.4.x/ui_utils.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/legacy/history_versions/README.md" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/macos/Pomodoro/Pomodoro.xcodeproj/project.pbxproj" beforeDir="false" afterPath="$PROJECT_DIR$/macos/Pomodoro/Pomodoro.xcodeproj/project.pbxproj" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/macos/Pomodoro/Pomodoro.xcodeproj/project.xcworkspace/xcuserdata/2111832868qq.com.xcuserdatad/UserInterfaceState.xcuserstate" beforeDir="false" afterPath="$PROJECT_DIR$/macos/Pomodoro/Pomodoro.xcodeproj/project.xcworkspace/xcuserdata/2111832868qq.com.xcuserdatad/UserInterfaceState.xcuserstate" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/macos/Pomodoro/Pomodoro/CalendarView.swift" beforeDir="false" afterPath="$PROJECT_DIR$/macos/Pomodoro/Pomodoro/CalendarView.swift" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/macos/Pomodoro/Pomodoro/RemindersSync.swift" beforeDir="false" afterPath="$PROJECT_DIR$/macos/Pomodoro/Pomodoro/RemindersSync.swift" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/macos/Pomodoro/Pomodoro/TodoListView.swift" beforeDir="false" afterPath="$PROJECT_DIR$/macos/Pomodoro/Pomodoro/TodoListView.swift" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -66,12 +30,12 @@
     &quot;assignee&quot;: &quot;T-1234567890&quot;
   }
 }</component>
-  <component name="GithubPullRequestsUISettings">{
-  &quot;selectedUrlAndAccountId&quot;: {
-    &quot;url&quot;: &quot;https://github.com/T-1234567890/pomodoro-app.git&quot;,
-    &quot;accountId&quot;: &quot;9e696c7e-a717-4e5c-8c9c-48d53b4fa09d&quot;
+  <component name="GithubPullRequestsUISettings"><![CDATA[{
+  "selectedUrlAndAccountId": {
+    "url": "git@github.com:T-1234567890/pomodoro-app.git",
+    "accountId": "9e696c7e-a717-4e5c-8c9c-48d53b4fa09d"
   }
-}</component>
+}]]></component>
   <component name="ProjectColorInfo">{
   &quot;associatedIndex&quot;: 2
 }</component>
@@ -333,7 +297,55 @@
       <option name="project" value="LOCAL" />
       <updated>1769010877803</updated>
     </task>
-    <option name="localTasksCounter" value="28" />
+    <task id="LOCAL-00028" summary="new onboarding">
+      <option name="closed" value="true" />
+      <created>1769179392008</created>
+      <option name="number" value="00028" />
+      <option name="presentableId" value="LOCAL-00028" />
+      <option name="project" value="LOCAL" />
+      <updated>1769179392008</updated>
+    </task>
+    <task id="LOCAL-00029" summary="Settings fix">
+      <option name="closed" value="true" />
+      <created>1769186621017</created>
+      <option name="number" value="00029" />
+      <option name="presentableId" value="LOCAL-00029" />
+      <option name="project" value="LOCAL" />
+      <updated>1769186621017</updated>
+    </task>
+    <task id="LOCAL-00030" summary="Settings fix">
+      <option name="closed" value="true" />
+      <created>1769224197387</created>
+      <option name="number" value="00030" />
+      <option name="presentableId" value="LOCAL-00030" />
+      <option name="project" value="LOCAL" />
+      <updated>1769224197387</updated>
+    </task>
+    <task id="LOCAL-00031" summary="Calendar and todo list fix">
+      <option name="closed" value="true" />
+      <created>1769227298389</created>
+      <option name="number" value="00031" />
+      <option name="presentableId" value="LOCAL-00031" />
+      <option name="project" value="LOCAL" />
+      <updated>1769227298389</updated>
+    </task>
+    <task id="LOCAL-00032" summary="Calendar and todo list basic update">
+      <option name="closed" value="true" />
+      <created>1769232991504</created>
+      <option name="number" value="00032" />
+      <option name="presentableId" value="LOCAL-00032" />
+      <option name="project" value="LOCAL" />
+      <updated>1769232991504</updated>
+    </task>
+    <task id="LOCAL-00033" summary="Calendar and todo list update">
+      <option name="closed" value="true" />
+      <created>1769235149760</created>
+      <option name="number" value="00033" />
+      <option name="presentableId" value="LOCAL-00033" />
+      <option name="project" value="LOCAL" />
+      <updated>1769235149760</updated>
+    </task>
+    <option name="localTasksCounter" value="34" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -360,6 +372,11 @@
     <MESSAGE value="Bug Fix and UI fix" />
     <MESSAGE value="UI fix" />
     <MESSAGE value="fix" />
-    <option name="LAST_COMMIT_MESSAGE" value="fix" />
+    <MESSAGE value="new onboarding" />
+    <MESSAGE value="Settings fix" />
+    <MESSAGE value="Calendar and todo list fix" />
+    <MESSAGE value="Calendar and todo list basic update" />
+    <MESSAGE value="Calendar and todo list update" />
+    <option name="LAST_COMMIT_MESSAGE" value="Calendar and todo list update" />
   </component>
 </project>
