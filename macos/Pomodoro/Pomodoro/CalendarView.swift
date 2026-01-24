@@ -670,8 +670,11 @@ private struct WeekTimelineView: View {
     let events: [Date: [EKEvent]]
     let tasks: [Date: [TodoItem]]
     
-    // Estimate row height: 6pt padding top + 6pt padding bottom + ~20pt content = ~32pt per row
-    // Plus header (~28pt) + top/bottom padding (16pt) + 24 dividers (~12pt)
+    // Height estimates based on actual UI components:
+    // - Row: 6pt top padding + ~20pt content (caption2 font) + 6pt bottom padding = 32pt
+    // - Header: ~28pt (caption font + spacing)
+    // - Padding: 8pt top + 8pt bottom = 16pt
+    // - Divider: ~0.5pt each
     private let estimatedRowHeight: CGFloat = 32
     private let estimatedHeaderHeight: CGFloat = 28
     private let estimatedPadding: CGFloat = 16
@@ -735,13 +738,21 @@ private struct WeekTimelineView: View {
     }
     
     private func calculateContentHeight() -> CGFloat {
+        // Calculate total content height based on UI structure:
+        // - Header row
+        // - 1 divider after header
+        // - 24 hour rows (each with content + divider)
+        // - Top and bottom padding
         let hourRowsCount: CGFloat = 24
-        let dividersCount: CGFloat = 25 // Header divider + 24 hour dividers
+        let dividersCount: CGFloat = 25 // 1 header divider + 24 hour dividers
         
-        return estimatedHeaderHeight + 
-               (hourRowsCount * estimatedRowHeight) + 
-               (dividersCount * estimatedDividerHeight) + 
-               estimatedPadding
+        let totalHeight = estimatedHeaderHeight + 
+                         (hourRowsCount * estimatedRowHeight) + 
+                         (dividersCount * estimatedDividerHeight) + 
+                         estimatedPadding
+        
+        // Add small buffer to avoid edge cases where content is just barely larger
+        return totalHeight + 10
     }
     
     private var header: some View {
