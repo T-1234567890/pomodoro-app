@@ -670,43 +670,78 @@ private struct WeekTimelineView: View {
     let events: [Date: [EKEvent]]
     let tasks: [Date: [TodoItem]]
     
+    // Estimate row height: 6pt padding top + 6pt padding bottom + ~20pt content = ~32pt per row
+    // Plus header (~28pt) + top/bottom padding (16pt) + 24 dividers (~12pt)
+    private let estimatedRowHeight: CGFloat = 32
+    private let estimatedHeaderHeight: CGFloat = 28
+    private let estimatedPadding: CGFloat = 16
+    private let estimatedDividerHeight: CGFloat = 0.5
+    
     var body: some View {
-        ScrollView {
-            LazyVStack(spacing: 0) {
-                header
-                Divider()
-                ForEach(0..<24, id: \.self) { hour in
-                    HStack(alignment: .top, spacing: 8) {
-                        Text(hourLabel(hour))
-                            .font(.caption)
-                            .frame(width: 44, alignment: .trailing)
-                        
-                        ForEach(days, id: \.self) { day in
-                            VStack(alignment: .leading, spacing: 4) {
-                                let hourEvents = eventsForHour(day: day, hour: hour)
-                                let hourTasks = tasksForHour(day: day, hour: hour)
-                                
-                                if hourEvents.isEmpty && hourTasks.isEmpty {
-                                    Text(" ")
-                                        .font(.caption2)
-                                } else {
-                                    ForEach(hourEvents, id: \.eventIdentifier) { event in
-                                        eventChip(event)
-                                    }
-                                    ForEach(hourTasks, id: \.id) { task in
-                                        taskChip(task)
-                                    }
+        GeometryReader { geometry in
+            let availableHeight = geometry.size.height
+            let contentHeight = calculateContentHeight()
+            let needsScrolling = contentHeight > availableHeight
+            
+            if needsScrolling {
+                ScrollView {
+                    weekContent
+                }
+            } else {
+                VStack(spacing: 0) {
+                    weekContent
+                    Spacer(minLength: 0)
+                }
+                .frame(maxHeight: .infinity, alignment: .top)
+            }
+        }
+    }
+    
+    private var weekContent: some View {
+        LazyVStack(spacing: 0) {
+            header
+            Divider()
+            ForEach(0..<24, id: \.self) { hour in
+                HStack(alignment: .top, spacing: 8) {
+                    Text(hourLabel(hour))
+                        .font(.caption)
+                        .frame(width: 44, alignment: .trailing)
+                    
+                    ForEach(days, id: \.self) { day in
+                        VStack(alignment: .leading, spacing: 4) {
+                            let hourEvents = eventsForHour(day: day, hour: hour)
+                            let hourTasks = tasksForHour(day: day, hour: hour)
+                            
+                            if hourEvents.isEmpty && hourTasks.isEmpty {
+                                Text(" ")
+                                    .font(.caption2)
+                            } else {
+                                ForEach(hourEvents, id: \.eventIdentifier) { event in
+                                    eventChip(event)
+                                }
+                                ForEach(hourTasks, id: \.id) { task in
+                                    taskChip(task)
                                 }
                             }
-                            .frame(maxWidth: .infinity, alignment: .leading)
                         }
+                        .frame(maxWidth: .infinity, alignment: .leading)
                     }
-                    .padding(.vertical, 6)
-                    Divider()
                 }
+                .padding(.vertical, 6)
+                Divider()
             }
-            .padding(.vertical, 8)
         }
+        .padding(.vertical, 8)
+    }
+    
+    private func calculateContentHeight() -> CGFloat {
+        let hourRowsCount: CGFloat = 24
+        let dividersCount: CGFloat = 25 // Header divider + 24 hour dividers
+        
+        return estimatedHeaderHeight + 
+               (hourRowsCount * estimatedRowHeight) + 
+               (dividersCount * estimatedDividerHeight) + 
+               estimatedPadding
     }
     
     private var header: some View {
