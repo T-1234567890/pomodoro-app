@@ -60,7 +60,7 @@ final class TodoStore: ObservableObject {
     }
     
     var itemsWithRemindersSync: [TodoItem] {
-        items.filter { $0.remindersIdentifier != nil }
+        items.filter { $0.reminderIdentifier != nil }
     }
     
     // MARK: - Persistence
@@ -83,7 +83,8 @@ final class TodoStore: ObservableObject {
     /// Link a TodoItem to an Apple Reminders identifier
     func linkToReminder(itemId: UUID, remindersId: String) {
         if let index = items.firstIndex(where: { $0.id == itemId }) {
-            items[index].remindersIdentifier = remindersId
+            items[index].reminderIdentifier = remindersId
+            items[index].syncStatus = .synced
             saveItems()
         }
     }
@@ -91,7 +92,24 @@ final class TodoStore: ObservableObject {
     /// Unlink a TodoItem from Apple Reminders
     func unlinkFromReminder(itemId: UUID) {
         if let index = items.firstIndex(where: { $0.id == itemId }) {
-            items[index].remindersIdentifier = nil
+            items[index].reminderIdentifier = nil
+            items[index].syncStatus = .local
+            saveItems()
+        }
+    }
+    
+    func linkToCalendarEvent(itemId: UUID, eventId: String) {
+        if let index = items.firstIndex(where: { $0.id == itemId }) {
+            items[index].calendarEventIdentifier = eventId
+            items[index].syncStatus = .synced
+            saveItems()
+        }
+    }
+    
+    func unlinkFromCalendarEvent(itemId: UUID) {
+        if let index = items.firstIndex(where: { $0.id == itemId }) {
+            items[index].calendarEventIdentifier = nil
+            items[index].syncStatus = .local
             saveItems()
         }
     }

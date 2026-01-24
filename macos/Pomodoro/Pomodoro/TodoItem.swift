@@ -9,17 +9,26 @@ struct TodoItem: Identifiable, Codable, Equatable {
     var notes: String?
     var isCompleted: Bool
     var dueDate: Date?
+    var durationMinutes: Int?
     var priority: Priority
     var createdAt: Date
     var modifiedAt: Date
     var tags: [String]
     
-    /// Optional reference to Apple Reminders EKReminder identifier
-    /// Only populated when synced with Apple Reminders
-    var remindersIdentifier: String?
+    /// Optional identifiers for system sync mirrors
+    var reminderIdentifier: String?
+    var calendarEventIdentifier: String?
+    
+    enum SyncStatus: String, Codable {
+        case local
+        case synced
+        case conflict
+    }
+    
+    var syncStatus: SyncStatus
     
     enum CodingKeys: String, CodingKey {
-        case id, title, notes, isCompleted, dueDate, priority, createdAt, modifiedAt, tags, remindersIdentifier
+        case id, title, notes, isCompleted, dueDate, durationMinutes, priority, createdAt, modifiedAt, tags, reminderIdentifier, calendarEventIdentifier, syncStatus
     }
     
     enum Priority: Int, Codable, CaseIterable {
@@ -44,22 +53,28 @@ struct TodoItem: Identifiable, Codable, Equatable {
         notes: String? = nil,
         isCompleted: Bool = false,
         dueDate: Date? = nil,
+        durationMinutes: Int? = nil,
         priority: Priority = .none,
         createdAt: Date = Date(),
         modifiedAt: Date = Date(),
         tags: [String] = [],
-        remindersIdentifier: String? = nil
+        reminderIdentifier: String? = nil,
+        calendarEventIdentifier: String? = nil,
+        syncStatus: SyncStatus = .local
     ) {
         self.id = id
         self.title = title
         self.notes = notes
         self.isCompleted = isCompleted
         self.dueDate = dueDate
+        self.durationMinutes = durationMinutes
         self.priority = priority
         self.createdAt = createdAt
         self.modifiedAt = modifiedAt
         self.tags = tags
-        self.remindersIdentifier = remindersIdentifier
+        self.reminderIdentifier = reminderIdentifier
+        self.calendarEventIdentifier = calendarEventIdentifier
+        self.syncStatus = syncStatus
     }
     
     init(from decoder: Decoder) throws {
@@ -69,11 +84,14 @@ struct TodoItem: Identifiable, Codable, Equatable {
         notes = try container.decodeIfPresent(String.self, forKey: .notes)
         isCompleted = try container.decode(Bool.self, forKey: .isCompleted)
         dueDate = try container.decodeIfPresent(Date.self, forKey: .dueDate)
+        durationMinutes = try container.decodeIfPresent(Int.self, forKey: .durationMinutes)
         priority = try container.decodeIfPresent(Priority.self, forKey: .priority) ?? .none
         createdAt = try container.decodeIfPresent(Date.self, forKey: .createdAt) ?? Date()
         modifiedAt = try container.decodeIfPresent(Date.self, forKey: .modifiedAt) ?? Date()
         tags = try container.decodeIfPresent([String].self, forKey: .tags) ?? []
-        remindersIdentifier = try container.decodeIfPresent(String.self, forKey: .remindersIdentifier)
+        reminderIdentifier = try container.decodeIfPresent(String.self, forKey: .reminderIdentifier)
+        calendarEventIdentifier = try container.decodeIfPresent(String.self, forKey: .calendarEventIdentifier)
+        syncStatus = try container.decodeIfPresent(SyncStatus.self, forKey: .syncStatus) ?? .local
     }
     
     func encode(to encoder: Encoder) throws {
@@ -83,13 +101,16 @@ struct TodoItem: Identifiable, Codable, Equatable {
         try container.encodeIfPresent(notes, forKey: .notes)
         try container.encode(isCompleted, forKey: .isCompleted)
         try container.encodeIfPresent(dueDate, forKey: .dueDate)
+        try container.encodeIfPresent(durationMinutes, forKey: .durationMinutes)
         try container.encode(priority, forKey: .priority)
         try container.encode(createdAt, forKey: .createdAt)
         try container.encode(modifiedAt, forKey: .modifiedAt)
         if !tags.isEmpty {
             try container.encode(tags, forKey: .tags)
         }
-        try container.encodeIfPresent(remindersIdentifier, forKey: .remindersIdentifier)
+        try container.encodeIfPresent(reminderIdentifier, forKey: .reminderIdentifier)
+        try container.encodeIfPresent(calendarEventIdentifier, forKey: .calendarEventIdentifier)
+        try container.encode(syncStatus, forKey: .syncStatus)
     }
     
     mutating func markComplete(_ completed: Bool) {

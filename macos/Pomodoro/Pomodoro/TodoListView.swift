@@ -191,10 +191,10 @@ struct TodoListView: View {
                 
                 // Sync to Reminders if authorized and linked
                 if permissionsManager.isRemindersAuthorized,
-                   item.remindersIdentifier != nil {
+                   item.reminderIdentifier != nil {
                     Task {
                         if let updatedItem = todoStore.items.first(where: { $0.id == item.id }) {
-                            try? await remindersSync.syncToReminders(updatedItem)
+                            try? await remindersSync.syncTask(updatedItem)
                         }
                     }
                 }
@@ -243,7 +243,7 @@ struct TodoListView: View {
                             .foregroundStyle(.secondary)
                     }
                     
-                    if item.remindersIdentifier != nil {
+                    if item.reminderIdentifier != nil {
                         Label("Synced", systemImage: "checkmark.icloud")
                             .font(.caption)
                             .foregroundStyle(.green)
@@ -255,10 +255,10 @@ struct TodoListView: View {
             
             Menu {
                 if permissionsManager.isRemindersAuthorized {
-                    if item.remindersIdentifier == nil {
+                    if item.reminderIdentifier == nil {
                         Button(action: {
                             Task {
-                                try? await remindersSync.syncToReminders(item)
+                                try? await remindersSync.syncTask(item)
                             }
                         }) {
                             Label("Sync to Reminders", systemImage: "arrow.triangle.2.circlepath")
@@ -281,7 +281,7 @@ struct TodoListView: View {
                 }
                 
                 Button(role: .destructive, action: {
-                    if item.remindersIdentifier != nil {
+                    if item.reminderIdentifier != nil {
                         Task {
                             try? await remindersSync.deleteReminder(item)
                         }

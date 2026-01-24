@@ -4,12 +4,12 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="2909c215-f590-49b8-8f9e-264ead6228fc" name="Changes" comment="Calendar and todo list update">
+    <list default="true" id="2909c215-f590-49b8-8f9e-264ead6228fc" name="Changes" comment="Docs organize">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/macos/Pomodoro/Pomodoro.xcodeproj/project.xcworkspace/xcuserdata/2111832868qq.com.xcuserdatad/UserInterfaceState.xcuserstate" beforeDir="false" afterPath="$PROJECT_DIR$/macos/Pomodoro/Pomodoro.xcodeproj/project.xcworkspace/xcuserdata/2111832868qq.com.xcuserdatad/UserInterfaceState.xcuserstate" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/macos/Pomodoro/Pomodoro/CalendarView.swift" beforeDir="false" afterPath="$PROJECT_DIR$/macos/Pomodoro/Pomodoro/CalendarView.swift" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/macos/Pomodoro/Pomodoro/RemindersSync.swift" beforeDir="false" afterPath="$PROJECT_DIR$/macos/Pomodoro/Pomodoro/RemindersSync.swift" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/macos/Pomodoro/Pomodoro/TodoItem.swift" beforeDir="false" afterPath="$PROJECT_DIR$/macos/Pomodoro/Pomodoro/TodoItem.swift" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/macos/Pomodoro/Pomodoro/TodoListView.swift" beforeDir="false" afterPath="$PROJECT_DIR$/macos/Pomodoro/Pomodoro/TodoListView.swift" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/macos/Pomodoro/Pomodoro/TodoStore.swift" beforeDir="false" afterPath="$PROJECT_DIR$/macos/Pomodoro/Pomodoro/TodoStore.swift" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -345,7 +345,23 @@
       <option name="project" value="LOCAL" />
       <updated>1769235149760</updated>
     </task>
-    <option name="localTasksCounter" value="34" />
+    <task id="LOCAL-00034" summary="Docs organize">
+      <option name="closed" value="true" />
+      <created>1769236693380</created>
+      <option name="number" value="00034" />
+      <option name="presentableId" value="LOCAL-00034" />
+      <option name="project" value="LOCAL" />
+      <updated>1769236693380</updated>
+    </task>
+    <task id="LOCAL-00035" summary="Docs organize">
+      <option name="closed" value="true" />
+      <created>1769236715832</created>
+      <option name="number" value="00035" />
+      <option name="presentableId" value="LOCAL-00035" />
+      <option name="project" value="LOCAL" />
+      <updated>1769236715832</updated>
+    </task>
+    <option name="localTasksCounter" value="36" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -377,6 +393,7 @@
     <MESSAGE value="Calendar and todo list fix" />
     <MESSAGE value="Calendar and todo list basic update" />
     <MESSAGE value="Calendar and todo list update" />
-    <option name="LAST_COMMIT_MESSAGE" value="Calendar and todo list update" />
+    <MESSAGE value="Docs organize" />
+    <option name="LAST_COMMIT_MESSAGE" value="Docs organize" />
   </component>
 </project>
