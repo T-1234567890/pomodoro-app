@@ -121,7 +121,7 @@ struct CalendarView: View {
                     .multilineTextAlignment(.center)
                     .fixedSize(horizontal: false, vertical: true)
                 
-                Text("Enable Calendar access in System Settings to use this feature.")
+                Text("Click the button below to request access.")
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
                     .multilineTextAlignment(.center)
@@ -131,10 +131,10 @@ struct CalendarView: View {
             
             Button(action: {
                 Task {
-                    await permissionsManager.registerCalendarIntent()
+                    await permissionsManager.requestCalendarPermission()
                 }
             }) {
-                Label("Enable Calendar Access", systemImage: "calendar")
+                Label("Request Calendar Access", systemImage: "calendar")
                     .font(.headline)
             }
             .buttonStyle(.borderedProminent)
@@ -142,6 +142,14 @@ struct CalendarView: View {
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .padding(48)
+        .alert("Calendar Access Denied", isPresented: $permissionsManager.showCalendarDeniedAlert) {
+            Button("Open Settings") {
+                permissionsManager.openSystemSettings()
+            }
+            Button("Cancel", role: .cancel) { }
+        } message: {
+            Text("Calendar access is required to view your events. You can enable it in System Settings → Privacy & Security → Calendar.")
+        }
     }
     
     @ViewBuilder

@@ -94,7 +94,7 @@ struct TodoListView: View {
                 Text("Reminders Sync Disabled")
                     .font(.headline)
                 
-                Text("Enable Reminders access in Settings to sync tasks with Apple Reminders.")
+                Text("Enable Reminders access to sync tasks with Apple Reminders.")
                     .font(.caption)
                     .foregroundStyle(.secondary)
             }
@@ -103,7 +103,7 @@ struct TodoListView: View {
             
             Button("Enable") {
                 Task {
-                    await permissionsManager.registerRemindersIntent()
+                    await permissionsManager.requestRemindersPermission()
                 }
             }
             .buttonStyle(.bordered)
@@ -113,6 +113,14 @@ struct TodoListView: View {
         .cornerRadius(8)
         .padding(.horizontal, 32)
         .padding(.bottom, 12)
+        .alert("Reminders Access Denied", isPresented: $permissionsManager.showRemindersDeniedAlert) {
+            Button("Open Settings") {
+                permissionsManager.openSystemSettings()
+            }
+            Button("Cancel", role: .cancel) { }
+        } message: {
+            Text("Reminders access allows you to sync tasks with Apple Reminders. You can enable it in System Settings → Privacy & Security → Reminders.")
+        }
     }
     
     private var emptyState: some View {

@@ -15,6 +15,10 @@ final class PermissionsManager: ObservableObject {
     @Published var calendarStatus: EKAuthorizationStatus = .notDetermined
     @Published var remindersStatus: EKAuthorizationStatus = .notDetermined
     
+    // Alert state for denied permissions
+    @Published var showCalendarDeniedAlert = false
+    @Published var showRemindersDeniedAlert = false
+    
     private let eventStore = EKEventStore()
     private let notificationCenter = UNUserNotificationCenter.current()
     
@@ -48,67 +52,132 @@ final class PermissionsManager: ObservableObject {
     
     // MARK: - Permission Requests
     
+    /// Request notification permission - shows system dialog if notDetermined, alert if denied/restricted
+    func requestNotificationPermission() async {
+        // Check current status
+        await refreshNotificationStatus()
+        
+        switch notificationStatus {
+        case .notDetermined:
+            // Request permission - this will show the system dialog
+            do {
+                let granted = try await notificationCenter.requestAuthorization(options: [.alert, .sound, .badge])
+                await refreshNotificationStatus()
+                
+                if !granted {
+                    // User denied in the dialog - no additional action needed
+                    print("[PermissionsManager] Notification permission denied by user")
+                }
+            } catch {
+                print("[PermissionsManager] Notification request failed: \(error)")
+            }
+            
+        case .denied:
+            // Already denied - inform user via alert (handled in UI)
+            print("[PermissionsManager] Notification permission already denied")
+            // Note: Notifications don't have a dedicated alert flag since they're handled differently in the UI
+            // but the pattern is consistent with Calendar/Reminders
+            
+        case .authorized, .provisional, .ephemeral:
+            // Already authorized
+            print("[PermissionsManager] Notification permission already authorized")
+            
+        @unknown default:
+            print("[PermissionsManager] Unknown notification status")
+        }
+    }
+    
+    /// Request calendar permission - shows system dialog if notDetermined, sets alert flag if denied/restricted
+    func requestCalendarPermission() async {
+        // Check current status
+        refreshCalendarStatus()
+        
+        switch calendarStatus {
+        case .notDetermined:
+            // Request permission - this will show the system dialog
+            do {
+                let granted = try await eventStore.requestAccess(to: .event)
+                refreshCalendarStatus()
+                
+                if !granted {
+                    // User denied in the dialog - show alert
+                    showCalendarDeniedAlert = true
+                    print("[PermissionsManager] Calendar permission denied by user")
+                }
+            } catch {
+                print("[PermissionsManager] Calendar request failed: \(error)")
+            }
+            
+        case .denied, .restricted:
+            // Already denied or restricted - show alert
+            showCalendarDeniedAlert = true
+            print("[PermissionsManager] Calendar permission already denied or restricted")
+            
+        case .authorized, .fullAccess, .writeOnly:
+            // Already authorized
+            print("[PermissionsManager] Calendar permission already authorized")
+            
+        @unknown default:
+            print("[PermissionsManager] Unknown calendar status")
+        }
+    }
+    
+    /// Request reminders permission - shows system dialog if notDetermined, sets alert flag if denied/restricted
+    func requestRemindersPermission() async {
+        // Check current status
+        refreshRemindersStatus()
+        
+        switch remindersStatus {
+        case .notDetermined:
+            // Request permission - this will show the system dialog
+            do {
+                let granted = try await eventStore.requestAccess(to: .reminder)
+                refreshRemindersStatus()
+                
+                if !granted {
+                    // User denied in the dialog - show alert
+                    showRemindersDeniedAlert = true
+                    print("[PermissionsManager] Reminders permission denied by user")
+                }
+            } catch {
+                print("[PermissionsManager] Reminders request failed: \(error)")
+            }
+            
+        case .denied, .restricted:
+            // Already denied or restricted - show alert
+            showRemindersDeniedAlert = true
+            print("[PermissionsManager] Reminders permission already denied or restricted")
+            
+        case .authorized, .fullAccess, .writeOnly:
+            // Already authorized
+            print("[PermissionsManager] Reminders permission already authorized")
+            
+        @unknown default:
+            print("[PermissionsManager] Unknown reminders status")
+        }
+    }
+    
+    // MARK: - Legacy Methods (Deprecated)
+    
     /// Register notification intent when status is notDetermined
     /// This may show the system prompt once
+    @available(*, deprecated, message: "Use requestNotificationPermission() instead")
     func registerNotificationIntent() async {
-        guard notificationStatus == .notDetermined else {
-            openSystemSettings()
-            return
-        }
-        
-        do {
-            let granted = try await notificationCenter.requestAuthorization(options: [.alert, .sound, .badge])
-            await refreshNotificationStatus()
-            
-            if !granted {
-                openSystemSettings()
-            }
-        } catch {
-            print("[PermissionsManager] Notification request failed: \(error)")
-            openSystemSettings()
-        }
+        await requestNotificationPermission()
     }
     
     /// Register calendar intent when status is notDetermined
     /// This may show the system prompt once
+    @available(*, deprecated, message: "Use requestCalendarPermission() instead")
     func registerCalendarIntent() async {
-        guard calendarStatus == .notDetermined else {
-            openSystemSettings()
-            return
-        }
-        
-        do {
-            let granted = try await eventStore.requestAccess(to: .event)
-            refreshCalendarStatus()
-            
-            if !granted {
-                openSystemSettings()
-            }
-        } catch {
-            print("[PermissionsManager] Calendar request failed: \(error)")
-            openSystemSettings()
-        }
+        await requestCalendarPermission()
     }
     
     /// Register reminders intent when status is notDetermined
     /// This may show the system prompt once
+    @available(*, deprecated, message: "Use requestRemindersPermission() instead")
     func registerRemindersIntent() async {
-        guard remindersStatus == .notDetermined else {
-            openSystemSettings()
-            return
-        }
-        
-        do {
-            let granted = try await eventStore.requestAccess(to: .reminder)
-            refreshRemindersStatus()
-            
-            if !granted {
-                openSystemSettings()
-            }
-        } catch {
-            print("[PermissionsManager] Reminders request failed: \(error)")
-            openSystemSettings()
-        }
+        await requestRemindersPermission()
     }
     
     // MARK: - System Settings

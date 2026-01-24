@@ -11,7 +11,7 @@ struct SettingsPermissionsView: View {
                 .font(.title2)
                 .fontWeight(.semibold)
             
-            Text("Grant permissions to enable full app functionality. All buttons open System Settings.")
+            Text("Grant permissions to enable full app functionality.")
                 .font(.subheadline)
                 .foregroundStyle(.secondary)
             
@@ -23,7 +23,7 @@ struct SettingsPermissionsView: View {
                     isAuthorized: permissionsManager.isNotificationsAuthorized,
                     action: {
                         Task {
-                            await permissionsManager.registerNotificationIntent()
+                            await permissionsManager.requestNotificationPermission()
                         }
                     }
                 )
@@ -35,9 +35,10 @@ struct SettingsPermissionsView: View {
                     title: "Calendar",
                     status: permissionsManager.calendarStatusText,
                     isAuthorized: permissionsManager.isCalendarAuthorized,
+                    isDenied: permissionsManager.calendarStatus == .denied || permissionsManager.calendarStatus == .restricted,
                     action: {
                         Task {
-                            await permissionsManager.registerCalendarIntent()
+                            await permissionsManager.requestCalendarPermission()
                         }
                     }
                 )
@@ -49,9 +50,10 @@ struct SettingsPermissionsView: View {
                     title: "Reminders",
                     status: permissionsManager.remindersStatusText,
                     isAuthorized: permissionsManager.isRemindersAuthorized,
+                    isDenied: permissionsManager.remindersStatus == .denied || permissionsManager.remindersStatus == .restricted,
                     action: {
                         Task {
-                            await permissionsManager.registerRemindersIntent()
+                            await permissionsManager.requestRemindersPermission()
                         }
                     }
                 )
@@ -69,6 +71,22 @@ struct SettingsPermissionsView: View {
         .onAppear {
             permissionsManager.refreshAllStatuses()
         }
+        .alert("Calendar Access Denied", isPresented: $permissionsManager.showCalendarDeniedAlert) {
+            Button("Open Settings") {
+                permissionsManager.openSystemSettings()
+            }
+            Button("Cancel", role: .cancel) { }
+        } message: {
+            Text("Calendar access is required to view your events and schedules. You can enable it in System Settings → Privacy & Security → Calendar.")
+        }
+        .alert("Reminders Access Denied", isPresented: $permissionsManager.showRemindersDeniedAlert) {
+            Button("Open Settings") {
+                permissionsManager.openSystemSettings()
+            }
+            Button("Cancel", role: .cancel) { }
+        } message: {
+            Text("Reminders access is optional but allows you to sync tasks with Apple Reminders. You can enable it in System Settings → Privacy & Security → Reminders.")
+        }
     }
     
     @ViewBuilder
@@ -77,12 +95,13 @@ struct SettingsPermissionsView: View {
         title: String,
         status: String,
         isAuthorized: Bool,
+        isDenied: Bool = false,
         action: @escaping () -> Void
     ) -> some View {
         HStack(spacing: 16) {
             Image(systemName: icon)
                 .font(.title2)
-                .foregroundStyle(isAuthorized ? .green : .secondary)
+                .foregroundStyle(isAuthorized ? .green : (isDenied ? .red : .secondary))
                 .frame(width: 32)
             
             VStack(alignment: .leading, spacing: 4) {
@@ -91,19 +110,35 @@ struct SettingsPermissionsView: View {
                 
                 Text(status)
                     .font(.caption)
-                    .foregroundStyle(isAuthorized ? .green : .secondary)
+                    .foregroundStyle(isAuthorized ? .green : (isDenied ? .red : .secondary))
             }
             
             Spacer()
             
-            Button(action: action) {
-                Text(isAuthorized ? "Authorized" : "Enable")
+            if isAuthorized {
+                Text("Authorized")
                     .font(.subheadline)
                     .fontWeight(.medium)
+                    .foregroundStyle(.green)
+                    .padding(.horizontal, 16)
+                    .padding(.vertical, 6)
+                    .background(Color.green.opacity(0.1))
+                    .cornerRadius(6)
+            } else if isDenied {
+                Button(action: action) {
+                    Text("Request Again")
+                        .font(.subheadline)
+                        .fontWeight(.medium)
+                }
+                .buttonStyle(.bordered)
+            } else {
+                Button(action: action) {
+                    Text("Enable")
+                        .font(.subheadline)
+                        .fontWeight(.medium)
+                }
+                .buttonStyle(.borderedProminent)
             }
-            .buttonStyle(.borderedProminent)
-            .tint(isAuthorized ? .green : .blue)
-            .disabled(isAuthorized)
         }
     }
 }
