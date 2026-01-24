@@ -6,7 +6,9 @@
 //
 
 import AppKit
+import EventKit
 import SwiftUI
+import UserNotifications
 
 struct MainWindowView: View {
     @EnvironmentObject private var appState: AppState
@@ -21,6 +23,10 @@ struct MainWindowView: View {
     @State private var sidebarSelection: SidebarItem = .pomodoro
     @State private var pomodoroStatePulse = false
     @State private var countdownStatePulse = false
+    @State private var notificationStatus: UNAuthorizationStatus = .notDetermined
+    @State private var calendarStatus: EKAuthorizationStatus = .notDetermined
+    @State private var remindersStatus: EKAuthorizationStatus = .notDetermined
+    private let eventStore = EKEventStore()
 
     var body: some View {
         ZStack(alignment: .top) {
@@ -339,9 +345,28 @@ struct MainWindowView: View {
                 Text("Quick Actions")
                     .font(.system(.headline, design: .rounded))
                     .foregroundStyle(.secondary)
+                VStack(alignment: .leading, spacing: 6) {
+                    permissionStatusRow(
+                        title: "Notifications",
+                        statusText: notificationStatusText(notificationStatus),
+                        statusColor: notificationStatusColor(notificationStatus)
+                    )
+                    permissionStatusRow(
+                        title: "Calendar",
+                        statusText: eventStatusText(calendarStatus),
+                        statusColor: eventStatusColor(calendarStatus)
+                    )
+                    permissionStatusRow(
+                        title: "Reminders",
+                        statusText: eventStatusText(remindersStatus),
+                        statusColor: eventStatusColor(remindersStatus)
+                    )
+                }
+                .padding(.bottom, 4)
+
                 HStack(spacing: 12) {
                     Button("Request Notifications") {
-                        appState.requestSystemNotificationAuthorization { _ in }
+                        handleNotificationAccessRequest()
                     }
                     .buttonStyle(.bordered)
 
@@ -353,12 +378,12 @@ struct MainWindowView: View {
 
                 HStack(spacing: 12) {
                     Button("Get Calendar Access") {
-                        openCalendarSettings()
+                        handleCalendarAccessRequest()
                     }
                     .buttonStyle(.bordered)
 
                     Button("Get Reminders Access") {
-                        openRemindersSettings()
+                        handleRemindersAccessRequest()
                     }
                     .buttonStyle(.bordered)
                 }
@@ -369,6 +394,12 @@ struct MainWindowView: View {
         .padding(.horizontal)
         .padding(.bottom)
         .frame(minWidth: 360, alignment: .leading)
+        .onAppear {
+            refreshPermissionStatuses()
+        }
+        .onReceive(NotificationCenter.default.publisher(for: NSApplication.didBecomeActiveNotification)) { _ in
+            refreshPermissionStatuses()
+        }
     }
 
     private var ambientSoundBinding: Binding<FocusSoundType> {
@@ -385,7 +416,9 @@ struct MainWindowView: View {
     }
 
     private func openNotificationSettings() {
-        guard let url = URL(string: "x-apple.systempreferences:com.apple.preference.notifications") else { return }
+        guard let url = URL(string: "x-apple.systempreferences:com.apple.preference.security?Privacy_Notifications") else {
+            return
+        }
         NSWorkspace.shared.open(url)
     }
 
@@ -397,6 +430,128 @@ struct MainWindowView: View {
     private func openRemindersSettings() {
         guard let url = URL(string: "x-apple.systempreferences:com.apple.preference.security?Privacy_Reminders") else { return }
         NSWorkspace.shared.open(url)
+    }
+
+    private func handleNotificationAccessRequest() {
+        UNUserNotificationCenter.current().getNotificationSettings { settings in
+            if settings.authorizationStatus == .notDetermined {
+                UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound, .badge]) { _, _ in
+                    refreshPermissionStatuses()
+                }
+            }
+            DispatchQueue.main.async {
+                openNotificationSettings()
+            }
+        }
+    }
+
+    private func handleCalendarAccessRequest() {
+        let status = EKEventStore.authorizationStatus(for: .event)
+        calendarStatus = status
+        if status == .notDetermined {
+            eventStore.requestAccess(to: .event) { _, _ in
+                DispatchQueue.main.async {
+                    refreshPermissionStatuses()
+                }
+            }
+        }
+        openCalendarSettings()
+    }
+
+    private func handleRemindersAccessRequest() {
+        let status = EKEventStore.authorizationStatus(for: .reminder)
+        remindersStatus = status
+        if status == .notDetermined {
+            eventStore.requestAccess(to: .reminder) { _, _ in
+                DispatchQueue.main.async {
+                    refreshPermissionStatuses()
+                }
+            }
+        }
+        openRemindersSettings()
+    }
+
+    private func refreshPermissionStatuses() {
+        UNUserNotificationCenter.current().getNotificationSettings { settings in
+            DispatchQueue.main.async {
+                notificationStatus = settings.authorizationStatus
+            }
+        }
+        calendarStatus = EKEventStore.authorizationStatus(for: .event)
+        remindersStatus = EKEventStore.authorizationStatus(for: .reminder)
+    }
+
+    private func permissionStatusRow(title: String, statusText: String, statusColor: Color) -> some View {
+        HStack(spacing: 8) {
+            Circle()
+                .fill(statusColor)
+                .frame(width: 8, height: 8)
+            Text("\(title): \(statusText)")
+                .font(.system(.subheadline, design: .rounded))
+                .foregroundStyle(.secondary)
+        }
+    }
+
+    private func notificationStatusText(_ status: UNAuthorizationStatus) -> String {
+        switch status {
+        case .notDetermined:
+            return "Not Determined"
+        case .denied:
+            return "Denied"
+        case .authorized:
+            return "Authorized"
+        case .provisional:
+            return "Provisional"
+        case .ephemeral:
+            return "Ephemeral"
+        @unknown default:
+            return "Unknown"
+        }
+    }
+
+    private func notificationStatusColor(_ status: UNAuthorizationStatus) -> Color {
+        switch status {
+        case .authorized, .provisional, .ephemeral:
+            return .green
+        case .denied:
+            return .red
+        case .notDetermined:
+            return .orange
+        @unknown default:
+            return .gray
+        }
+    }
+
+    private func eventStatusText(_ status: EKAuthorizationStatus) -> String {
+        switch status {
+        case .notDetermined:
+            return "Not Determined"
+        case .restricted:
+            return "Restricted"
+        case .denied:
+            return "Denied"
+        case .authorized:
+            return "Authorized"
+        case .fullAccess:
+            return "Full Access"
+        case .writeOnly:
+            return "Write Only"
+        @unknown default:
+            return "Unknown"
+        }
+    }
+
+    private func eventStatusColor(_ status: EKAuthorizationStatus) -> Color {
+        switch status {
+        case .authorized, .fullAccess, .writeOnly:
+            return .green
+        case .denied, .restricted:
+            return .red
+        case .notDetermined:
+            return .orange
+        @unknown default:
+            return .gray
+        }
     }
 
     private enum DurationField: Hashable {
