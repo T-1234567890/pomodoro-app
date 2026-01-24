@@ -27,6 +27,12 @@ struct MainWindowView: View {
     @State private var calendarStatus: EKAuthorizationStatus = .notDetermined
     @State private var remindersStatus: EKAuthorizationStatus = .notDetermined
     private let eventStore = EKEventStore()
+    
+    // New: Calendar, Reminders, and Todo system
+    @StateObject private var permissionsManager = PermissionsManager.shared
+    @StateObject private var todoStore = TodoStore()
+    @StateObject private var remindersSync = RemindersSync()
+    @StateObject private var calendarManager = CalendarManager()
 
     var body: some View {
         ZStack(alignment: .top) {
@@ -107,6 +113,10 @@ struct MainWindowView: View {
                 pomodoroView
             case .countdown:
                 countdownView
+            case .tasks:
+                tasksView
+            case .calendar:
+                calendarView
             case .audioAndMusic:
                 audioAndMusicView
             case .summary:
@@ -269,6 +279,24 @@ struct MainWindowView: View {
         .padding(.bottom)
         .frame(minWidth: 360, alignment: .leading)
     }
+    
+    private var tasksView: some View {
+        TodoListView(
+            todoStore: todoStore,
+            remindersSync: remindersSync,
+            permissionsManager: permissionsManager
+        )
+        .onAppear {
+            remindersSync.setTodoStore(todoStore)
+        }
+    }
+    
+    private var calendarView: some View {
+        CalendarView(
+            calendarManager: calendarManager,
+            permissionsManager: permissionsManager
+        )
+    }
 
     private var audioAndMusicView: some View {
         VStack(alignment: .leading, spacing: 16) {
@@ -342,51 +370,11 @@ struct MainWindowView: View {
             }
 
             VStack(alignment: .leading, spacing: 8) {
-                Text("Quick Actions")
+                Text("Permissions")
                     .font(.system(.headline, design: .rounded))
                     .foregroundStyle(.secondary)
-                VStack(alignment: .leading, spacing: 6) {
-                    permissionStatusRow(
-                        title: "Notifications",
-                        statusText: notificationStatusText(notificationStatus),
-                        statusColor: notificationStatusColor(notificationStatus)
-                    )
-                    permissionStatusRow(
-                        title: "Calendar",
-                        statusText: eventStatusText(calendarStatus),
-                        statusColor: eventStatusColor(calendarStatus)
-                    )
-                    permissionStatusRow(
-                        title: "Reminders",
-                        statusText: eventStatusText(remindersStatus),
-                        statusColor: eventStatusColor(remindersStatus)
-                    )
-                }
-                .padding(.bottom, 4)
-
-                HStack(spacing: 12) {
-                    Button("Request Notifications") {
-                        handleNotificationAccessRequest()
-                    }
-                    .buttonStyle(.bordered)
-
-                    Button("Open Notification Settings") {
-                        openNotificationSettings()
-                    }
-                    .buttonStyle(.bordered)
-                }
-
-                HStack(spacing: 12) {
-                    Button("Get Calendar Access") {
-                        handleCalendarAccessRequest()
-                    }
-                    .buttonStyle(.bordered)
-
-                    Button("Get Reminders Access") {
-                        handleRemindersAccessRequest()
-                    }
-                    .buttonStyle(.bordered)
-                }
+                
+                SettingsPermissionsView(permissionsManager: permissionsManager)
             }
 
         }
@@ -564,6 +552,8 @@ struct MainWindowView: View {
     private enum SidebarItem: String, CaseIterable, Identifiable {
         case pomodoro
         case countdown
+        case tasks
+        case calendar
         case audioAndMusic
         case summary
         case settings
@@ -576,6 +566,10 @@ struct MainWindowView: View {
                 return "Pomodoro"
             case .countdown:
                 return "Countdown"
+            case .tasks:
+                return "Tasks"
+            case .calendar:
+                return "Calendar"
             case .audioAndMusic:
                 return "Audio&Music"
             case .summary:
@@ -591,6 +585,10 @@ struct MainWindowView: View {
                 return "timer"
             case .countdown:
                 return "hourglass"
+            case .tasks:
+                return "checklist"
+            case .calendar:
+                return "calendar"
             case .audioAndMusic:
                 return "music.note.list"
             case .summary:
