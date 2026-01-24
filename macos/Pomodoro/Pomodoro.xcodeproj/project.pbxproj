@@ -47,7 +47,10 @@
 		D1A1B00F0000000000000001 /* SettingsPermissionsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D1A1B0100000000000000001 /* SettingsPermissionsView.swift */; };
 		E7FB0168DAB22D17FF66223F /* AmbientNoiseEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = C67603580DB6C7C7A08CA894 /* AmbientNoiseEngine.swift */; };
 		EC7658622FEE47D78BFEA957 /* DailyStats.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0D409152AD794BA998253C35 /* DailyStats.swift */; };
-/* End PBXBuildFile section */
+		4BDE965F88F5BUILDCBB5DF2 /* CalendarDayView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4BDE965F88F54754BCBB5DF2 /* CalendarDayView.swift */; };
+		CC366ABE14C2BUILD3DDDB2A /* CalendarWeekView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC366ABE14C245B3A3DDDB2A /* CalendarWeekView.swift */; };
+		D0495D48D1B5BUILDBDA97DE /* CalendarMonthView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D0495D48D1B544D0ABDA97DE /* CalendarMonthView.swift */; };
+		/* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
 		05F639B95E5345199E439834 /* LocalMediaPlayer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalMediaPlayer.swift; sourceTree = "<group>"; };
@@ -91,7 +94,10 @@
 		D1A1B00C0000000000000001 /* TodoListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TodoListView.swift; sourceTree = "<group>"; };
 		D1A1B00E0000000000000001 /* RemindersSync.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RemindersSync.swift; sourceTree = "<group>"; };
 		D1A1B0100000000000000001 /* SettingsPermissionsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsPermissionsView.swift; sourceTree = "<group>"; };
-/* End PBXFileReference section */
+		4BDE965F88F54754BCBB5DF2 /* CalendarDayView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalendarDayView.swift; sourceTree = "<group>"; };
+		CC366ABE14C245B3A3DDDB2A /* CalendarWeekView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalendarWeekView.swift; sourceTree = "<group>"; };
+		D0495D48D1B544D0ABDA97DE /* CalendarMonthView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalendarMonthView.swift; sourceTree = "<group>"; };
+		/* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
 		7C360D352F191F17007313D3 /* Frameworks */ = {
@@ -183,6 +189,9 @@
 				49393474CCC34E2091E176A1 /* WindowBackgroundConfigurator.swift */,
 				B6A2000A2FFD4BD7B90F8AC1 /* OnboardingFlowView.swift */,
 				D1A1B0060000000000000001 /* CalendarView.swift */,
+				4BDE965F88F54754BCBB5DF2 /* CalendarDayView.swift */,
+				CC366ABE14C245B3A3DDDB2A /* CalendarWeekView.swift */,
+				D0495D48D1B544D0ABDA97DE /* CalendarMonthView.swift */,
 				D1A1B00C0000000000000001 /* TodoListView.swift */,
 				D1A1B0100000000000000001 /* SettingsPermissionsView.swift */,
 			);
@@ -321,6 +330,9 @@
 				D1A1B0010000000000000001 /* PermissionsManager.swift in Sources */,
 				D1A1B0030000000000000001 /* CalendarManager.swift in Sources */,
 				D1A1B0050000000000000001 /* CalendarView.swift in Sources */,
+				4BDE965F88F5BUILDCBB5DF2 /* CalendarDayView.swift in Sources */,
+				CC366ABE14C2BUILD3DDDB2A /* CalendarWeekView.swift in Sources */,
+				D0495D48D1B5BUILDBDA97DE /* CalendarMonthView.swift in Sources */,
 				D1A1B0070000000000000001 /* TodoItem.swift in Sources */,
 				D1A1B0090000000000000001 /* TodoStore.swift in Sources */,
 				D1A1B00B0000000000000001 /* TodoListView.swift in Sources */,
