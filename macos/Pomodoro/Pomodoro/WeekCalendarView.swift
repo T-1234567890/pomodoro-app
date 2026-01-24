@@ -9,8 +9,8 @@ struct WeekCalendarView: View {
     
     @State private var selectedDay: Date?
     
-    private let columnSpacing: CGFloat = 12
-    private let columnWidth: CGFloat = 200
+    private let columnSpacing: CGFloat = 10
+    private let columnWidth: CGFloat = 180
     
     var body: some View {
         // Outer vertical scroll prevents bottom clipping when content grows tall.
@@ -30,8 +30,8 @@ struct WeekCalendarView: View {
                         .frame(minWidth: columnWidth, maxWidth: columnWidth, alignment: .topLeading)
                     }
                 }
-                .padding(.horizontal, 12)
-                .padding(.vertical, 8)
+                .padding(.horizontal, 10)
+                .padding(.vertical, 6)
             }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
@@ -88,13 +88,13 @@ private struct DayColumnView: View {
     }()
     
     var body: some View {
-        VStack(alignment: .leading, spacing: 10) {
+        VStack(alignment: .leading, spacing: 8) {
             HStack {
                 VStack(alignment: .leading, spacing: 2) {
                     Text(Self.dayFormatter.string(from: date))
-                        .font(.headline)
-                    Text(dayNumberString(date))
                         .font(.subheadline)
+                    Text(dayNumberString(date))
+                        .font(.caption)
                         .foregroundStyle(.secondary)
                 }
                 Spacer()
@@ -102,11 +102,11 @@ private struct DayColumnView: View {
             
             if events.isEmpty && tasks.isEmpty {
                 Text("No events")
-                    .font(.caption)
+                    .font(.caption2)
                     .foregroundStyle(.secondary)
                     .frame(maxWidth: .infinity, alignment: .leading)
             } else {
-                VStack(alignment: .leading, spacing: 8) {
+                VStack(alignment: .leading, spacing: 6) {
                     ForEach(events, id: \.eventIdentifier) { event in
                         EventCard(event: event)
                     }
@@ -118,20 +118,20 @@ private struct DayColumnView: View {
             
             Spacer(minLength: 0)
         }
-        .padding(12)
+        .padding(10)
         .background(cardBackground)
         .overlay(
-            RoundedRectangle(cornerRadius: 12)
+            RoundedRectangle(cornerRadius: 10)
                 .stroke(isSelected ? Color.accentColor : Color.primary.opacity(0.08), lineWidth: isSelected ? 2 : 1)
         )
-        .cornerRadius(12)
+        .cornerRadius(10)
         .contentShape(Rectangle())
         .onTapGesture { onSelect() }
     }
     
     private var cardBackground: some View {
-        RoundedRectangle(cornerRadius: 12)
-            .fill(isSelected ? Color.accentColor.opacity(0.12) : Color.primary.opacity(0.04))
+        RoundedRectangle(cornerRadius: 10)
+            .fill(isSelected ? Color.accentColor.opacity(0.1) : Color.primary.opacity(0.035))
     }
     
     private func dayNumberString(_ date: Date) -> String {
@@ -147,16 +147,15 @@ private struct DayColumnView: View {
             VStack(alignment: .leading, spacing: 4) {
                 Text(event.title ?? "Untitled")
                     .font(.subheadline)
-                    .fontWeight(.semibold)
                     .lineLimit(1)
                 Text(timeRange(event))
-                    .font(.caption)
+                    .font(.caption2)
                     .foregroundStyle(.secondary)
             }
-            .padding(8)
+            .padding(7)
             .frame(maxWidth: .infinity, alignment: .leading)
-            .background(Color(cgColor: event.calendar.cgColor).opacity(0.14))
-            .cornerRadius(8)
+            .background(Color(cgColor: event.calendar.cgColor).opacity(0.12))
+            .cornerRadius(7)
         }
         
         private func timeRange(_ event: EKEvent) -> String {
@@ -175,22 +174,21 @@ private struct DayColumnView: View {
             VStack(alignment: .leading, spacing: 4) {
                 Text(task.title)
                     .font(.subheadline)
-                    .fontWeight(.semibold)
                     .lineLimit(1)
                 if let due = task.dueDate {
                     Text(timeRange(from: due, duration: task.durationMinutes))
-                        .font(.caption)
+                        .font(.caption2)
                         .foregroundStyle(.secondary)
                 } else {
                     Text("No due time")
-                        .font(.caption)
+                        .font(.caption2)
                         .foregroundStyle(.secondary)
                 }
             }
-            .padding(8)
+            .padding(7)
             .frame(maxWidth: .infinity, alignment: .leading)
-            .background(Color.blue.opacity(0.12))
-            .cornerRadius(8)
+            .background(Color.blue.opacity(0.1))
+            .cornerRadius(7)
         }
         
         private func timeRange(from start: Date, duration: Int?) -> String {
@@ -200,4 +198,3 @@ private struct DayColumnView: View {
         }
     }
 }
-
