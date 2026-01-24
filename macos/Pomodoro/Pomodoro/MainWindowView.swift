@@ -107,6 +107,10 @@ struct MainWindowView: View {
                 pomodoroView
             case .countdown:
                 countdownView
+            case .calendar:
+                calendarView
+            case .reminders:
+                remindersView
             case .audioAndMusic:
                 audioAndMusicView
             case .summary:
@@ -263,6 +267,26 @@ struct MainWindowView: View {
                     appState.countdown.reset()
                 }
             }
+        }
+        .padding(.top, 28)
+        .padding(.horizontal)
+        .padding(.bottom)
+        .frame(minWidth: 360, alignment: .leading)
+    }
+
+    private var calendarView: some View {
+        blankSectionView(title: "Calendar")
+    }
+
+    private var remindersView: some View {
+        blankSectionView(title: "Reminders")
+    }
+
+    private func blankSectionView(title: String) -> some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Text(title)
+                .font(.system(.headline, design: .rounded))
+                .foregroundStyle(.secondary)
         }
         .padding(.top, 28)
         .padding(.horizontal)
@@ -564,6 +588,8 @@ struct MainWindowView: View {
     private enum SidebarItem: String, CaseIterable, Identifiable {
         case pomodoro
         case countdown
+        case calendar
+        case reminders
         case audioAndMusic
         case summary
         case settings
@@ -576,6 +602,10 @@ struct MainWindowView: View {
                 return "Pomodoro"
             case .countdown:
                 return "Countdown"
+            case .calendar:
+                return "Calendar"
+            case .reminders:
+                return "Reminders"
             case .audioAndMusic:
                 return "Audio&Music"
             case .summary:
@@ -591,6 +621,10 @@ struct MainWindowView: View {
                 return "timer"
             case .countdown:
                 return "hourglass"
+            case .calendar:
+                return "calendar"
+            case .reminders:
+                return "list.bullet.rectangle"
             case .audioAndMusic:
                 return "music.note.list"
             case .summary:
