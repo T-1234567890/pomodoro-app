@@ -1,4 +1,5 @@
 # 🍅 Pomodoro
+### Plan. Focus. Done.
 
 **Pomodoro** is a macOS productivity app that connects focus sessions, Tasks, Reminders, and Calendar into a single workflow.  
 It is not just a timer — it links tasks, time, and focus, adapting to task-driven, time-blocking, or flow-based work styles. Pomodoro is built as a unified time system rather than a rigid productivity method, with a macOS-inspired **glass / liquid glass UI**.
