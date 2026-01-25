@@ -30,3 +30,11 @@
 - General UI improvements
 - New navigation bar
 - New pop up reminders when timer season ends
+
+## 1.0.0
+-fully migrated to Swift
+
+Major UI polish and layout refinement
+New sidebar-based navigation
+Improved glass / background blur rendering
+Stability improvements
