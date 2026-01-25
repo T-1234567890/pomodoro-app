@@ -1,62 +1,41 @@
-# 🍅 Pomodoro
+# 🍅 Pomodoro App
 ### Plan. Focus. Done.
 
-**Pomodoro** is a macOS productivity app that connects focus sessions, Tasks, Reminders, and Calendar into a single workflow.  
+**Pomodoro App** is a macOS productivity app that connects focus sessions, Tasks, Reminders, and Calendar into a single workflow.  
 It is not just a timer — it links tasks, time, and focus, adapting to task-driven, time-blocking, or flow-based work styles. Pomodoro is built as a unified time system rather than a rigid productivity method, with a macOS-inspired **glass / liquid glass UI**.
 
 Version **1.1.0** is a feature integration update that deepens system connections without a full redesign.
 
-<img width="320" height="320" alt="Firefly_Gemini Flash_Make it in to normal white background 328819" src="https://github.com/user-attachments/assets/629e345e-5540-4439-8e47-30f3db8c6cad" />
+<p align="center">
+  <img
+    width="320"
+    height="320"
+    alt="Pomodoro App Logo"
+    src="https://github.com/user-attachments/assets/629e345e-5540-4439-8e47-30f3db8c6cad"
+  />
+</p>
 
-![License](https://img.shields.io/github/license/T-1234567890/pomodoro-app)
-![Platform](https://img.shields.io/badge/platform-macOS-blue?logo=apple)
-![Release](https://img.shields.io/github/v/release/T-1234567890/pomodoro-app)
-![Downloads](https://img.shields.io/github/downloads/T-1234567890/pomodoro-app/total)
+<p align="center">
+  <img src="https://img.shields.io/github/license/T-1234567890/pomodoro-app" alt="License" />
+  <img src="https://img.shields.io/badge/platform-macOS-blue?logo=apple" alt="Platform" />
+  <img src="https://img.shields.io/github/v/release/T-1234567890/pomodoro-app" alt="Release" />
+  <img src="https://img.shields.io/github/downloads/T-1234567890/pomodoro-app/total" alt="Downloads" />
+</p>
 
 >## ⚠️ Notice
 > If the app still ask for calendar&reminders permissions after you activate, please quit and restart the app
 
+## 🚀 Try it now
+
+Download the latest release from GitHub and run the app immediately: see Pomodoro v1.1.0 for the current build. Future releases will appear under Releases.
+
+- **Gatekeeper warning**: macOS may warn that the app is from an unidentified developer. This is expected while the project awaits Apple Developer Program approval.
+- **Bypass Gatekeeper safely**: follow the step‑by‑step guide in *docs/Gatekeeper.md* to open the downloaded app without compromising security.
+
+Once the Apple developer account is active, signed TestFlight and App Store builds will be provided.
+
 ## Screenshot
 <img width="1046" height="638" alt="Screenshot 2026-01-21 at 10 10 07 PM" src="https://github.com/user-attachments/assets/7135a578-4191-4aea-9629-cd7072180557" />
-
-## Version status
-
-Current Version: <br>
-✅ 1.1.0 (feature integration update; not a redesign)
-
-Update history: see `History versions.md` for archived notes.
-
-## What’s New in v1.1.0
-
-- Task system with optional Reminders integration
-- Calendar view (Day / Week / Month)
-- Bidirectional sync foundations between Tasks and Reminders
-- Calendar as a visual layer for time-based planning
-- Improved permission handling for Calendar, Reminders, and Notifications
-- UX refinements related to planning and review
-
-### 📌 Update Policy
-- Will receive more updates
-- Changes may occur without notice
-- Feedback, PR, and issue reports are welcome
-
-
-## Changelog (short)
-
-## 1.1.0
-- Task system with optional Reminders integration
-- Calendar view (Day / Week / Month) with planning visual layer
-- Bidirectional sync foundations between Tasks and Reminders
-- Improved permission handling for Calendar, Reminders, and Notifications
-- UX refinements for planning and review
-- Feature integration update (not a redesign)
-
-## 1.0.x
--fully migrated to Swift
-- Major UI polish and layout refinement
-- New sidebar-based navigation
-- Improved glass / background blur rendering
-- Stability improvements
 
 ## ✅ Features
 
@@ -82,17 +61,47 @@ Pomodoro App is designed as a unified time system — not just a timer. It bring
 
 Instead of forcing a rigid productivity method, Pomodoro App **adapts to how you actually work — whether that’s time-blocking, task-driven planning, or flow-based focus**.
 
-## 🚀 Running the App (1.0.0+ Swift)
+## 🧰 Running & Developing
 
-Using the official release or running with Xcode
+### Running the app
 
----
+If you prefer not to build from source, download the binary from the latest release (see “Try it now” above). On first launch, macOS may block the app; use the Gatekeeper guide linked above.
 
-### 🔧 Requirements for Developing
+### Building from source
 
-Install the following: Xcode, macOS 14.6+
+Requires Xcode on macOS 14.6 or later.
+Clone this repository, open the project in Xcode, and build/run as usual.
 
----
+The current version is fully native Swift; legacy Tauri/Svelte/Python versions are archived.
+
+## Version status
+
+Current Version: <br>
+✅ 1.1.0 (feature integration update; not a redesign)
+
+Update history: see `History versions.md` for archived notes.
+
+### 📌 Update Policy
+- Will receive more updates
+- Changes may occur without notice
+- Feedback, PR, and issue reports are welcome
+
+## Changelog (short)
+
+## 1.1.0
+- Task system with optional Reminders integration
+- Calendar view (Day / Week / Month) with planning visual layer
+- Bidirectional sync foundations between Tasks and Reminders
+- Improved permission handling for Calendar, Reminders, and Notifications
+- UX refinements for planning and review
+- Feature integration update (not a redesign)
+
+## 1.0.x
+- fully migrated to Swift
+- Major UI polish and layout refinement
+- New sidebar-based navigation
+- Improved glass / background blur rendering
+- Stability improvements
 
 ## Current UI Direction
 
@@ -106,11 +115,11 @@ Version 1.1.x focuses on:
 
 The goal of upcoming versions is to transition toward a softer, macOS-inspired liquid glass look — with more subtle contrast, improved typography, and refined panel depth.
 
-## Project Status
+## 🛠️ Project status
 
 - Stable for daily use
-- Design iterations in progress
-- New features in upcoming versions
+- Design iterations are ongoing
+- New features are in development
 
 >**🚧 Distribution Status**
 >
@@ -152,8 +161,6 @@ Planned for future versions:
 - 🔔 Advanced reminder scheduling & customization
 - ⌨️ More features
 - 🛎️ Issue requirements
-
----
 
 ## 🤝 Collaboration & Contributions
 
