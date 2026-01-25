@@ -15,7 +15,7 @@ This document exists to:
 
 ## Status Summary
 
-- Current version: **v1.1.x**
+- Current version: **v1.x.x**
 - Distribution: GitHub Releases (unsigned)
 - Business model: **Free and Open source**
 - Pro plan: **Not launched / Not scheduled**
@@ -38,11 +38,76 @@ A Pro plan would exist only to **sustain development**, not to restrict core usa
 
 ---
 
+## Bring Your Own AI Key (Out of pro plan)
+
+For advanced or experimental users, Pomodoro App may explore a **Bring Your Own AI Key** mode in the future.
+
+This mode is intended for users who prefer to:
+- Use their own AI provider (OpenAI, compatible APIs, etc.)
+- Avoid managed services
+- Experiment with AI features locally
+
+### Scope & Limitations
+
+- This mode is **read-only by design**
+- AI can provide **advice, reflection, or suggestions**
+- AI **cannot** modify:
+  - Tasks
+  - Calendar events
+  - Schedules
+  - Time blocks
+
+All AI output is treated as **assistance**, not control.
+
+### Philosophy
+
+The goal is to keep this mode:
+- Transparent
+- User-controlled
+- Low-risk
+
+System-level automation (such as scheduling or calendar writes) is intentionally excluded and reserved for managed solutions.
+
+---
+
 ## Possible Pro Features (Exploratory)
 
 > All items below are **ideas**, not promises.
 
-### 1. AI-Assisted Planning & Reflection
+### Flow Mode (Full Experience)
+
+Flow Mode is a dedicated focus space designed for deep, uninterrupted work.
+
+In its complete form, Flow Mode may include:
+- A large, customizable clock (visual time awareness, not mandatory countdown)
+- Optional small countdown timer for session-based work
+- Automatic fullscreen entry to reduce distractions
+- Background blur or dimming
+- Custom background images or wallpapers
+- Minimal controls with keyboard-first interaction
+
+Flow Mode is designed to feel like a **workspace**, not a control panel.
+
+Some elements of Flow Mode may be limited or simplified outside of Pro, while the full experience is reserved for advanced use.
+
+### Task States (Beyond Completion)
+
+Tasks may support multiple states beyond simple completion, allowing more realistic day-to-day planning.
+
+Possible task states include:
+- Planned
+- In Progress
+- Paused / Parked
+- Completed
+
+These states are intended to:
+- Reduce pressure caused by binary "done / not done" thinking
+- Better reflect real-world workflows
+- Improve daily and weekly review experiences
+
+Task states focus on clarity and flexibility, not micromanagement.
+
+### AI-Assisted Planning & Reflection
 - Automatic time-block suggestions based on tasks and calendar gaps
 - Daily / weekly focus summaries
 - Lightweight insights (overload detection, consistency trends)
@@ -51,7 +116,7 @@ A Pro plan would exist only to **sustain development**, not to restrict core usa
 
 ---
 
-### 2. Advanced Productivity Analytics
+### Advanced Productivity Analytics
 - Extended charts across weeks or months
 - Pattern recognition (focus vs. distraction)
 - Long-term trend analysis
@@ -60,17 +125,52 @@ A Pro plan would exist only to **sustain development**, not to restrict core usa
 
 ---
 
-### 3. Optional Cloud Sync
+### Optional Cloud Sync
 - Cross-device sync (initially via iCloud)
 - Backup & restore
 - Optional account-based sync for non-Apple platforms (exploratory)
 
 ---
 
-### 4. Personalization & Focus Environment
+### Personalization & Focus Environment
 - Custom home backgrounds or images
 - Extended theming options
 - Advanced “Flow” focus modes (non-Pomodoro)
+
+---
+
+### AI Advice & Reflection
+- Daily or weekly focus feedback
+- Overload or imbalance warnings
+- Pattern observations (e.g. over-scheduling, task drift)
+
+---
+
+### AI-Assisted Task Writing
+
+- Convert short notes or rough ideas into structured tasks
+- Improve task clarity (title, description, optional steps)
+- Suggest estimated effort or focus type
+
+---
+
+### AI-to-Task Creation
+
+- User provides creative or unstructured input (text, concepts, or visual references)
+- AI helps translate that input into actionable tasks
+- Tasks are **drafted**, not automatically scheduled
+
+---
+
+## Non-Goals
+
+The following are **explicitly not goals** for AI features:
+
+- Fully autonomous scheduling without user approval
+- AI silently modifying calendars or tasks
+- Replacing user decision-making
+
+Pomodoro App aims to assist focus, not override it.
 
 ---
 
@@ -102,8 +202,8 @@ The app should never become unusable without Pro.
 > Pricing below is **not finalized** and may change significantly.
 
 - **US/International (USD)**
-  - $3.99–$4.99/month
-  - $29–$39/year
+  - $4.99/month
+  - $39/year
 
 - **China (RMB)**
   - ¥29/month
