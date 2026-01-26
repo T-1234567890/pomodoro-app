@@ -1,5 +1,6 @@
 import SwiftUI
 import EventKit
+import AppKit
 
 /// Calendar view showing time-based events and allowing event creation.
 /// Blocked when unauthorized with explanation and enable button.
@@ -10,6 +11,11 @@ struct CalendarView: View {
     
     @State private var selectedView: ViewType = .day
     @State private var anchorDate: Date = Date()
+    @State private var selectedEventIDs: Set<String> = []
+    @State private var lastSelectedEventID: String?
+    @State private var batchEventDate: Date = Date()
+    @State private var showDeleteEventsConfirmation = false
+    @State private var batchEventWarning: String?
     
     // New event sheet state
     @State private var showingAddEvent = false
@@ -132,6 +138,10 @@ struct CalendarView: View {
                         Label("Refresh", systemImage: "arrow.clockwise")
                     }
                     .buttonStyle(.bordered)
+                }
+                
+                if selectedEventIDs.count > 1 {
+                    batchEventActionsBar
                 }
             }
             
@@ -319,7 +329,7 @@ struct CalendarView: View {
                             .font(.subheadline)
                             .foregroundStyle(.secondary)
                         ForEach(todayEvents, id: \.eventIdentifier) { event in
-                            blockCard(event)
+                            blockCard(event, events: todayEvents)
                         }
                     }
 
@@ -340,8 +350,9 @@ struct CalendarView: View {
 
     // MARK: - Card builders
 
-    private func blockCard(_ event: EKEvent) -> some View {
-        VStack(alignment: .leading, spacing: 6) {
+    private func blockCard(_ event: EKEvent, events: [EKEvent]) -> some View {
+        let isSelected = event.eventIdentifier.map { selectedEventIDs.contains($0) } ?? false
+        return VStack(alignment: .leading, spacing: 6) {
             Text(event.title ?? "Untitled")
                 .font(.headline)
             Text(formatEventTime(event))
@@ -355,8 +366,12 @@ struct CalendarView: View {
         }
         .padding(12)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .background(Color.primary.opacity(0.05))
+        .background(isSelected ? Color.accentColor.opacity(0.15) : Color.primary.opacity(0.05))
         .cornerRadius(8)
+        .contentShape(Rectangle())
+        .onTapGesture(perform: {
+            handleEventSelection(event, allEvents: events)
+        })
     }
 
     private func taskCard(_ item: TodoItem) -> some View {
@@ -379,6 +394,131 @@ struct CalendarView: View {
         .frame(maxWidth: .infinity, alignment: .leading)
         .background(Color.primary.opacity(0.04))
         .cornerRadius(8)
+    }
+
+    // MARK: - Selection helpers
+
+    private func handleEventSelection(_ event: EKEvent, allEvents: [EKEvent]) {
+        guard let id = event.eventIdentifier else { return }
+        let flags = NSApp.currentEvent?.modifierFlags ?? []
+        let isShift = flags.contains(.shift)
+        let isCommand = flags.contains(.command)
+        
+        if isShift, let anchor = lastSelectedEventID,
+           let anchorIndex = allEvents.firstIndex(where: { $0.eventIdentifier == anchor }),
+           let targetIndex = allEvents.firstIndex(where: { $0.eventIdentifier == id }) {
+            let lower = min(anchorIndex, targetIndex)
+            let upper = max(anchorIndex, targetIndex)
+            let rangeIDs = allEvents[lower...upper].compactMap { $0.eventIdentifier }
+            selectedEventIDs.formUnion(rangeIDs)
+            lastSelectedEventID = id
+            return
+        }
+        
+        if isCommand {
+            if selectedEventIDs.contains(id) {
+                selectedEventIDs.remove(id)
+            } else {
+                selectedEventIDs.insert(id)
+                lastSelectedEventID = id
+            }
+            return
+        }
+        
+        // Default single selection
+        selectedEventIDs = [id]
+        lastSelectedEventID = id
+    }
+    
+    @ViewBuilder
+    private var batchEventActionsBar: some View {
+        let editableSelection = selectedEventIDs.compactMap { id in
+            calendarManager.events.first(where: { $0.eventIdentifier == id })
+        }.filter { $0.calendar.allowsContentModifications }
+        let hasReadOnly = selectedEventIDs.count != editableSelection.count
+        
+        VStack(alignment: .leading, spacing: 6) {
+            HStack(spacing: 10) {
+                Text("\(selectedEventIDs.count) selected")
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
+                
+                if hasReadOnly {
+                    Text("Some events are read-only (holidays/subscribed). Actions apply only to editable ones.")
+                        .font(.caption)
+                        .foregroundStyle(.orange)
+                }
+                
+                Spacer()
+                
+                DatePicker(
+                    "Move to",
+                    selection: $batchEventDate,
+                    displayedComponents: [.date]
+                )
+                .labelsHidden()
+                .datePickerStyle(.compact)
+                
+                Button {
+                    Task { await applyEventMove(to: batchEventDate, editable: editableSelection) }
+                } label: {
+                    Label("Move", systemImage: "arrow.right.circle")
+                }
+                .buttonStyle(.bordered)
+                .disabled(editableSelection.isEmpty)
+                
+                Button(role: .destructive) {
+                    showDeleteEventsConfirmation = true
+                } label: {
+                    Label("Delete", systemImage: "trash")
+                }
+                .buttonStyle(.borderedProminent)
+                .tint(.red)
+                .disabled(editableSelection.isEmpty)
+            }
+            
+            if let warning = batchEventWarning {
+                Text(warning)
+                    .font(.caption)
+                    .foregroundStyle(.orange)
+            }
+        }
+        .alert("Delete \(editableSelection.count) events?", isPresented: $showDeleteEventsConfirmation) {
+            Button("Delete", role: .destructive) {
+                Task { await applyEventDelete(editable: editableSelection) }
+            }
+            Button("Cancel", role: .cancel) { }
+        } message: {
+            Text("Read-only events (holidays/subscribed) will not be deleted.")
+        }
+    }
+    
+    private func applyEventMove(to date: Date, editable: [EKEvent]) async {
+        guard !editable.isEmpty else { return }
+        let ids = editable.compactMap { $0.eventIdentifier }
+        do {
+            try await calendarManager.moveEvents(with: ids, to: date)
+            selectedEventIDs.removeAll()
+            lastSelectedEventID = nil
+            await loadEvents()
+        } catch {
+            batchEventWarning = "Could not move all events: \(error.localizedDescription)"
+            print("[CalendarView] move events failed: \(error)")
+        }
+    }
+    
+    private func applyEventDelete(editable: [EKEvent]) async {
+        guard !editable.isEmpty else { return }
+        let ids = editable.compactMap { $0.eventIdentifier }
+        do {
+            try await calendarManager.deleteEvents(with: ids)
+            selectedEventIDs.removeAll()
+            lastSelectedEventID = nil
+            await loadEvents()
+        } catch {
+            batchEventWarning = "Could not delete all events: \(error.localizedDescription)"
+            print("[CalendarView] delete events failed: \(error)")
+        }
     }
 
     private func summaryPill(title: String, value: String) -> some View {

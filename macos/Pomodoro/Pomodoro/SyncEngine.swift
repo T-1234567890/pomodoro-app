@@ -44,38 +44,9 @@ final class SyncEngine {
             if let parsed = ExternalID.parse(from: reminder.notes), parsed.externalId.hasPrefix(ExternalID.taskPrefix) {
                 reminderMap[parsed.externalId] = reminder
             } else {
-                // System-created reminder with no externalId; import once by assigning a new externalId marker.
+                // External/unknown reminder without Pomodoro externalId:
+                // treat as outside task scope; do not import or create tasks.
                 stats.skipped += 1
-                guard let store = todoStore else { return }
-                let newId = UUID()
-                let externalId = ExternalID.taskId(for: newId)
-                let now = Date()
-                let newTask = TodoItem(
-                    id: newId,
-                    externalId: externalId,
-                    title: reminder.title,
-                    notes: reminder.notes,
-                    isCompleted: reminder.isCompleted,
-                    dueDate: reminder.dueDateComponents.flatMap { Calendar.current.date(from: $0) },
-                    durationMinutes: nil,
-                    priority: .none,
-                    createdAt: reminder.creationDate ?? now,
-                    modifiedAt: reminder.lastModifiedDate ?? now,
-                    tags: [],
-                    reminderIdentifier: reminder.calendarItemIdentifier,
-                    calendarEventIdentifier: nil,
-                    syncStatus: .synced
-                )
-                store.addItem(newTask)
-                // Write marker back into the system item so it becomes Pomodoro-managed.
-                reminder.notes = combinedNotes(from: reminder.notes, tags: [], externalId: externalId)
-                do {
-                    try eventStore.save(reminder, commit: true)
-                    print("[SyncEngine][Reminders] Imported system reminder and stamped externalId \(externalId)")
-                } catch {
-                    print("[SyncEngine][Reminders] Failed to stamp externalId on imported reminder: \(error)")
-                }
-                reminderMap[externalId] = reminder
             }
         }
         
@@ -169,56 +140,22 @@ final class SyncEngine {
         
         var eventMap: [String: EKEvent] = [:]
         events.forEach { event in
-            if let parsed = ExternalID.parse(from: event.notes), parsed.externalId.hasPrefix(ExternalID.eventPrefix) {
+            if let parsed = ExternalID.parse(from: event.notes),
+               (parsed.externalId.hasPrefix(ExternalID.eventPrefix) || parsed.externalId.hasPrefix(ExternalID.taskPrefix)) {
                 eventMap[parsed.externalId] = event
             } else {
-                // System-created calendar event with no externalId; import once by assigning a new externalId marker.
+                // Respect user control: do not import Calendar events that are not Pomodoro-managed.
                 stats.skipped += 1
-                guard let store = todoStore else { return }
-                let newId = UUID()
-                let externalId = ExternalID.eventId(for: newId)
-                let now = Date()
-                let durationMinutes: Int?
-                if let start = event.startDate, let end = event.endDate {
-                    durationMinutes = Int(end.timeIntervalSince(start) / 60)
-                } else {
-                    durationMinutes = nil
-                }
-                let newTask = TodoItem(
-                    id: newId,
-                    externalId: externalId,
-                    title: event.title,
-                    notes: event.notes,
-                    isCompleted: false,
-                    dueDate: event.startDate,
-                    durationMinutes: durationMinutes,
-                    priority: .none,
-                    createdAt: event.creationDate ?? now,
-                    modifiedAt: event.lastModifiedDate ?? now,
-                    tags: [],
-                    reminderIdentifier: nil,
-                    calendarEventIdentifier: event.eventIdentifier,
-                    syncStatus: .synced
-                )
-                store.addItem(newTask)
-                // Stamp externalId into notes so it becomes Pomodoro-managed.
-                event.notes = combinedNotes(from: event.notes, tags: [], externalId: externalId)
-                do {
-                    try eventStore.save(event, span: .thisEvent, commit: true)
-                    print("[SyncEngine][Calendar] Imported system event and stamped externalId \(externalId)")
-                } catch {
-                    print("[SyncEngine][Calendar] Failed to stamp externalId on imported event: \(error)")
-                }
-                eventMap[externalId] = event
             }
         }
         
         for item in store.items {
-            guard let duration = item.durationMinutes, duration > 0 else { continue }
+            guard item.syncToCalendar else { continue }
             guard item.dueDate != nil else { continue }
             
-            let externalId = ExternalID.eventId(for: item.id)
-            if let existing = eventMap[externalId] {
+            let externalId = item.externalId
+            let legacyExternalId = ExternalID.eventId(for: item.id)
+            if let existing = eventMap[externalId] ?? eventMap[legacyExternalId] {
                 let remoteModified = existing.lastModifiedDate ?? existing.creationDate ?? .distantPast
                 if remoteModified > item.lastModified {
                     var updated = item
@@ -226,11 +163,15 @@ final class SyncEngine {
                     updated.notes = ExternalID.parse(from: existing.notes)?.cleanNotes
                     updated.dueDate = existing.startDate
                     updated.calendarEventIdentifier = existing.eventIdentifier
+                    updated.linkedCalendarEventId = existing.eventIdentifier
                     updated.lastModified = remoteModified
                     store.updateItem(updated)
                     print("[SyncEngine][Calendar] remote wins for \(externalId)")
                 } else {
                     try updateEvent(existing, with: item, externalId: externalId)
+                    var updated = item
+                    updated.linkedCalendarEventId = existing.eventIdentifier
+                    store.updateItem(updated)
                     print("[SyncEngine][Calendar] local wins for \(externalId)")
                 }
                 stats.written += 1
@@ -238,6 +179,7 @@ final class SyncEngine {
                 let eventId = try createEvent(from: item, externalId: externalId)
                 var updated = item
                 updated.calendarEventIdentifier = eventId
+                updated.linkedCalendarEventId = eventId
                 updated.lastModified = Date()
                 store.updateItem(updated)
                 print("[SyncEngine][Calendar] created remote for \(externalId)")
@@ -337,6 +279,8 @@ final class SyncEngine {
         event.startDate = item.dueDate
         if let duration = item.durationMinutes {
             event.endDate = item.dueDate?.addingTimeInterval(Double(duration * 60))
+        } else if let start = item.dueDate {
+            event.endDate = start.addingTimeInterval(30 * 60)
         }
         event.calendar = eventStore.defaultCalendarForNewEvents
         try eventStore.save(event, span: .thisEvent, commit: true)
@@ -349,6 +293,8 @@ final class SyncEngine {
         event.startDate = item.dueDate
         if let duration = item.durationMinutes {
             event.endDate = item.dueDate?.addingTimeInterval(Double(duration * 60))
+        } else if let start = item.dueDate {
+            event.endDate = start.addingTimeInterval(30 * 60)
         }
         try eventStore.save(event, span: .thisEvent, commit: true)
     }

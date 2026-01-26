@@ -47,6 +47,7 @@ final class PlanningStore: ObservableObject {
             items[idx].endDate = endDate
             items[idx].sourceType = .task
             items[idx].sourceID = task.id.uuidString
+            items[idx].linkedCalendarEventId = task.linkedCalendarEventId ?? task.calendarEventIdentifier
         } else {
             let newItem = PlanningItem(
                 title: task.title,
@@ -58,7 +59,8 @@ final class PlanningStore: ObservableObject {
                 completed: task.isCompleted,
                 source: .local,
                 sourceType: .task,
-                sourceID: task.id.uuidString
+                sourceID: task.id.uuidString,
+                linkedCalendarEventId: task.linkedCalendarEventId ?? task.calendarEventIdentifier
             )
             items.append(newItem)
         }

@@ -26,6 +26,7 @@ struct PlanningItem: Identifiable, Codable, Equatable {
     var sourceID: String?
     var reminderIdentifier: String?
     var calendarEventIdentifier: String?
+    var linkedCalendarEventId: String?
     
     init(
         id: UUID = UUID(),
@@ -40,7 +41,8 @@ struct PlanningItem: Identifiable, Codable, Equatable {
         sourceType: SourceType? = nil,
         sourceID: String? = nil,
         reminderIdentifier: String? = nil,
-        calendarEventIdentifier: String? = nil
+        calendarEventIdentifier: String? = nil,
+        linkedCalendarEventId: String? = nil
     ) {
         self.id = id
         self.title = title
@@ -55,5 +57,6 @@ struct PlanningItem: Identifiable, Codable, Equatable {
         self.sourceID = sourceID
         self.reminderIdentifier = reminderIdentifier
         self.calendarEventIdentifier = calendarEventIdentifier
+        self.linkedCalendarEventId = linkedCalendarEventId
     }
 }

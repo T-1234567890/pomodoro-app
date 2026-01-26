@@ -25,7 +25,8 @@ final class CalendarManager: ObservableObject {
     
     // MARK: - Event Fetching
     
-    /// Fetch events for a date range
+    /// Fetch events for a date range.
+    /// Safety: this is a READ-ONLY refresh for Calendar UI; it must not create or modify tasks.
     func fetchEvents(from startDate: Date, to endDate: Date) async {
         guard isAuthorized else {
             error = "Calendar access not authorized"
@@ -111,11 +112,57 @@ final class CalendarManager: ObservableObject {
         try eventStore.save(event, span: .thisEvent, commit: true)
     }
     
+    /// Delete multiple events atomically. Fails if any event is not editable.
+    func deleteEvents(with identifiers: [String]) async throws {
+        guard isAuthorized else { throw CalendarError.notAuthorized }
+        let events = identifiers.compactMap { eventStore.event(withIdentifier: $0) }
+        if events.count != identifiers.count {
+            throw CalendarError.notEditable // missing or inaccessible events
+        }
+        guard events.allSatisfy({ $0.calendar.allowsContentModifications }) else {
+            throw CalendarError.notEditable
+        }
+        for event in events {
+            try eventStore.remove(event, span: .thisEvent, commit: false)
+        }
+        try eventStore.commit()
+    }
+    
+    /// Move events to a target date (preserves time-of-day and duration). Fails if any event is not editable.
+    func moveEvents(with identifiers: [String], to targetDate: Date) async throws {
+        guard isAuthorized else { throw CalendarError.notAuthorized }
+        let events = identifiers.compactMap { eventStore.event(withIdentifier: $0) }
+        if events.count != identifiers.count {
+            throw CalendarError.notEditable
+        }
+        guard events.allSatisfy({ $0.calendar.allowsContentModifications }) else {
+            throw CalendarError.notEditable
+        }
+        
+        let calendar = Calendar.current
+        for event in events {
+            guard let start = event.startDate else { continue }
+            let end = event.endDate ?? start
+            let duration = end.timeIntervalSince(start)
+            
+            let components = calendar.dateComponents([.hour, .minute, .second], from: start)
+            var combined = calendar.date(from: calendar.dateComponents([.year, .month, .day], from: targetDate)) ?? targetDate
+            if let hours = components.hour, let minutes = components.minute, let seconds = components.second {
+                combined = calendar.date(bySettingHour: hours, minute: minutes, second: seconds, of: combined) ?? combined
+            }
+            event.startDate = combined
+            event.endDate = combined.addingTimeInterval(duration)
+            try eventStore.save(event, span: .thisEvent, commit: false)
+        }
+        try eventStore.commit()
+    }
+    
     // MARK: - Error Types
     
     enum CalendarError: LocalizedError {
         case notAuthorized
         case failedToCreate
+        case notEditable
         
         var errorDescription: String? {
             switch self {
@@ -123,6 +170,8 @@ final class CalendarManager: ObservableObject {
                 return "Calendar access not authorized"
             case .failedToCreate:
                 return "Failed to create calendar event"
+            case .notEditable:
+                return "One or more events cannot be modified"
             }
         }
     }

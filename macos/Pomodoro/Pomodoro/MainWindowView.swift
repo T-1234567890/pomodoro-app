@@ -9,6 +9,7 @@ import AppKit
 import EventKit
 import SwiftUI
 import UserNotifications
+import Charts
 
 struct MainWindowView: View {
     @EnvironmentObject private var appState: AppState
@@ -26,6 +27,10 @@ struct MainWindowView: View {
     @State private var notificationStatus: UNAuthorizationStatus = .notDetermined
     @State private var calendarStatus: EKAuthorizationStatus = .notDetermined
     @State private var remindersStatus: EKAuthorizationStatus = .notDetermined
+    private let sessionRecordStore = SessionRecordStore.shared
+    @State private var weeklyFocusPoints: [DailyFocusPoint] = []
+    @State private var todayFocusMinutes: Int = 0
+    @State private var completionRate: Double = 0
     private let eventStore = EKEventStore()
     
     // New: Calendar, Reminders, and Todo system
@@ -324,19 +329,31 @@ struct MainWindowView: View {
     }
 
     private var summaryView: some View {
-        VStack(alignment: .leading, spacing: 16) {
-            VStack(alignment: .center, spacing: 8) {
-                Text("Today's Summary")
-                    .font(.system(size: 22, weight: .semibold, design: .default))
-                    .foregroundStyle(.secondary)
-                summarySection
+        ScrollView {
+            VStack(alignment: .leading, spacing: 18) {
+                VStack(alignment: .center, spacing: 8) {
+                    Text("Today's Summary")
+                        .font(.system(size: 22, weight: .semibold, design: .default))
+                        .foregroundStyle(.secondary)
+                    summarySection
+                }
+                .frame(maxWidth: .infinity, alignment: .center)
+                
+                summaryFocusTiles
+                weeklyFocusChart
+                completionSection
             }
-            .frame(maxWidth: .infinity, alignment: .center)
+            .padding(.top, 28)
+            .padding(.horizontal)
+            .padding(.bottom)
+            .frame(minWidth: 360, alignment: .leading)
         }
-        .padding(.top, 28)
-        .padding(.horizontal)
-        .padding(.bottom)
-        .frame(minWidth: 360, alignment: .leading)
+        .onAppear {
+            refreshSummaryMetrics()
+        }
+        .onChange(of: todoStore.items) { _, _ in
+            refreshSummaryMetrics()
+        }
     }
 
     private var settingsView: some View {
@@ -800,6 +817,133 @@ struct MainWindowView: View {
         }
     }
 
+    private var summaryFocusTiles: some View {
+        HStack(spacing: 16) {
+            VStack(alignment: .leading, spacing: 6) {
+                Text("Today's Focus")
+                    .font(.headline)
+                    .foregroundStyle(.secondary)
+                Text("\(todayFocusMinutes)m")
+                    .font(.title)
+                    .fontWeight(.semibold)
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding()
+            .background(Color.primary.opacity(0.05))
+            .cornerRadius(10)
+            
+            VStack(alignment: .leading, spacing: 6) {
+                Text("Completion")
+                    .font(.headline)
+                    .foregroundStyle(.secondary)
+                Text("\(Int(completionRate * 100))%")
+                    .font(.title)
+                    .fontWeight(.semibold)
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding()
+            .background(Color.primary.opacity(0.05))
+            .cornerRadius(10)
+        }
+    }
+    
+    private var weeklyFocusChart: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Text("Weekly Focus Trend")
+                .font(.headline)
+                .foregroundStyle(.secondary)
+            Chart(weeklyFocusPoints) { point in
+                BarMark(
+                    x: .value("Day", shortWeekdayFormatter.string(from: point.date)),
+                    y: .value("Minutes", point.minutes)
+                )
+            }
+            .frame(height: 180)
+        }
+    }
+    
+    private var completionSection: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Text("Task Completion")
+                .font(.headline)
+                .foregroundStyle(.secondary)
+            
+            if todoStore.items.isEmpty {
+                Text("No tasks yet.")
+                    .foregroundStyle(.secondary)
+                    .font(.subheadline)
+            } else {
+                let completedCount = todoStore.items.filter { $0.isCompleted }.count
+                let total = todoStore.items.count
+                let activeCount = max(0, total - completedCount)
+                
+                // Option A: Split into two clear sections to avoid scale imbalance.
+                VStack(alignment: .leading, spacing: 10) {
+                    VStack(alignment: .leading, spacing: 6) {
+                        Text("Completion Overview")
+                            .font(.subheadline)
+                            .foregroundStyle(.secondary)
+                        Text("\(completedCount) completed")
+                            .font(.system(size: 26, weight: .semibold, design: .rounded))
+                            .foregroundStyle(.primary)
+                    }
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding()
+                    // Subtle material + tint to feel native and avoid heavy color blocks.
+                    .background(.thinMaterial)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 12)
+                            .fill(Color.green.opacity(0.08))
+                    )
+                    .cornerRadius(10)
+                    
+                    VStack(alignment: .leading, spacing: 6) {
+                        Text("Current Load")
+                            .font(.subheadline)
+                            .foregroundStyle(.secondary)
+                        Text("\(activeCount) active")
+                            .font(.system(size: 26, weight: .semibold, design: .rounded))
+                            .foregroundStyle(.primary)
+                    }
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding()
+                    .background(.thinMaterial)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 12)
+                            .fill(Color.cyan.opacity(0.08))
+                    )
+                    .cornerRadius(10)
+                }
+            }
+        }
+    }
+
+    private var shortWeekdayFormatter: DateFormatter {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "E"
+        return formatter
+    }
+
+    private func refreshSummaryMetrics() {
+        let calendar = Calendar.current
+        let todayRecords = sessionRecordStore.records(for: Date(), calendar: calendar)
+        todayFocusMinutes = todayRecords.reduce(0) { $0 + max(0, $1.durationSeconds) } / 60
+        
+        let sevenDayRecords = sessionRecordStore.records(lastDays: 7, calendar: calendar)
+        let grouped = Dictionary(grouping: sevenDayRecords) { calendar.startOfDay(for: $0.startTime) }
+        let lastSevenDays = (0..<7).compactMap { offset -> Date? in
+            calendar.date(byAdding: .day, value: -offset, to: calendar.startOfDay(for: Date()))
+        }.reversed()
+        weeklyFocusPoints = lastSevenDays.map { day in
+            let totalSeconds = grouped[day]?.reduce(0) { $0 + $1.durationSeconds } ?? 0
+            return DailyFocusPoint(date: day, minutes: totalSeconds / 60)
+        }
+        
+        let totalTasks = todoStore.items.count
+        let completed = todoStore.items.filter { $0.isCompleted }.count
+        completionRate = totalTasks == 0 ? 0 : Double(completed) / Double(totalTasks)
+    }
+
     private func labelForPomodoroState(_ state: TimerState) -> String {
         switch state {
         case .idle:
@@ -831,6 +975,12 @@ struct MainWindowView: View {
         let canPause: Bool
         let canResume: Bool
         let canSkipBreak: Bool
+    }
+
+    private struct DailyFocusPoint: Identifiable {
+        let id = UUID()
+        let date: Date
+        let minutes: Int
     }
 
     private struct CountdownActionAvailability {

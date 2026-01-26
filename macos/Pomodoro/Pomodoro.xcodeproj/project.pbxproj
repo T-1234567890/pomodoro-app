@@ -40,6 +40,7 @@
 		B6A200182FFD4BD7B90F8AC1 /* OnboardingFlowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6A2000A2FFD4BD7B90F8AC1 /* OnboardingFlowView.swift */; };
 		B6A2001B2FFD4BD7B90F8AC1 /* ExternalID.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6A2000B2FFD4BD7B90F8AC1 /* ExternalID.swift */; };
 		B6A2001C2FFD4BD7B90F8AC1 /* IntentMarkers.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6A2000C2FFD4BD7B90F8AC1 /* IntentMarkers.swift */; };
+		B6A2001D2FFD4BD7B90F8AC1 /* SessionRecordStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6A2001E2FFD4BD7B90F8AC1 /* SessionRecordStore.swift */; };
 		B6A200192FFD4BD7B90F8AC1 /* SyncEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6A2001A2FFD4BD7B90F8AC1 /* SyncEngine.swift */; };
 		C9E56B409BCB40FCA8485A09 /* LocalMediaPlayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 05F639B95E5345199E439834 /* LocalMediaPlayer.swift */; };
 		D0495D48D1B5BUILDBDA97DE /* CalendarMonthView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D0495D48D1B544D0ABDA97DE /* CalendarMonthView.swift */; };
@@ -94,6 +95,7 @@
 		B6A2000A2FFD4BD7B90F8AC1 /* OnboardingFlowView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingFlowView.swift; sourceTree = "<group>"; };
 		B6A2000B2FFD4BD7B90F8AC1 /* ExternalID.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExternalID.swift; sourceTree = "<group>"; };
 		B6A2000C2FFD4BD7B90F8AC1 /* IntentMarkers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IntentMarkers.swift; sourceTree = "<group>"; };
+		B6A2001E2FFD4BD7B90F8AC1 /* SessionRecordStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionRecordStore.swift; sourceTree = "<group>"; };
 		B6A2001A2FFD4BD7B90F8AC1 /* SyncEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SyncEngine.swift; sourceTree = "<group>"; };
 		C67603580DB6C7C7A08CA894 /* AmbientNoiseEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AmbientNoiseEngine.swift; sourceTree = "<group>"; };
 		D0495D48D1B544D0ABDA97DE /* CalendarMonthView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalendarMonthView.swift; sourceTree = "<group>"; };
@@ -179,6 +181,7 @@
 				D1A1B00E0000000000000001 /* RemindersSync.swift */,
 				B6A2000B2FFD4BD7B90F8AC1 /* ExternalID.swift */,
 				B6A2000C2FFD4BD7B90F8AC1 /* IntentMarkers.swift */,
+				B6A2001E2FFD4BD7B90F8AC1 /* SessionRecordStore.swift */,
 				B6A2001A2FFD4BD7B90F8AC1 /* SyncEngine.swift */,
 			);
 			name = State;
@@ -357,6 +360,7 @@
 				D1A1B00F0000000000000001 /* SettingsPermissionsView.swift in Sources */,
 				B6A2001B2FFD4BD7B90F8AC1 /* ExternalID.swift in Sources */,
 				B6A2001C2FFD4BD7B90F8AC1 /* IntentMarkers.swift in Sources */,
+				B6A2001D2FFD4BD7B90F8AC1 /* SessionRecordStore.swift in Sources */,
 				B6A200192FFD4BD7B90F8AC1 /* SyncEngine.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

@@ -1,4 +1,5 @@
 import SwiftUI
+import AppKit
 
 /// Todo/Tasks view - always accessible with optional Reminders sync.
 /// Shows non-blocking banner when Reminders is unauthorized.
@@ -15,6 +16,11 @@ struct TodoListView: View {
     @State private var dueDateEnabled = false
     @State private var dueDateField = Date()
     @State private var selectedSegment: Segment = .active
+    @State private var syncToCalendarField = false
+    @State private var selectedTaskIDs: Set<UUID> = []
+    @State private var lastSelectedTaskID: UUID?
+    @State private var batchDueDate: Date = Date()
+    @State private var showBatchDeleteConfirmation = false
     @State private var showTaskHint = false
     
     private static let taskHintDefaultsKey = "com.pomodoro.taskHintShown"
@@ -120,6 +126,13 @@ struct TodoListView: View {
             }
             
             Divider()
+            
+            // Batch actions bar (shown only when multi-select is active)
+            if selectedTaskIDs.count > 1 {
+                batchActionsBar
+                    .padding(.horizontal, 32)
+                    .padding(.vertical, 8)
+            }
             
             // Tasks list
             ScrollView {
@@ -247,6 +260,7 @@ This does not start a timer or schedule time—tasks work fine without #.
     
     @ViewBuilder
     private func todoRow(_ item: TodoItem) -> some View {
+        let isSelected = selectedTaskIDs.contains(item.id)
         HStack(spacing: 12) {
             Button(action: {
                 todoStore.toggleCompletion(item)
@@ -320,6 +334,10 @@ This does not start a timer or schedule time—tasks work fine without #.
                         Label("Synced", systemImage: "checkmark.icloud")
                             .font(.caption)
                             .foregroundStyle(.green)
+                    } else if item.syncToCalendar, (item.linkedCalendarEventId ?? item.calendarEventIdentifier) != nil {
+                        Label("In Calendar", systemImage: "calendar.badge.checkmark")
+                            .font(.caption)
+                            .foregroundStyle(.green)
                     }
                 }
             }
@@ -370,8 +388,12 @@ This does not start a timer or schedule time—tasks work fine without #.
             .buttonStyle(.plain)
         }
         .padding(12)
-        .background(Color.primary.opacity(0.05))
+        .background(isSelected ? Color.accentColor.opacity(0.15) : Color.primary.opacity(0.05))
         .cornerRadius(8)
+        .contentShape(Rectangle())
+        .onTapGesture {
+            handleTaskSelection(item)
+        }
     }
     
     @ViewBuilder
@@ -408,7 +430,7 @@ This does not start a timer or schedule time—tasks work fine without #.
         case .active:
             return todoStore.pendingItems
         case .completed:
-            return todoStore.completedItems
+            return todoStore.completedItems.sorted { $0.modifiedAt > $1.modifiedAt }
         }
     }
     
@@ -443,6 +465,13 @@ This does not start a timer or schedule time—tasks work fine without #.
                     .foregroundStyle(.secondary)
                 TextField("e.g. work, focus", text: $tagsField)
                     .textFieldStyle(.roundedBorder)
+                
+                Toggle("Sync this task to Calendar", isOn: $syncToCalendarField)
+                    .toggleStyle(.switch)
+                    .font(.subheadline)
+                    .foregroundStyle(.primary)
+                    .padding(.top, 6)
+                    .help("Writes this task to Calendar when enabled. Does not auto-schedule or delete events.")
             }
             
             Spacer(minLength: 0)
@@ -474,6 +503,7 @@ This does not start a timer or schedule time—tasks work fine without #.
         tagsField = ""
         dueDateEnabled = false
         dueDateField = Date()
+        syncToCalendarField = false
         showingEditor = true
     }
     
@@ -489,6 +519,7 @@ This does not start a timer or schedule time—tasks work fine without #.
             dueDateEnabled = false
             dueDateField = Date()
         }
+        syncToCalendarField = item.syncToCalendar
         showingEditor = true
     }
     
@@ -499,6 +530,7 @@ This does not start a timer or schedule time—tasks work fine without #.
         tagsField = ""
         dueDateEnabled = false
         dueDateField = Date()
+        syncToCalendarField = false
     }
     
     private func saveTask() {
@@ -517,6 +549,7 @@ This does not start a timer or schedule time—tasks work fine without #.
             editing.notes = trimmedNotes.isEmpty ? nil : trimmedNotes
             editing.dueDate = dueDate
             editing.tags = tags
+            editing.syncToCalendar = syncToCalendarField
             todoStore.updateItem(editing)
             
             if permissionsManager.isRemindersAuthorized,
@@ -527,13 +560,157 @@ This does not start a timer or schedule time—tasks work fine without #.
             let newItem = TodoItem(
                 title: trimmedTitle,
                 notes: trimmedNotes.isEmpty ? nil : trimmedNotes,
-                dueDate: dueDate
+                dueDate: dueDate,
+                syncToCalendar: syncToCalendarField
             )
             todoStore.addItem(newItem)
         }
         
         resetEditor()
         showingEditor = false
+    }
+}
+
+// MARK: - Selection helpers
+
+extension TodoListView {
+    fileprivate func handleTaskSelection(_ item: TodoItem) {
+        let flags = NSApp.currentEvent?.modifierFlags ?? []
+        let isShift = flags.contains(.shift)
+        let isCommand = flags.contains(.command)
+        
+        if isShift, let anchor = lastSelectedTaskID,
+           let anchorIndex = filteredItems.firstIndex(where: { $0.id == anchor }),
+           let targetIndex = filteredItems.firstIndex(where: { $0.id == item.id }) {
+            let lower = min(anchorIndex, targetIndex)
+            let upper = max(anchorIndex, targetIndex)
+            let rangeIDs = filteredItems[lower...upper].map { $0.id }
+            selectedTaskIDs.formUnion(rangeIDs)
+            lastSelectedTaskID = item.id
+            return
+        }
+        
+        if isCommand {
+            if selectedTaskIDs.contains(item.id) {
+                selectedTaskIDs.remove(item.id)
+            } else {
+                selectedTaskIDs.insert(item.id)
+                lastSelectedTaskID = item.id
+            }
+            return
+        }
+        
+        // Default single selection
+        selectedTaskIDs = [item.id]
+        lastSelectedTaskID = item.id
+    }
+}
+
+// MARK: - Batch actions
+
+extension TodoListView {
+    @ViewBuilder
+    fileprivate var batchActionsBar: some View {
+        HStack(spacing: 12) {
+            Text("\(selectedTaskIDs.count) selected")
+                .font(.subheadline)
+                .foregroundStyle(.secondary)
+            
+            Divider()
+            
+            DatePicker(
+                "Move to",
+                selection: $batchDueDate,
+                displayedComponents: [.date]
+            )
+            .labelsHidden()
+            .datePickerStyle(.compact)
+            
+            Button {
+                applyBatchMove(to: batchDueDate)
+            } label: {
+                Label("Move", systemImage: "arrow.right.circle")
+            }
+            .buttonStyle(.bordered)
+            
+            Button {
+                applyBatchClearDate()
+            } label: {
+                Label("Clear date", systemImage: "calendar.badge.minus")
+            }
+            .buttonStyle(.bordered)
+            
+            Spacer()
+            
+            Button(role: .destructive) {
+                showBatchDeleteConfirmation = true
+            } label: {
+                Label("Delete", systemImage: "trash")
+            }
+            .buttonStyle(.borderedProminent)
+            .tint(.red)
+        }
+        .alert("Delete \(selectedTaskIDs.count) items?", isPresented: $showBatchDeleteConfirmation) {
+            Button("Delete", role: .destructive) {
+                applyBatchDelete()
+            }
+            Button("Cancel", role: .cancel) { }
+        } message: {
+            Text("This will remove all selected tasks. This action cannot be undone.")
+        }
+    }
+    
+    /// Move all selected tasks to a specific date (user-invoked, explicit).
+    fileprivate func applyBatchMove(to date: Date) {
+        let tasks = selectedTasks()
+        guard !tasks.isEmpty else { return }
+        for var task in tasks {
+            task.dueDate = date
+            task.modifiedAt = Date()
+            todoStore.updateItem(task)
+            
+            // Propagate to Reminders/Calendar only for managed items; this is user-initiated.
+            if permissionsManager.isRemindersAuthorized,
+               task.reminderIdentifier != nil {
+                Task { try? await remindersSync.syncTask(task) }
+            }
+        }
+        clearTaskSelection()
+    }
+    
+    /// Clear due date on selected tasks.
+    fileprivate func applyBatchClearDate() {
+        let tasks = selectedTasks()
+        guard !tasks.isEmpty else { return }
+        for var task in tasks {
+            task.dueDate = nil
+            task.modifiedAt = Date()
+            todoStore.updateItem(task)
+            if permissionsManager.isRemindersAuthorized,
+               task.reminderIdentifier != nil {
+                Task { try? await remindersSync.syncTask(task) }
+            }
+        }
+        clearTaskSelection()
+    }
+    
+    /// Atomic delete for selected tasks.
+    fileprivate func applyBatchDelete() {
+        let tasks = selectedTasks()
+        guard !tasks.isEmpty else { return }
+        for task in tasks {
+            todoStore.deleteItem(task)
+        }
+        clearTaskSelection()
+    }
+    
+    private func selectedTasks() -> [TodoItem] {
+        todoStore.items.filter { selectedTaskIDs.contains($0.id) }
+    }
+    
+    private func clearTaskSelection() {
+        selectedTaskIDs.removeAll()
+        lastSelectedTaskID = nil
     }
 }
 

@@ -151,13 +151,16 @@ final class PomodoroTimerEngine: ObservableObject {
         switch state {
         case .breakRunning, .breakPaused:
             stopTimer()
-            state = .idle
+            // Break finished → automatically begin next work session (Pomodoro continues without user action).
+            // This keeps the classic Pomodoro cycle flowing unless the user manually stops.
+            state = .running
             remainingSeconds = durationConfig.workDuration
             if mode == .longBreak {
                 completedWorkSessions = 0
             }
             mode = .work
             updateCurrentMode()
+            startTimer()
         case .running, .paused:
             completedWorkSessions += 1
             beginBreak(isLongBreak: isLongBreakDue())
