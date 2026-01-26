@@ -27,6 +27,7 @@
 		7C360D912F191F17007313D3 /* SystemMediaController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C360D972F191F17007313D3 /* SystemMediaController.swift */; };
 		7C360D922F191F17007313D3 /* MusicPanelView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C360D982F191F17007313D3 /* MusicPanelView.swift */; };
 		815B35241A15471083A7F5C2 /* VisualEffectBlur.swift in Sources */ = {isa = PBXBuildFile; fileRef = 36B4A1D0B6904D3B9A1E8353 /* VisualEffectBlur.swift */; };
+		9F1C2A3B4D5E6F708192A3B5 /* WeekCalendarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9F1C2A3B4D5E6F708192A3B4 /* WeekCalendarView.swift */; };
 		AB9F279C180740EE9216C649 /* MediaControlBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = ABFA2AD704BE4758B0A786D8 /* MediaControlBar.swift */; };
 		B6A200102FFD4BD7B90F8AC1 /* NowPlayingRouter.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6A200022FFD4BD7B90F8AC1 /* NowPlayingRouter.swift */; };
 		B6A200112FFD4BD7B90F8AC1 /* NowPlayingProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6A200032FFD4BD7B90F8AC1 /* NowPlayingProvider.swift */; };
@@ -37,11 +38,11 @@
 		B6A200162FFD4BD7B90F8AC1 /* LocalMusicPlayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6A200082FFD4BD7B90F8AC1 /* LocalMusicPlayer.swift */; };
 		B6A200172FFD4BD7B90F8AC1 /* OnboardingState.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6A200092FFD4BD7B90F8AC1 /* OnboardingState.swift */; };
 		B6A200182FFD4BD7B90F8AC1 /* OnboardingFlowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6A2000A2FFD4BD7B90F8AC1 /* OnboardingFlowView.swift */; };
+		B6A2001B2FFD4BD7B90F8AC1 /* ExternalID.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6A2000B2FFD4BD7B90F8AC1 /* ExternalID.swift */; };
+		B6A2001C2FFD4BD7B90F8AC1 /* IntentMarkers.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6A2000C2FFD4BD7B90F8AC1 /* IntentMarkers.swift */; };
+		B6A200192FFD4BD7B90F8AC1 /* SyncEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6A2001A2FFD4BD7B90F8AC1 /* SyncEngine.swift */; };
 		C9E56B409BCB40FCA8485A09 /* LocalMediaPlayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 05F639B95E5345199E439834 /* LocalMediaPlayer.swift */; };
-		9F1C2A3B4D5E6F708192A3B5 /* WeekCalendarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9F1C2A3B4D5E6F708192A3B4 /* WeekCalendarView.swift */; };
 		D0495D48D1B5BUILDBDA97DE /* CalendarMonthView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D0495D48D1B544D0ABDA97DE /* CalendarMonthView.swift */; };
-		PLANNING001 /* PlanningItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = PLANNING000 /* PlanningItem.swift */; };
-		PLANNING003 /* PlanningStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = PLANNING002 /* PlanningStore.swift */; };
 		D1A1B0010000000000000001 /* PermissionsManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = D1A1B0020000000000000001 /* PermissionsManager.swift */; };
 		D1A1B0030000000000000001 /* CalendarManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = D1A1B0040000000000000001 /* CalendarManager.swift */; };
 		D1A1B0050000000000000001 /* CalendarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D1A1B0060000000000000001 /* CalendarView.swift */; };
@@ -52,6 +53,8 @@
 		D1A1B00F0000000000000001 /* SettingsPermissionsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D1A1B0100000000000000001 /* SettingsPermissionsView.swift */; };
 		E7FB0168DAB22D17FF66223F /* AmbientNoiseEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = C67603580DB6C7C7A08CA894 /* AmbientNoiseEngine.swift */; };
 		EC7658622FEE47D78BFEA957 /* DailyStats.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0D409152AD794BA998253C35 /* DailyStats.swift */; };
+		PLANNING001 /* PlanningItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = PLANNING000 /* PlanningItem.swift */; };
+		PLANNING003 /* PlanningStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = PLANNING002 /* PlanningStore.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -78,22 +81,21 @@
 		7C360D962F191F17007313D3 /* MusicController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MusicController.swift; sourceTree = "<group>"; };
 		7C360D972F191F17007313D3 /* SystemMediaController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SystemMediaController.swift; sourceTree = "<group>"; };
 		7C360D982F191F17007313D3 /* MusicPanelView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MusicPanelView.swift; sourceTree = "<group>"; };
+		9F1C2A3B4D5E6F708192A3B4 /* WeekCalendarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeekCalendarView.swift; sourceTree = "<group>"; };
 		ABFA2AD704BE4758B0A786D8 /* MediaControlBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MediaControlBar.swift; sourceTree = "<group>"; };
 		B6A200022FFD4BD7B90F8AC1 /* NowPlayingRouter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NowPlayingRouter.swift; sourceTree = "<group>"; };
 		B6A200032FFD4BD7B90F8AC1 /* NowPlayingProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NowPlayingProvider.swift; sourceTree = "<group>"; };
 		B6A200042FFD4BD7B90F8AC1 /* AppleMusicProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppleMusicProvider.swift; sourceTree = "<group>"; };
 		B6A200052FFD4BD7B90F8AC1 /* SpotifyProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpotifyProvider.swift; sourceTree = "<group>"; };
 		B6A200062FFD4BD7B90F8AC1 /* QQMusicProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QQMusicProvider.swift; sourceTree = "<group>"; };
-		PLANNING000 /* PlanningItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlanningItem.swift; sourceTree = "<group>"; };
-		PLANNING002 /* PlanningStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlanningStore.swift; sourceTree = "<group>"; };
 		B6A200072FFD4BD7B90F8AC1 /* AppleScriptRunner.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppleScriptRunner.swift; sourceTree = "<group>"; };
 		B6A200082FFD4BD7B90F8AC1 /* LocalMusicPlayer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalMusicPlayer.swift; sourceTree = "<group>"; };
 		B6A200092FFD4BD7B90F8AC1 /* OnboardingState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingState.swift; sourceTree = "<group>"; };
 		B6A2000A2FFD4BD7B90F8AC1 /* OnboardingFlowView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingFlowView.swift; sourceTree = "<group>"; };
+		B6A2000B2FFD4BD7B90F8AC1 /* ExternalID.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExternalID.swift; sourceTree = "<group>"; };
+		B6A2000C2FFD4BD7B90F8AC1 /* IntentMarkers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IntentMarkers.swift; sourceTree = "<group>"; };
+		B6A2001A2FFD4BD7B90F8AC1 /* SyncEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SyncEngine.swift; sourceTree = "<group>"; };
 		C67603580DB6C7C7A08CA894 /* AmbientNoiseEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AmbientNoiseEngine.swift; sourceTree = "<group>"; };
-		9F1C2A3B4D5E6F708192A3B4 /* WeekCalendarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeekCalendarView.swift; sourceTree = "<group>"; };
-		PLANNING000 /* PlanningItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlanningItem.swift; sourceTree = "<group>"; };
-		PLANNING002 /* PlanningStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlanningStore.swift; sourceTree = "<group>"; };
 		D0495D48D1B544D0ABDA97DE /* CalendarMonthView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalendarMonthView.swift; sourceTree = "<group>"; };
 		D1A1B0020000000000000001 /* PermissionsManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PermissionsManager.swift; sourceTree = "<group>"; };
 		D1A1B0040000000000000001 /* CalendarManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalendarManager.swift; sourceTree = "<group>"; };
@@ -103,6 +105,8 @@
 		D1A1B00C0000000000000001 /* TodoListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TodoListView.swift; sourceTree = "<group>"; };
 		D1A1B00E0000000000000001 /* RemindersSync.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RemindersSync.swift; sourceTree = "<group>"; };
 		D1A1B0100000000000000001 /* SettingsPermissionsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsPermissionsView.swift; sourceTree = "<group>"; };
+		PLANNING000 /* PlanningItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlanningItem.swift; sourceTree = "<group>"; };
+		PLANNING002 /* PlanningStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlanningStore.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -173,6 +177,9 @@
 				PLANNING000 /* PlanningItem.swift */,
 				PLANNING002 /* PlanningStore.swift */,
 				D1A1B00E0000000000000001 /* RemindersSync.swift */,
+				B6A2000B2FFD4BD7B90F8AC1 /* ExternalID.swift */,
+				B6A2000C2FFD4BD7B90F8AC1 /* IntentMarkers.swift */,
+				B6A2001A2FFD4BD7B90F8AC1 /* SyncEngine.swift */,
 			);
 			name = State;
 			sourceTree = "<group>";
@@ -348,6 +355,9 @@
 				D1A1B00B0000000000000001 /* TodoListView.swift in Sources */,
 				D1A1B00D0000000000000001 /* RemindersSync.swift in Sources */,
 				D1A1B00F0000000000000001 /* SettingsPermissionsView.swift in Sources */,
+				B6A2001B2FFD4BD7B90F8AC1 /* ExternalID.swift in Sources */,
+				B6A2001C2FFD4BD7B90F8AC1 /* IntentMarkers.swift in Sources */,
+				B6A200192FFD4BD7B90F8AC1 /* SyncEngine.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -509,7 +519,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 14.6;
-				MARKETING_VERSION = 1.1.0;
+				MARKETING_VERSION = 1.2.0;
 				PRODUCT_BUNDLE_IDENTIFIER = dev.pomodoro.Pomodoro;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				REGISTER_APP_GROUPS = YES;
@@ -565,7 +575,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 14.6;
-				MARKETING_VERSION = 1.1.0;
+				MARKETING_VERSION = 1.2.0;
 				PRODUCT_BUNDLE_IDENTIFIER = dev.pomodoro.Pomodoro;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				REGISTER_APP_GROUPS = YES;

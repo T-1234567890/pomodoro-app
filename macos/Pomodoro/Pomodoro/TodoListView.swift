@@ -15,6 +15,9 @@ struct TodoListView: View {
     @State private var dueDateEnabled = false
     @State private var dueDateField = Date()
     @State private var selectedSegment: Segment = .active
+    @State private var showTaskHint = false
+    
+    private static let taskHintDefaultsKey = "com.pomodoro.taskHintShown"
     
     private enum Segment: String, CaseIterable, Identifiable {
         case active = "Active"
@@ -57,6 +60,12 @@ struct TodoListView: View {
             // Non-blocking Reminders banner
             if !permissionsManager.isRemindersAuthorized {
                 remindersBanner
+            }
+            
+            if showTaskHint {
+                taskHint
+                    .padding(.horizontal, 32)
+                    .padding(.bottom, 12)
             }
             
             // Toolbar
@@ -138,6 +147,9 @@ struct TodoListView: View {
         }
         .onAppear {
             permissionsManager.refreshRemindersStatus()
+            if !UserDefaults.standard.bool(forKey: Self.taskHintDefaultsKey) {
+                showTaskHint = true
+            }
         }
     }
     
@@ -197,6 +209,42 @@ struct TodoListView: View {
         .padding(48)
     }
     
+    /// Inline, dismissible hint for first-time task writers.
+    private var taskHint: some View {
+        HStack(alignment: .top, spacing: 12) {
+            Image(systemName: "lightbulb")
+                .font(.title3)
+                .foregroundStyle(.yellow)
+            
+            VStack(alignment: .leading, spacing: 6) {
+                Text("Write tasks naturally. #pomodoro is optional.")
+                    .font(.headline)
+                Text("""
+Add a # to mark a task as focused work (totally optional):
+• Finish biology notes #pomodoro / #专注
+• Prepare slides for Monday #番茄 / #番茄钟
+This does not start a timer or schedule time—tasks work fine without #.
+""")
+                .font(.subheadline)
+                .foregroundStyle(.secondary)
+            }
+            
+            Spacer()
+            
+            Button {
+                showTaskHint = false
+                UserDefaults.standard.set(true, forKey: Self.taskHintDefaultsKey)
+            } label: {
+                Image(systemName: "xmark.circle.fill")
+                    .foregroundStyle(.secondary)
+            }
+            .buttonStyle(.plain)
+        }
+        .padding(14)
+        .background(Color.primary.opacity(0.05))
+        .cornerRadius(10)
+    }
+    
     @ViewBuilder
     private func todoRow(_ item: TodoItem) -> some View {
         HStack(spacing: 12) {
@@ -230,6 +278,17 @@ struct TodoListView: View {
                         .font(.caption)
                         .foregroundStyle(.secondary)
                         .lineLimit(1)
+                }
+                
+                if IntentMarkers.containsFocusIntent(in: item.title) || IntentMarkers.containsFocusIntent(in: item.notes) {
+                    HStack(spacing: 6) {
+                        Image(systemName: "target")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                        Text("Marked for focused work (#pomodoro / #专注 / #番茄 / #番茄钟)")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    }
                 }
                 
                 if !item.tags.isEmpty {

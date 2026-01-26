@@ -1,10 +1,11 @@
 import Foundation
-import EventKit
 
 /// Primary task data model for the app.
 /// Represents both internal todos and synced Apple Reminders.
 struct TodoItem: Identifiable, Codable, Equatable {
     let id: UUID
+    /// External identifier used for all cross-system sync. Format: pomodoroapp://task/<UUID>
+    var externalId: String
     var title: String
     var notes: String?
     var isCompleted: Bool
@@ -28,7 +29,7 @@ struct TodoItem: Identifiable, Codable, Equatable {
     var syncStatus: SyncStatus
     
     enum CodingKeys: String, CodingKey {
-        case id, title, notes, isCompleted, dueDate, durationMinutes, priority, createdAt, modifiedAt, tags, reminderIdentifier, calendarEventIdentifier, syncStatus
+        case id, externalId, title, notes, isCompleted, dueDate, durationMinutes, priority, createdAt, modifiedAt, tags, reminderIdentifier, calendarEventIdentifier, syncStatus
     }
     
     enum Priority: Int, Codable, CaseIterable {
@@ -49,6 +50,7 @@ struct TodoItem: Identifiable, Codable, Equatable {
     
     init(
         id: UUID = UUID(),
+        externalId: String? = nil,
         title: String,
         notes: String? = nil,
         isCompleted: Bool = false,
@@ -63,6 +65,7 @@ struct TodoItem: Identifiable, Codable, Equatable {
         syncStatus: SyncStatus = .local
     ) {
         self.id = id
+        self.externalId = externalId ?? ExternalID.taskId(for: id)
         self.title = title
         self.notes = notes
         self.isCompleted = isCompleted
@@ -80,6 +83,11 @@ struct TodoItem: Identifiable, Codable, Equatable {
     init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         id = try container.decode(UUID.self, forKey: .id)
+        if let external = try container.decodeIfPresent(String.self, forKey: .externalId) {
+            externalId = external
+        } else {
+            externalId = ExternalID.taskId(for: id)
+        }
         title = try container.decode(String.self, forKey: .title)
         notes = try container.decodeIfPresent(String.self, forKey: .notes)
         isCompleted = try container.decode(Bool.self, forKey: .isCompleted)
@@ -97,6 +105,7 @@ struct TodoItem: Identifiable, Codable, Equatable {
     func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
         try container.encode(id, forKey: .id)
+        try container.encode(externalId, forKey: .externalId)
         try container.encode(title, forKey: .title)
         try container.encodeIfPresent(notes, forKey: .notes)
         try container.encode(isCompleted, forKey: .isCompleted)
@@ -124,5 +133,11 @@ struct TodoItem: Identifiable, Codable, Equatable {
         if let dueDate = dueDate { self.dueDate = dueDate }
         if let priority = priority { self.priority = priority }
         modifiedAt = Date()
+    }
+
+    /// Convenience alias to align with sync field naming.
+    var lastModified: Date {
+        get { modifiedAt }
+        set { modifiedAt = newValue }
     }
 }
