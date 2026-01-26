@@ -91,6 +91,32 @@ This keeps mobile usage lightweight while preserving a focused desktop experienc
 
 ---
 
+## Can I write tasks from my phone?
+
+Yes.
+
+You can:
+- Create tasks in Apple Reminders or Calendar
+- Sync them back to Pomodoro App on macOS
+
+This allows you to capture ideas on the go without using a separate mobile app.
+
+### Task Keywords
+
+Pomodoro App supports lightweight **focus intent markers** in task text.  
+These keywords help indicate that a task is meant for focused work.  
+They do **not** start timers, schedule time, or change tasks automatically.
+
+Supported keywords (type this in your Apple Reminders task):
+
+- `#pomodoro`
+- `#Pomodoro`
+- `#专注`
+- `#番茄`
+- `#番茄钟`
+
+---
+
 ## Does Pomodoro App sync data to the cloud?
 
 Currently:
