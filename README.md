@@ -252,6 +252,11 @@ not replace it or become distracting.
 
 ## Docs
 
+- Future planning: `docs/Future_Pro_Plan.md`
+- Development roadmap: `docs/Roadmap_1.0-2.0.md`
+- FAQ & design decisions: `docs/FAQ.md`
+- Gatekeeper & installation notes: `docs/Gatekeeper.md`
+
 ### Long-term Future Directions
 
 **Pomodoro App is free**.
@@ -260,12 +265,6 @@ A small number of long-term ideas (AI features, cloud sync, deeper analytics) ar
 **No paid plan exists at this stage.**
 
 Details: `docs/Future_Pro_Plan.md`
-
-### Development Roadmap
-
-The development direction from v1.x to v2.0 is documented here:
-
-`docs/Roadmap_1.0-2.0.md`
 
 ## 📈 Star History
 
