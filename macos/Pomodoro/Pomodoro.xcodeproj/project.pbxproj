@@ -38,10 +38,10 @@
 		B6A200162FFD4BD7B90F8AC1 /* LocalMusicPlayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6A200082FFD4BD7B90F8AC1 /* LocalMusicPlayer.swift */; };
 		B6A200172FFD4BD7B90F8AC1 /* OnboardingState.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6A200092FFD4BD7B90F8AC1 /* OnboardingState.swift */; };
 		B6A200182FFD4BD7B90F8AC1 /* OnboardingFlowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6A2000A2FFD4BD7B90F8AC1 /* OnboardingFlowView.swift */; };
+		B6A200192FFD4BD7B90F8AC1 /* SyncEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6A2001A2FFD4BD7B90F8AC1 /* SyncEngine.swift */; };
 		B6A2001B2FFD4BD7B90F8AC1 /* ExternalID.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6A2000B2FFD4BD7B90F8AC1 /* ExternalID.swift */; };
 		B6A2001C2FFD4BD7B90F8AC1 /* IntentMarkers.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6A2000C2FFD4BD7B90F8AC1 /* IntentMarkers.swift */; };
 		B6A2001D2FFD4BD7B90F8AC1 /* SessionRecordStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6A2001E2FFD4BD7B90F8AC1 /* SessionRecordStore.swift */; };
-		B6A200192FFD4BD7B90F8AC1 /* SyncEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6A2001A2FFD4BD7B90F8AC1 /* SyncEngine.swift */; };
 		C9E56B409BCB40FCA8485A09 /* LocalMediaPlayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 05F639B95E5345199E439834 /* LocalMediaPlayer.swift */; };
 		D0495D48D1B5BUILDBDA97DE /* CalendarMonthView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D0495D48D1B544D0ABDA97DE /* CalendarMonthView.swift */; };
 		D1A1B0010000000000000001 /* PermissionsManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = D1A1B0020000000000000001 /* PermissionsManager.swift */; };
@@ -56,6 +56,7 @@
 		EC7658622FEE47D78BFEA957 /* DailyStats.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0D409152AD794BA998253C35 /* DailyStats.swift */; };
 		PLANNING001 /* PlanningItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = PLANNING000 /* PlanningItem.swift */; };
 		PLANNING003 /* PlanningStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = PLANNING002 /* PlanningStore.swift */; };
+		F0F0F0F12FFF000000000001 /* FlowModeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0F0F0F02FFF000000000001 /* FlowModeView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -95,8 +96,8 @@
 		B6A2000A2FFD4BD7B90F8AC1 /* OnboardingFlowView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingFlowView.swift; sourceTree = "<group>"; };
 		B6A2000B2FFD4BD7B90F8AC1 /* ExternalID.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExternalID.swift; sourceTree = "<group>"; };
 		B6A2000C2FFD4BD7B90F8AC1 /* IntentMarkers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IntentMarkers.swift; sourceTree = "<group>"; };
-		B6A2001E2FFD4BD7B90F8AC1 /* SessionRecordStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionRecordStore.swift; sourceTree = "<group>"; };
 		B6A2001A2FFD4BD7B90F8AC1 /* SyncEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SyncEngine.swift; sourceTree = "<group>"; };
+		B6A2001E2FFD4BD7B90F8AC1 /* SessionRecordStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionRecordStore.swift; sourceTree = "<group>"; };
 		C67603580DB6C7C7A08CA894 /* AmbientNoiseEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AmbientNoiseEngine.swift; sourceTree = "<group>"; };
 		D0495D48D1B544D0ABDA97DE /* CalendarMonthView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalendarMonthView.swift; sourceTree = "<group>"; };
 		D1A1B0020000000000000001 /* PermissionsManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PermissionsManager.swift; sourceTree = "<group>"; };
@@ -109,6 +110,7 @@
 		D1A1B0100000000000000001 /* SettingsPermissionsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsPermissionsView.swift; sourceTree = "<group>"; };
 		PLANNING000 /* PlanningItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlanningItem.swift; sourceTree = "<group>"; };
 		PLANNING002 /* PlanningStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlanningStore.swift; sourceTree = "<group>"; };
+		F0F0F0F02FFF000000000001 /* FlowModeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FlowModeView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -201,6 +203,7 @@
 			children = (
 				7C360D532F191F17007313D3 /* ContentView.swift */,
 				7C360D542F191F17007313D3 /* MainWindowView.swift */,
+				F0F0F0F02FFF000000000001 /* FlowModeView.swift */,
 				ABFA2AD704BE4758B0A786D8 /* MediaControlBar.swift */,
 				7C360D982F191F17007313D3 /* MusicPanelView.swift */,
 				36B4A1D0B6904D3B9A1E8353 /* VisualEffectBlur.swift */,
@@ -317,6 +320,7 @@
 				7C360D5A2F191F17007313D3 /* ContentView.swift in Sources */,
 				AB9F279C180740EE9216C649 /* MediaControlBar.swift in Sources */,
 				7C360D5B2F191F17007313D3 /* MainWindowView.swift in Sources */,
+				F0F0F0F12FFF000000000001 /* FlowModeView.swift in Sources */,
 				7C360D922F191F17007313D3 /* MusicPanelView.swift in Sources */,
 				7C360D5C2F191F17007313D3 /* PomodoroApp.swift in Sources */,
 				7C360D6B2F191F17007313D3 /* AppDelegate.swift in Sources */,
@@ -523,7 +527,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 14.6;
-				MARKETING_VERSION = 1.2.0;
+				MARKETING_VERSION = 1.3.0;
 				PRODUCT_BUNDLE_IDENTIFIER = dev.pomodoro.Pomodoro;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				REGISTER_APP_GROUPS = YES;
@@ -579,7 +583,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 14.6;
-				MARKETING_VERSION = 1.2.0;
+				MARKETING_VERSION = 1.3.0;
 				PRODUCT_BUNDLE_IDENTIFIER = dev.pomodoro.Pomodoro;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				REGISTER_APP_GROUPS = YES;

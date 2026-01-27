@@ -4,6 +4,7 @@ struct MainWindowView: View {
     @EnvironmentObject private var appState: AppState
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @State private var selectedItem: SidebarItem? = .pomodoro
+    @State private var lastNonFlowItem: SidebarItem = .pomodoro
     @State private var columnVisibility: NavigationSplitViewVisibility = .all
 
     var body: some View {
@@ -26,6 +27,11 @@ struct MainWindowView: View {
             .onChange(of: columnVisibility) { newValue in
                 if newValue != .all {
                     columnVisibility = .all
+                }
+            }
+            .onChange(of: selectedItem) { newValue in
+                if let newValue, newValue != .flow {
+                    lastNonFlowItem = newValue
                 }
             }
         }
@@ -51,11 +57,16 @@ struct MainWindowView: View {
     private var sidebar: some View {
         List(selection: $selectedItem) {
             ForEach(SidebarItem.allCases) { item in
-                Label(item.title, systemImage: item.systemImage)
-                    .tag(item as SidebarItem?)
+                sidebarRow(item)
             }
         }
         .listStyle(.sidebar)
+    }
+
+    @ViewBuilder
+    private func sidebarRow(_ item: SidebarItem) -> some View {
+        Label(item.title, systemImage: item.systemImage)
+            .tag(item as SidebarItem?)
     }
 
     @ViewBuilder
@@ -71,6 +82,8 @@ struct MainWindowView: View {
             summaryView
         case .settings:
             settingsView
+        case .flow:
+            flowModeView
         }
     }
 
@@ -89,6 +102,12 @@ struct MainWindowView: View {
         .padding(.top, 64)
         .padding(.horizontal, 32)
         .padding(.bottom, 28)
+    }
+
+    private var flowModeView: some View {
+        FlowModeView(
+            exitAction: { selectedItem = lastNonFlowItem }
+        )
     }
 
     private var countdownView: some View {
@@ -171,6 +190,7 @@ struct MainWindowView: View {
 
     private enum SidebarItem: String, CaseIterable, Identifiable {
         case pomodoro
+        case flow
         case countdown
         case audioMusic
         case summary
@@ -182,6 +202,8 @@ struct MainWindowView: View {
             switch self {
             case .pomodoro:
                 return "Pomodoro"
+            case .flow:
+                return "Flow"
             case .countdown:
                 return "Countdown"
             case .audioMusic:
@@ -197,6 +219,8 @@ struct MainWindowView: View {
             switch self {
             case .pomodoro:
                 return "timer"
+            case .flow:
+                return "circle.dotted"
             case .countdown:
                 return "hourglass"
             case .audioMusic:

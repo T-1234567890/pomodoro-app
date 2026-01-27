@@ -116,6 +116,8 @@ struct MainWindowView: View {
             switch sidebarSelection {
             case .pomodoro:
                 pomodoroView
+            case .flow:
+                flowModeView
             case .countdown:
                 countdownView
             case .tasks:
@@ -230,6 +232,14 @@ struct MainWindowView: View {
         .padding(.horizontal)
         .padding(.bottom)
         .frame(minWidth: 360, alignment: .leading)
+    }
+
+    private var flowModeView: some View {
+        FlowModeView(exitAction: {
+            withAnimation {
+                sidebarSelection = .pomodoro
+            }
+        })
     }
 
     private var countdownView: some View {
@@ -585,6 +595,7 @@ struct MainWindowView: View {
 
     private enum SidebarItem: String, CaseIterable, Identifiable {
         case pomodoro
+        case flow
         case countdown
         case tasks
         case calendar
@@ -598,6 +609,8 @@ struct MainWindowView: View {
             switch self {
             case .pomodoro:
                 return "Pomodoro"
+            case .flow:
+                return "Flow"
             case .countdown:
                 return "Countdown"
             case .tasks:
@@ -617,6 +630,8 @@ struct MainWindowView: View {
             switch self {
             case .pomodoro:
                 return "timer"
+            case .flow:
+                return "circle.dotted"
             case .countdown:
                 return "hourglass"
             case .tasks:
