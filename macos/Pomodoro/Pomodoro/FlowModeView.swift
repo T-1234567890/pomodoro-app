@@ -11,14 +11,13 @@ struct FlowModeView: View {
     var showsCountdown: Bool = false
     var exitAction: () -> Void = {}
 
-    @State private var now = Date()
     @State private var countdownVisible: Bool
     @State private var isPresented = false
+    @State private var sessionDissolve = false
     @State private var timerHovering = false
     @GestureState private var timerPressing = false
     @State private var exitHovering = false
     @GestureState private var exitPressing = false
-    private let clockTimer = Timer.publish(every: 1, on: .main, in: .common).autoconnect()
 
     init(showsCountdown: Bool = false, exitAction: @escaping () -> Void = {}) {
         self.showsCountdown = showsCountdown
@@ -54,17 +53,20 @@ struct FlowModeView: View {
         // Enter/exit feel like settling in: fade + slight scale with Apple-like easing.
         .opacity(flowOpacity)
         .scaleEffect(flowScale)
-        .onReceive(clockTimer) { now = $0 }
         // Flow Mode is a presentation-only context: entering/leaving must not alter timers or tasks.
         .onAppear {
             appState.isInFlowMode = true
             guard !reduceMotion else { isPresented = true; return }
             withAnimation(.easeOut(duration: 0.25)) { isPresented = true }
+            triggerSessionDissolve()
         }
         .onDisappear {
             appState.isInFlowMode = false
             guard !reduceMotion else { return }
             withAnimation(.easeOut(duration: 0.20)) { isPresented = false }
+        }
+        .onChange(of: sessionVisualToken) { _, _ in
+            triggerSessionDissolve()
         }
     }
 
@@ -141,24 +143,28 @@ struct FlowModeView: View {
     }
 
     private var clockStack: some View {
-        VStack(spacing: 8) {
-            Text(timeString)
-                .font(clockFont)
-                // Fixed neutral tone: Flow clock should not signal urgency or timer state.
-                .foregroundStyle(Color.primary.opacity(0.9))
-                .kerning(-0.8)
-                .shadow(color: Color.black.opacity(0.08), radius: 12, x: 0, y: 10)
-                .layoutPriority(1) // keep the clock dominant; prevents compression by surrounding content
-                // Calm numeric morph to reduce tick anxiety.
-                .contentTransition(.numericText())
-                .animation(timeUpdateAnimation, value: timeString)
-                .accessibilityLabel("Current time")
+        TimelineView(.periodic(from: .now, by: 60)) { context in
+            let currentDate = context.date
+            VStack(spacing: 8) {
+                Text(wallClockString(for: currentDate))
+                    .font(clockFont)
+                    // Fixed neutral tone: Flow clock should not signal urgency or timer state.
+                    .foregroundStyle(Color.primary.opacity(0.9))
+                    .kerning(-0.8)
+                    .shadow(color: Color.black.opacity(0.08), radius: 12, x: 0, y: 10)
+                    .layoutPriority(1) // keep the clock dominant; prevents compression by surrounding content
+                    // Calm numeric morph to reduce tick anxiety.
+                    .contentTransition(.numericText())
+                    // Minutes-only animation: barely-there dissolve when minutes roll.
+                    .animation(minuteMorphAnimation, value: minuteMorphToken(for: currentDate))
+                    .accessibilityLabel("Current time")
 
-            if shouldShowTimerChip {
-                timerChip
+                if shouldShowTimerChip {
+                    timerChip
+                }
             }
+            .frame(maxWidth: .infinity)
         }
-        .frame(maxWidth: .infinity)
     }
 
     private var timerChip: some View {
@@ -168,7 +174,8 @@ struct FlowModeView: View {
             Text(timerTimeString)
                 .font(.headline.monospacedDigit())
                 .contentTransition(.numericText())
-                .animation(timeUpdateAnimation, value: timerTimeString)
+                // Seconds update every second: keep animation extremely subtle.
+                .animation(secondTickAnimation, value: timerTimeString)
             Text(timerStatusLabel)
                 .font(.caption)
                 .foregroundStyle(.secondary)
@@ -183,6 +190,9 @@ struct FlowModeView: View {
             Capsule(style: .continuous)
                 .strokeBorder(Color.primary.opacity(0.10), lineWidth: 1)
         )
+        // Soft dissolve on session changes; keeps interaction live.
+        .opacity(sessionOpacity)
+        .blur(radius: sessionBlur)
         // Overlay is intentionally lightweight; tap pauses/resumes, long-press or secondary click hides.
         .onTapGesture { toggleActiveTimer() }
         .onLongPressGesture { countdownVisible.toggle() }
@@ -195,13 +205,27 @@ struct FlowModeView: View {
 
     // MARK: - Helpers
 
-    private var timeString: String {
-        // Intentionally excludes seconds to avoid anxious ticking; minutes-only time awareness.
-        now.formatted(
+    private func wallClockString(for date: Date) -> String {
+        // System wall-clock time; locale-aware 12/24h, no seconds for calmer display.
+        date.formatted(
             .dateTime
                 .hour(.defaultDigits(amPM: .abbreviated))
                 .minute(.twoDigits)
         )
+    }
+    
+    /// Token used to trigger a soft morph only when minutes change.
+    private func minuteMorphToken(for date: Date) -> String {
+        date.formatted(
+            .dateTime
+                .hour(.defaultDigits(amPM: .abbreviated))
+                .minute(.twoDigits)
+        )
+    }
+    
+    /// Token representing session state changes for dissolve animation.
+    private var sessionVisualToken: String {
+        "\(appState.isInFlowMode)-\(appState.pomodoro.state.rawValue)"
     }
 
     private var countdownTimeString: String {
@@ -331,6 +355,38 @@ private extension FlowModeView {
     var timeUpdateAnimation: Animation? {
         // Very light easing to make digits "flow" instead of tick.
         reduceMotion ? nil : .easeOut(duration: 0.18)
+    }
+    
+    var minuteMorphAnimation: Animation? {
+        // Slightly fuller dissolve for minute transitions; still calm and short.
+        reduceMotion ? nil : .easeOut(duration: 0.2)
+    }
+    
+    var secondTickAnimation: Animation? {
+        // Near-invisible change each second to avoid flicker stress.
+        reduceMotion ? nil : .easeOut(duration: 0.12)
+    }
+    
+    var sessionTransitionAnimation: Animation {
+        .easeOut(duration: 0.2)
+    }
+    
+    var sessionOpacity: Double {
+        guard !reduceMotion else { return 1.0 }
+        return sessionDissolve ? 0.6 : 1.0
+    }
+    
+    var sessionBlur: CGFloat {
+        guard !reduceMotion else { return 0 }
+        return sessionDissolve ? 1.2 : 0
+    }
+    
+    func triggerSessionDissolve() {
+        guard !reduceMotion else { return }
+        sessionDissolve = true
+        withAnimation(sessionTransitionAnimation) {
+            sessionDissolve = false
+        }
     }
 }
 
