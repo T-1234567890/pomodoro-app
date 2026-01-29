@@ -15,6 +15,8 @@ struct TodoListView: View {
     @State private var tagsField = ""
     @State private var dueDateEnabled = false
     @State private var dueDateField = Date()
+    /// Time is opt-in; we default to date-only for quick entry.
+    @State private var includeDueTime = false
     @State private var selectedSegment: Segment = .active
     @State private var syncToCalendarField = false
     @State private var selectedTaskIDs: Set<UUID> = []
@@ -36,6 +38,14 @@ struct TodoListView: View {
         let formatter = DateFormatter()
         formatter.dateStyle = .short
         formatter.timeStyle = .none
+        formatter.locale = .autoupdatingCurrent
+        return formatter
+    }()
+    
+    private static let dateTimeFormatter: DateFormatter = {
+        let formatter = DateFormatter()
+        formatter.dateStyle = .short
+        formatter.timeStyle = .short
         formatter.locale = .autoupdatingCurrent
         return formatter
     }()
@@ -325,7 +335,7 @@ This does not start a timer or schedule time—tasks work fine without #.
                     }
                     
                     if let dueDate = item.dueDate {
-                        Label(formatDate(dueDate), systemImage: "calendar")
+                        Label(formattedDueDate(item, dueDate: dueDate), systemImage: "calendar")
                             .font(.caption)
                             .foregroundStyle(.secondary)
                     }
@@ -421,8 +431,34 @@ This does not start a timer or schedule time—tasks work fine without #.
         }
     }
     
-    private func formatDate(_ date: Date) -> String {
-        Self.dateFormatter.string(from: date)
+    private func formattedDueDate(_ item: TodoItem, dueDate: Date) -> String {
+        if item.hasDueTime {
+            return Self.dateTimeFormatter.string(from: dueDate)
+        }
+        return Self.dateFormatter.string(from: dueDate)
+    }
+    
+    /// Strips the time portion unless the user explicitly opted in.
+    private func normalizedDueDate(from date: Date, includeTime: Bool) -> Date {
+        guard !includeTime else { return date }
+        return Calendar.current.startOfDay(for: date)
+    }
+    
+    /// Preserve an existing time component when moving to a new day.
+    private func mergedDueDate(newDay: Date, from task: TodoItem) -> (date: Date, hasTime: Bool) {
+        let calendar = Calendar.current
+        let dayStart = calendar.startOfDay(for: newDay)
+        guard task.hasDueTime, let existing = task.dueDate else {
+            return (dayStart, false)
+        }
+        let timeComponents = calendar.dateComponents([.hour, .minute, .second], from: existing)
+        let merged = calendar.date(
+            bySettingHour: timeComponents.hour ?? 0,
+            minute: timeComponents.minute ?? 0,
+            second: timeComponents.second ?? 0,
+            of: dayStart
+        ) ?? dayStart
+        return (merged, true)
     }
     
     private var filteredItems: [TodoItem] {
@@ -445,13 +481,34 @@ This does not start a timer or schedule time—tasks work fine without #.
                     .textFieldStyle(.roundedBorder)
                 
                 Toggle("Set due date", isOn: $dueDateEnabled)
+                    .onChange(of: dueDateEnabled) { _, isOn in
+                        // Default to date-only when enabling; user opts into time explicitly.
+                        if !isOn { includeDueTime = false }
+                    }
                 
                 if dueDateEnabled {
                     DatePicker(
-                        "Due",
+                        "Due date",
                         selection: $dueDateField,
-                        displayedComponents: [.date, .hourAndMinute]
+                        displayedComponents: [.date]
                     )
+                    Toggle("Include time", isOn: $includeDueTime)
+                        .toggleStyle(.switch)
+                        .font(.subheadline)
+                        .foregroundStyle(.secondary)
+                    
+                    if includeDueTime {
+                        DatePicker(
+                            "Time",
+                            selection: $dueDateField,
+                            displayedComponents: [.hourAndMinute]
+                        )
+                        .datePickerStyle(.field)
+                    } else {
+                        Text("Default: saves the date only until you turn time on.")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    }
                 }
                 
                 Text("Notes (optional)")
@@ -503,6 +560,7 @@ This does not start a timer or schedule time—tasks work fine without #.
         tagsField = ""
         dueDateEnabled = false
         dueDateField = Date()
+        includeDueTime = false
         syncToCalendarField = false
         showingEditor = true
     }
@@ -515,9 +573,11 @@ This does not start a timer or schedule time—tasks work fine without #.
         if let due = item.dueDate {
             dueDateEnabled = true
             dueDateField = due
+            includeDueTime = item.hasDueTime
         } else {
             dueDateEnabled = false
             dueDateField = Date()
+            includeDueTime = false
         }
         syncToCalendarField = item.syncToCalendar
         showingEditor = true
@@ -530,6 +590,7 @@ This does not start a timer or schedule time—tasks work fine without #.
         tagsField = ""
         dueDateEnabled = false
         dueDateField = Date()
+        includeDueTime = false
         syncToCalendarField = false
     }
     
@@ -537,7 +598,8 @@ This does not start a timer or schedule time—tasks work fine without #.
         let trimmedTitle = titleField.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmedTitle.isEmpty else { return }
         
-        let dueDate = dueDateEnabled ? dueDateField : nil
+        let hasDueTime = dueDateEnabled ? includeDueTime : false
+        let dueDate = dueDateEnabled ? normalizedDueDate(from: dueDateField, includeTime: includeDueTime) : nil
         let trimmedNotes = notesField.trimmingCharacters(in: .whitespacesAndNewlines)
         let tags = tagsField
             .split(separator: ",")
@@ -548,6 +610,7 @@ This does not start a timer or schedule time—tasks work fine without #.
             editing.title = trimmedTitle
             editing.notes = trimmedNotes.isEmpty ? nil : trimmedNotes
             editing.dueDate = dueDate
+            editing.hasDueTime = hasDueTime
             editing.tags = tags
             editing.syncToCalendar = syncToCalendarField
             todoStore.updateItem(editing)
@@ -561,6 +624,7 @@ This does not start a timer or schedule time—tasks work fine without #.
                 title: trimmedTitle,
                 notes: trimmedNotes.isEmpty ? nil : trimmedNotes,
                 dueDate: dueDate,
+                hasDueTime: hasDueTime,
                 syncToCalendar: syncToCalendarField
             )
             todoStore.addItem(newItem)
@@ -665,7 +729,9 @@ extension TodoListView {
         let tasks = selectedTasks()
         guard !tasks.isEmpty else { return }
         for var task in tasks {
-            task.dueDate = date
+            let merged = mergedDueDate(newDay: date, from: task)
+            task.dueDate = merged.date
+            task.hasDueTime = merged.hasTime
             task.modifiedAt = Date()
             todoStore.updateItem(task)
             
@@ -684,6 +750,7 @@ extension TodoListView {
         guard !tasks.isEmpty else { return }
         for var task in tasks {
             task.dueDate = nil
+            task.hasDueTime = false
             task.modifiedAt = Date()
             todoStore.updateItem(task)
             if permissionsManager.isRemindersAuthorized,

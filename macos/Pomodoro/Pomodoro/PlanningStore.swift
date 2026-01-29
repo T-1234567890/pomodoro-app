@@ -39,11 +39,14 @@ final class PlanningStore: ObservableObject {
             removeTaskPlan(for: task.id)
             return
         }
-        let endDate = due.addingTimeInterval(30 * 60)
+        let startDate = task.hasDueTime ? due : Calendar.current.startOfDay(for: due)
+        let endDate = task.hasDueTime
+        ? startDate.addingTimeInterval(Double((task.durationMinutes ?? 30) * 60))
+        : startDate
         if let idx = items.firstIndex(where: { $0.sourceType == .task && $0.sourceID == task.id.uuidString }) {
             items[idx].title = task.title
             items[idx].notes = task.notes
-            items[idx].startDate = due
+            items[idx].startDate = startDate
             items[idx].endDate = endDate
             items[idx].sourceType = .task
             items[idx].sourceID = task.id.uuidString
@@ -52,7 +55,7 @@ final class PlanningStore: ObservableObject {
             let newItem = PlanningItem(
                 title: task.title,
                 notes: task.notes,
-                startDate: due,
+                startDate: startDate,
                 endDate: endDate,
                 isTask: true,
                 isCalendarEvent: false,

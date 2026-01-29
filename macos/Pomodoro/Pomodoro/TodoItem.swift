@@ -10,6 +10,9 @@ struct TodoItem: Identifiable, Codable, Equatable {
     var notes: String?
     var isCompleted: Bool
     var dueDate: Date?
+    /// Indicates whether the stored `dueDate` has a user-selected time component.
+    /// When false we treat the due date as date-only (all-day) to reduce friction.
+    var hasDueTime: Bool
     var durationMinutes: Int?
     var priority: Priority
     var createdAt: Date
@@ -33,7 +36,7 @@ struct TodoItem: Identifiable, Codable, Equatable {
     var syncStatus: SyncStatus
     
     enum CodingKeys: String, CodingKey {
-        case id, externalId, title, notes, isCompleted, dueDate, durationMinutes, priority, createdAt, modifiedAt, tags, syncToCalendar, linkedCalendarEventId, reminderIdentifier, calendarEventIdentifier, syncStatus
+        case id, externalId, title, notes, isCompleted, dueDate, hasDueTime, durationMinutes, priority, createdAt, modifiedAt, tags, syncToCalendar, linkedCalendarEventId, reminderIdentifier, calendarEventIdentifier, syncStatus
     }
     
     enum Priority: Int, Codable, CaseIterable {
@@ -59,6 +62,7 @@ struct TodoItem: Identifiable, Codable, Equatable {
         notes: String? = nil,
         isCompleted: Bool = false,
         dueDate: Date? = nil,
+        hasDueTime: Bool = false,
         durationMinutes: Int? = nil,
         priority: Priority = .none,
         createdAt: Date = Date(),
@@ -76,6 +80,7 @@ struct TodoItem: Identifiable, Codable, Equatable {
         self.notes = notes
         self.isCompleted = isCompleted
         self.dueDate = dueDate
+        self.hasDueTime = hasDueTime
         self.durationMinutes = durationMinutes
         self.priority = priority
         self.createdAt = createdAt
@@ -100,6 +105,7 @@ struct TodoItem: Identifiable, Codable, Equatable {
         notes = try container.decodeIfPresent(String.self, forKey: .notes)
         isCompleted = try container.decode(Bool.self, forKey: .isCompleted)
         dueDate = try container.decodeIfPresent(Date.self, forKey: .dueDate)
+        hasDueTime = try container.decodeIfPresent(Bool.self, forKey: .hasDueTime) ?? (dueDate != nil)
         durationMinutes = try container.decodeIfPresent(Int.self, forKey: .durationMinutes)
         priority = try container.decodeIfPresent(Priority.self, forKey: .priority) ?? .none
         createdAt = try container.decodeIfPresent(Date.self, forKey: .createdAt) ?? Date()
@@ -120,6 +126,7 @@ struct TodoItem: Identifiable, Codable, Equatable {
         try container.encodeIfPresent(notes, forKey: .notes)
         try container.encode(isCompleted, forKey: .isCompleted)
         try container.encodeIfPresent(dueDate, forKey: .dueDate)
+        try container.encode(hasDueTime, forKey: .hasDueTime)
         try container.encodeIfPresent(durationMinutes, forKey: .durationMinutes)
         try container.encode(priority, forKey: .priority)
         try container.encode(createdAt, forKey: .createdAt)

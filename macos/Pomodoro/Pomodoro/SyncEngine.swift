@@ -63,6 +63,7 @@ final class SyncEngine {
                     if let comps = reminder.dueDateComponents,
                        let date = Calendar.current.date(from: comps) {
                         local.dueDate = date
+                        local.hasDueTime = comps.hasTimeComponents
                     }
                     local.reminderIdentifier = reminder.calendarItemIdentifier
                     local.lastModified = remoteModified
@@ -80,6 +81,7 @@ final class SyncEngine {
                     notes: cleanNotes,
                     isCompleted: reminder.isCompleted,
                     dueDate: reminder.dueDateComponents.flatMap { Calendar.current.date(from: $0) },
+                    hasDueTime: reminder.dueDateComponents?.hasTimeComponents ?? false,
                     durationMinutes: nil,
                     priority: .none,
                     createdAt: reminder.creationDate ?? Date(),
@@ -162,6 +164,7 @@ final class SyncEngine {
                     updated.title = existing.title
                     updated.notes = ExternalID.parse(from: existing.notes)?.cleanNotes
                     updated.dueDate = existing.startDate
+                    updated.hasDueTime = !existing.isAllDay
                     updated.calendarEventIdentifier = existing.eventIdentifier
                     updated.linkedCalendarEventId = existing.eventIdentifier
                     updated.lastModified = remoteModified
@@ -217,6 +220,17 @@ final class SyncEngine {
     }
     
     // MARK: - Reminders Helpers
+
+    private func reminderComponents(from item: TodoItem) -> DateComponents? {
+        guard let due = item.dueDate else { return nil }
+        var components = Calendar.current.dateComponents([.year, .month, .day], from: due)
+        if item.hasDueTime {
+            let time = Calendar.current.dateComponents([.hour, .minute], from: due)
+            components.hour = time.hour
+            components.minute = time.minute
+        }
+        return components
+    }
     
     private func fetchAllReminders() async -> [EKReminder] {
         let predicate = eventStore.predicateForReminders(in: nil)
@@ -232,7 +246,7 @@ final class SyncEngine {
         reminder.title = item.title
         reminder.notes = combinedNotes(from: item.notes, tags: item.tags, externalId: item.externalId)
         reminder.isCompleted = item.isCompleted
-        reminder.dueDateComponents = item.dueDate.flatMap { Calendar.current.dateComponents([.year, .month, .day, .hour, .minute], from: $0) }
+        reminder.dueDateComponents = reminderComponents(from: item)
         reminder.priority = reminderPriority(from: item.priority)
         reminder.calendar = eventStore.defaultCalendarForNewReminders()
         
@@ -244,7 +258,7 @@ final class SyncEngine {
         reminder.title = item.title
         reminder.notes = combinedNotes(from: item.notes, tags: item.tags, externalId: item.externalId)
         reminder.isCompleted = item.isCompleted
-        reminder.dueDateComponents = item.dueDate.flatMap { Calendar.current.dateComponents([.year, .month, .day, .hour, .minute], from: $0) }
+        reminder.dueDateComponents = reminderComponents(from: item)
         reminder.priority = reminderPriority(from: item.priority)
         try eventStore.save(reminder, commit: true)
     }
@@ -276,11 +290,18 @@ final class SyncEngine {
         let event = EKEvent(eventStore: eventStore)
         event.title = item.title
         event.notes = combinedNotes(from: item.notes, tags: item.tags, externalId: externalId)
-        event.startDate = item.dueDate
-        if let duration = item.durationMinutes {
-            event.endDate = item.dueDate?.addingTimeInterval(Double(duration * 60))
-        } else if let start = item.dueDate {
-            event.endDate = start.addingTimeInterval(30 * 60)
+        if let due = item.dueDate {
+            if item.hasDueTime {
+                event.isAllDay = false
+                event.startDate = due
+                let durationMinutes = item.durationMinutes ?? 30
+                event.endDate = due.addingTimeInterval(Double(durationMinutes * 60))
+            } else {
+                let start = Calendar.current.startOfDay(for: due)
+                event.isAllDay = true
+                event.startDate = start
+                event.endDate = Calendar.current.date(byAdding: .day, value: 1, to: start)
+            }
         }
         event.calendar = eventStore.defaultCalendarForNewEvents
         try eventStore.save(event, span: .thisEvent, commit: true)
@@ -290,11 +311,18 @@ final class SyncEngine {
     private func updateEvent(_ event: EKEvent, with item: TodoItem, externalId: String) throws {
         event.title = item.title
         event.notes = combinedNotes(from: item.notes, tags: item.tags, externalId: externalId)
-        event.startDate = item.dueDate
-        if let duration = item.durationMinutes {
-            event.endDate = item.dueDate?.addingTimeInterval(Double(duration * 60))
-        } else if let start = item.dueDate {
-            event.endDate = start.addingTimeInterval(30 * 60)
+        if let due = item.dueDate {
+            if item.hasDueTime {
+                event.isAllDay = false
+                event.startDate = due
+                let durationMinutes = item.durationMinutes ?? 30
+                event.endDate = due.addingTimeInterval(Double(durationMinutes * 60))
+            } else {
+                let start = Calendar.current.startOfDay(for: due)
+                event.isAllDay = true
+                event.startDate = start
+                event.endDate = Calendar.current.date(byAdding: .day, value: 1, to: start)
+            }
         }
         try eventStore.save(event, span: .thisEvent, commit: true)
     }
@@ -334,5 +362,11 @@ final class SyncEngine {
     
     enum SyncError: LocalizedError {
         case notAuthorized
+    }
+}
+
+private extension DateComponents {
+    var hasTimeComponents: Bool {
+        hour != nil || minute != nil || second != nil
     }
 }

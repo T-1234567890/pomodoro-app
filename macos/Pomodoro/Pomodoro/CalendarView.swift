@@ -385,7 +385,9 @@ struct CalendarView: View {
                     .foregroundStyle(.secondary)
             }
             if let due = item.dueDate {
-                Text(Self.shortDayFormatter.string(from: due))
+                let day = Self.shortDayFormatter.string(from: due)
+                let suffix = item.hasDueTime ? " • \(Self.eventTimeFormatter.string(from: due))" : ""
+                Text(day + suffix)
                     .font(.caption2)
                     .foregroundStyle(.secondary)
             }

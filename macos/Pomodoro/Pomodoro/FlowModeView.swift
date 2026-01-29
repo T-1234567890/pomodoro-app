@@ -13,6 +13,10 @@ struct FlowModeView: View {
 
     @State private var now = Date()
     @State private var countdownVisible: Bool
+    @State private var timerHovering = false
+    @GestureState private var timerPressing = false
+    @State private var exitHovering = false
+    @GestureState private var exitPressing = false
     private let clockTimer = Timer.publish(every: 1, on: .main, in: .common).autoconnect()
 
     init(showsCountdown: Bool = false, exitAction: @escaping () -> Void = {}) {
@@ -79,10 +83,18 @@ struct FlowModeView: View {
                     .padding(.vertical, 8)
                     .background(
                         Capsule(style: .continuous)
-                            .fill(Color.primary.opacity(0.08))
+                            .fill(Color.primary.opacity(timerHovering ? 0.12 : 0.08))
                     )
                 }
                 .buttonStyle(.plain)
+                .scaleEffect(timerScale)
+                .animation(reduceMotion ? nil : .easeOut(duration: 0.18), value: timerPressing)
+                .animation(reduceMotion ? nil : .easeOut(duration: 0.2), value: timerHovering)
+                .onHover { timerHovering = $0 }
+                .simultaneousGesture(
+                    DragGesture(minimumDistance: 0)
+                        .updating($timerPressing) { _, state, _ in state = true }
+                )
                 .accessibilityLabel("Show Pomodoro timer")
             }
 
@@ -98,10 +110,18 @@ struct FlowModeView: View {
                 .padding(.vertical, 8)
                 .background(
                     Capsule(style: .continuous)
-                        .fill(Color.primary.opacity(0.08))
+                        .fill(Color.primary.opacity(exitHovering ? 0.12 : 0.08))
                 )
             }
             .buttonStyle(.plain)
+            .scaleEffect(exitScale)
+            .animation(reduceMotion ? nil : .easeOut(duration: 0.18), value: exitPressing)
+            .animation(reduceMotion ? nil : .easeOut(duration: 0.2), value: exitHovering)
+            .onHover { exitHovering = $0 }
+            .simultaneousGesture(
+                DragGesture(minimumDistance: 0)
+                    .updating($exitPressing) { _, state, _ in state = true }
+            )
             .help("Return to main workspace")
             .keyboardShortcut(.escape, modifiers: [])
             .accessibilityLabel("Exit Flow Mode")
@@ -270,12 +290,27 @@ struct FlowModeView: View {
     }
 }
 
+private extension FlowModeView {
+    var timerScale: CGFloat {
+        guard !reduceMotion else { return 1.0 }
+        return timerPressing ? 0.98 : 1.0
+    }
+    
+    var exitScale: CGFloat {
+        guard !reduceMotion else { return 1.0 }
+        return exitPressing ? 0.98 : 1.0
+    }
+}
+
 // MARK: - Ambient Audio
 
 private struct AmbientAudioStrip: View {
     @EnvironmentObject private var musicController: MusicController
     @EnvironmentObject private var audioSourceStore: AudioSourceStore
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @State private var ambientVolume: Double = 0.4
+    @State private var sliderEditing = false
+    @State private var sliderHover = false
 
     var body: some View {
         Group {
@@ -333,12 +368,32 @@ private struct AmbientAudioStrip: View {
             Slider(
                 value: $ambientVolume,
                 in: 0...1,
+                onEditingChanged: { editing in
+                    if reduceMotion {
+                        sliderEditing = editing
+                    } else {
+                        withAnimation(.easeOut(duration: 0.2)) { sliderEditing = editing }
+                    }
+                },
                 minimumValueLabel: Image(systemName: "speaker.wave.1.fill").foregroundStyle(.secondary),
                 maximumValueLabel: Image(systemName: "speaker.wave.3.fill").foregroundStyle(.secondary),
                 label: { EmptyView() }
             )
             .frame(width: 180)
             .tint(.primary.opacity(0.65))
+            // Smooth track fill animation; matches macOS slider feel.
+            .animation(reduceMotion ? nil : .easeOut(duration: 0.2), value: ambientVolume)
+            // Knob scales very slightly while dragging; no layout change.
+            .scaleEffect(sliderEditing ? 1.03 : 1.0, anchor: .center)
+            // Hover brightens softly to indicate focus without glow.
+            .opacity((sliderHover || sliderEditing) ? 1.0 : 0.95)
+            .onHover { hovering in
+                if reduceMotion {
+                    sliderHover = hovering
+                } else {
+                    withAnimation(.easeOut(duration: 0.18)) { sliderHover = hovering }
+                }
+            }
             .accessibilityLabel("Ambient volume")
             .onChange(of: ambientVolume) { _, newValue in
                 audioSourceStore.setVolume(Float(newValue))

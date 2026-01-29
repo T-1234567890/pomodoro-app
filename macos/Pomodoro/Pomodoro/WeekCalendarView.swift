@@ -176,9 +176,15 @@ private struct DayColumnView: View {
                     .font(.subheadline)
                     .lineLimit(1)
                 if let due = task.dueDate {
-                    Text(timeRange(from: due, duration: task.durationMinutes))
-                        .font(.caption2)
-                        .foregroundStyle(.secondary)
+                    if task.hasDueTime {
+                        Text(timeRange(from: due, duration: task.durationMinutes))
+                            .font(.caption2)
+                            .foregroundStyle(.secondary)
+                    } else {
+                        Text("All day")
+                            .font(.caption2)
+                            .foregroundStyle(.secondary)
+                    }
                 } else {
                     Text("No due time")
                         .font(.caption2)

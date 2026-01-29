@@ -34,6 +34,10 @@ struct MainWindowView: View {
     @State private var completionRate: Double = 0
     private let eventStore = EKEventStore()
     @State private var lastNonFlowSelection: SidebarItem = .pomodoro
+    // Slider micro-interactions
+    @State private var ambientSliderEditing = false
+    @State private var ambientSliderHover = false
+    @State private var systemSliderHover = false
     
     // New: Calendar, Reminders, and Todo system
     @StateObject private var permissionsManager = PermissionsManager.shared
@@ -527,10 +531,20 @@ struct MainWindowView: View {
                         Text("Volume (system)")
                             .font(.caption)
                             .foregroundStyle(.secondary)
-                        Slider(value: .constant(Double(musicController.focusVolume)), in: 0...1)
+                        Slider(value: .constant(Double(musicController.focusVolume)), in: 0...1, onEditingChanged: { _ in })
                             .disabled(true)
+                            // Soft hover feedback without altering layout or color palette.
+                            .opacity(systemSliderHover ? 1.0 : 0.92)
+                            .onHover { hovering in
+                                if reduceMotion {
+                                    systemSliderHover = hovering
+                                } else {
+                                    withAnimation(.easeOut(duration: 0.18)) { systemSliderHover = hovering }
+                                }
+                            }
                     }
                     .frame(width: 200)
+                    .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 10, style: .continuous))
                 }
 
             case .ambient(let type):
@@ -568,9 +582,29 @@ struct MainWindowView: View {
                         Text("Volume")
                             .font(.caption)
                             .foregroundStyle(.secondary)
-                        Slider(value: ambientVolumeBinding, in: 0...1)
+                        Slider(value: ambientVolumeBinding, in: 0...1, onEditingChanged: { editing in
+                            if reduceMotion {
+                                ambientSliderEditing = editing
+                            } else {
+                                withAnimation(.easeOut(duration: 0.2)) { ambientSliderEditing = editing }
+                            }
+                        })
+                        // Smooth fill animation to avoid abrupt jumps.
+                        .animation(reduceMotion ? nil : .easeOut(duration: 0.2), value: musicController.focusVolume)
+                        // Tactile scale while dragging; small enough to avoid layout shift.
+                        .scaleEffect(ambientSliderEditing ? 1.03 : 1.0, anchor: .center)
+                        // Subtle hover lift in line with macOS controls.
+                        .opacity((ambientSliderHover || ambientSliderEditing) ? 1.0 : 0.95)
+                        .onHover { hovering in
+                            if reduceMotion {
+                                ambientSliderHover = hovering
+                            } else {
+                                withAnimation(.easeOut(duration: 0.18)) { ambientSliderHover = hovering }
+                            }
+                        }
                     }
                     .frame(width: 200)
+                    .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 10, style: .continuous))
                 }
 
             case .off:
@@ -959,6 +993,8 @@ struct MainWindowView: View {
         let isEnabled: Bool
         let action: () -> Void
         @State private var isHovering = false
+        @GestureState private var isPressing = false
+        @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
         init(_ title: String, isEnabled: Bool = true, action: @escaping () -> Void) {
             self.title = title
@@ -972,13 +1008,25 @@ struct MainWindowView: View {
                 .controlSize(.regular)
                 .disabled(!isEnabled)
                 .opacity(isEnabled ? 1.0 : 0.45)
+                .scaleEffect(pressScale)
                 .background(
                     RoundedRectangle(cornerRadius: 6)
                         .fill(isHovering && isEnabled ? Color.accentColor.opacity(0.08) : .clear)
                 )
+                .animation(reduceMotion ? nil : .easeOut(duration: 0.2), value: isHovering)
+                .animation(reduceMotion ? nil : .easeOut(duration: 0.18), value: isPressing)
                 .onHover { hovering in
                     isHovering = hovering
                 }
+                .simultaneousGesture(
+                    DragGesture(minimumDistance: 0)
+                        .updating($isPressing) { _, state, _ in state = true }
+                )
+        }
+
+        private var pressScale: CGFloat {
+            guard isEnabled, !reduceMotion else { return 1.0 }
+            return isPressing ? 0.98 : 1.0
         }
     }
 
@@ -1367,18 +1415,19 @@ struct MainWindowView: View {
     }
 
     private var timerStateAnimation: Animation? {
-        reduceMotion ? nil : .easeInOut(duration: 0.18)
+        // Calm, lightweight easing for state transitions and numeric pulse.
+        reduceMotion ? nil : .easeOut(duration: 0.22)
     }
 
     private var sectionTransition: AnyTransition {
         guard !reduceMotion else { return .identity }
-        let insertion = AnyTransition.opacity.combined(with: .offset(x: 8, y: 0))
-        let removal = AnyTransition.opacity.combined(with: .offset(x: -8, y: 0))
-        return .asymmetric(insertion: insertion, removal: removal)
+        // Calm fade + slight scale keeps transitions lightweight; avoids sliding motion.
+        let fadeScale = AnyTransition.opacity.combined(with: .scale(scale: 0.985))
+        return .asymmetric(insertion: fadeScale, removal: fadeScale)
     }
 
     private var sectionTransitionAnimation: Animation? {
-        reduceMotion ? nil : .easeInOut(duration: 0.15)
+        reduceMotion ? nil : .easeOut(duration: 0.22)
     }
 
     private func shouldAnimateTimerTransition(from oldValue: TimerState, to newValue: TimerState) -> Bool {
@@ -1388,7 +1437,13 @@ struct MainWindowView: View {
         if oldValue == .running && newValue == .paused {
             return true
         }
+        if oldValue == .paused && newValue == .running {
+            return true
+        }
         if oldValue == .running && (newValue == .breakRunning || newValue == .breakPaused) {
+            return true
+        }
+        if oldValue == .breakPaused && newValue == .breakRunning {
             return true
         }
         if (oldValue == .breakRunning || oldValue == .breakPaused) && newValue == .idle {
