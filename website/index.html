@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Pomodoro · macOS Focus App</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header class="topbar glass">
+    <div class="logo" data-en="Pomodoro" data-zh="Pomodoro">Pomodoro</div>
+    <nav class="nav-links">
+      <a href="#overview" data-en="Overview" data-zh="概览">Overview</a>
+      <a href="#features" data-en="Features" data-zh="功能">Features</a>
+      <a href="#screenshots" data-en="Focus Cycle" data-zh="专注循环">Focus Cycle</a>
+      <a href="#docs" data-en="Docs" data-zh="文档">Docs</a>
+      <a href="#download" data-en="Download" data-zh="下载">Download</a>
+      <a href="https://github.com/T-1234567890/pomodoro-app" target="_blank" rel="noreferrer" data-en="GitHub" data-zh="GitHub">GitHub</a>
+      <button id="lang-toggle" aria-label="Switch language" data-en="EN / 中文" data-zh="中文 / EN">EN / 中文</button>
+    </nav>
+  </header>
+
+  <main>
+    <section class="hero" id="overview">
+      <div class="hero-text fade-on-load">
+        <p class="eyebrow" data-en="Pomodoro" data-zh="Pomodoro">Pomodoro</p>
+        <h1 data-en="A calm open-source focus app for macOS" data-zh="一个为 macOS 设计的开源专注应用">A calm open-source focus app for macOS</h1>
+        <p class="lede" data-en="Pomodoro is a lightweight focus tool designed for people who want to work without distraction. It combines a clean timer, gentle focus flow sessions, and task awareness in a quiet interface.<br><br>Open-source core, thoughtfully evolving." data-zh="Pomodoro 是一个轻量级专注工具，为希望减少干扰、安静工作的用户设计。它结合了计时器、专注节奏模式和任务管理，界面简洁，不打扰你的工作。<br><br>核心开源，持续演进。">Pomodoro is a lightweight focus tool designed for people who want to work without distraction. It combines a clean timer, gentle focus flow sessions, and task awareness in a quiet interface.<br><br>Open-source core, thoughtfully evolving.</p>
+        <div class="cta-row">
+          <a class="primary-btn" href="https://github.com/T-1234567890/pomodoro-app/releases" target="_blank" rel="noreferrer" data-en="Download → GitHub Releases" data-zh="下载 → GitHub Releases">Download → GitHub Releases</a>
+          <a class="ghost-btn" href="https://github.com/T-1234567890/pomodoro-app" target="_blank" rel="noreferrer" data-en="View on GitHub" data-zh="查看 GitHub">View on GitHub</a>
+        </div>
+      </div>
+      <div class="hero-illustration hero-tomato fade-on-load" aria-hidden="true">
+        <svg viewBox="0 0 720 520" role="presentation">
+          <defs>
+            <path id="tomatoShape" d="M302 46c38 6 72 21 100 42 28 21 51 49 65 82 14 33 20 72 10 108-10 36-36 69-70 94-34 24-76 40-122 43-46 3-95-7-133-30-39-22-67-56-80-94-13-38-11-80 5-117 16-36 46-68 84-89 38-21 82-31 131-27 4 0 7 0 10 1z" />
+            <path id="leafShape" d="M287 66c-4-18-4-28 3-34 7-6 20-7 35-3 15 4 32 13 46 27-14-3-27-5-39-6-12-1-22 1-30 6-8 5-13 12-15 10z" />
+            <radialGradient id="tomatoSkin" cx="42%" cy="32%" r="68%">
+              <stop offset="0%" stop-color="#ffd8c7" />
+              <stop offset="45%" stop-color="#f17c69" />
+              <stop offset="100%" stop-color="#b23a32" />
+            </radialGradient>
+            <radialGradient id="tomatoDepth" cx="70%" cy="75%" r="70%">
+              <stop offset="0%" stop-color="rgba(122, 34, 30, 0)" />
+              <stop offset="45%" stop-color="rgba(122, 34, 30, 0.26)" />
+              <stop offset="100%" stop-color="rgba(74, 16, 12, 0.42)" />
+            </radialGradient>
+            <radialGradient id="tomatoBloom" cx="36%" cy="30%" r="38%">
+              <stop offset="0%" stop-color="rgba(255,255,255,0.82)" />
+              <stop offset="60%" stop-color="rgba(255,255,255,0.12)" />
+              <stop offset="100%" stop-color="rgba(255,255,255,0)" />
+            </radialGradient>
+            <radialGradient id="ambientGlow" cx="45%" cy="40%" r="75%">
+              <stop offset="0%" stop-color="rgba(255, 210, 194, 0.65)" />
+              <stop offset="100%" stop-color="rgba(218, 156, 144, 0)" />
+            </radialGradient>
+            <radialGradient id="leafSurface" cx="32%" cy="30%" r="78%">
+              <stop offset="0%" stop-color="#9bb88c" />
+              <stop offset="48%" stop-color="#6f8c61" />
+              <stop offset="100%" stop-color="#324832" />
+            </radialGradient>
+            <radialGradient id="leafBloom" cx="46%" cy="24%" r="52%">
+              <stop offset="0%" stop-color="rgba(255,255,255,0.54)" />
+              <stop offset="80%" stop-color="rgba(255,255,255,0)" />
+            </radialGradient>
+            <linearGradient id="unevenShade" x1="8%" y1="6%" x2="92%" y2="96%">
+              <stop offset="0%" stop-color="#ffffff" stop-opacity="0.06" />
+              <stop offset="28%" stop-color="#000000" stop-opacity="0.08" />
+              <stop offset="62%" stop-color="#ffffff" stop-opacity="0.03" />
+              <stop offset="100%" stop-color="#000000" stop-opacity="0.12" />
+            </linearGradient>
+            <radialGradient id="paperWash" cx="50%" cy="48%" r="82%">
+              <stop offset="0%" stop-color="#fbe8de" stop-opacity="0.28" />
+              <stop offset="55%" stop-color="#f3d4c6" stop-opacity="0.18" />
+              <stop offset="100%" stop-color="#e0b6a7" stop-opacity="0" />
+            </radialGradient>
+            <filter id="softBlur" x="-30%" y="-30%" width="160%" height="160%">
+              <feGaussianBlur stdDeviation="26" />
+            </filter>
+            <filter id="sheenBlur" x="-40%" y="-40%" width="180%" height="180%">
+              <feGaussianBlur stdDeviation="18" />
+            </filter>
+            <filter id="grainTexture" x="-40%" y="-40%" width="180%" height="180%" color-interpolation-filters="sRGB">
+              <feTurbulence type="fractalNoise" baseFrequency="0.85" numOctaves="2" seed="12" result="noise" />
+              <feColorMatrix in="noise" type="saturate" values="0" result="mono" />
+              <feColorMatrix in="mono" type="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 0.16 0" result="grain" />
+              <feGaussianBlur in="grain" stdDeviation="0.35" />
+            </filter>
+            <filter id="paperFibers" x="-30%" y="-30%" width="160%" height="160%" color-interpolation-filters="sRGB">
+              <feTurbulence type="fractalNoise" baseFrequency="0.22" numOctaves="3" seed="4" result="fibers" />
+              <feColorMatrix in="fibers" type="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 0.10 0" />
+              <feGaussianBlur stdDeviation="5" />
+            </filter>
+            <mask id="tomatoMask">
+              <use href="#tomatoShape" fill="white" />
+            </mask>
+            <mask id="leafMask">
+              <use href="#leafShape" fill="white" />
+            </mask>
+          </defs>
+          <g transform="translate(60 40)">
+            <circle cx="320" cy="250" r="190" fill="url(#ambientGlow)" filter="url(#softBlur)" opacity="0.7" />
+            <use href="#tomatoShape" fill="url(#tomatoSkin)" />
+            <use href="#tomatoShape" fill="url(#tomatoDepth)" />
+            <g mask="url(#tomatoMask)">
+              <ellipse cx="290" cy="210" rx="140" ry="110" fill="url(#tomatoBloom)" filter="url(#sheenBlur)" />
+              <ellipse cx="380" cy="340" rx="160" ry="120" fill="rgba(80,19,12,0.28)" filter="url(#softBlur)" />
+              <rect x="60" y="30" width="500" height="440" fill="url(#unevenShade)" />
+              <rect x="40" y="10" width="540" height="470" fill="url(#paperWash)" />
+              <rect x="30" y="0" width="560" height="500" filter="url(#grainTexture)" />
+              <rect x="20" y="-10" width="580" height="520" filter="url(#paperFibers)" />
+            </g>
+            <g transform="translate(-6 -6)">
+              <use href="#leafShape" fill="url(#leafSurface)" />
+              <g mask="url(#leafMask)">
+                <ellipse cx="312" cy="62" rx="42" ry="26" fill="url(#leafBloom)" filter="url(#sheenBlur)" />
+              </g>
+            </g>
+          </g>
+        </svg>
+      </div>
+    </section>
+
+    <section class="features" id="features">
+      <div class="section-head reveal">
+        <p class="eyebrow" data-en="Features" data-zh="功能">Features</p>
+        <h2 data-en="Built for quiet productivity" data-zh="为安静的生产力而生">Built for quiet productivity</h2>
+      </div>
+      <div class="feature-grid">
+        <article class="feature-card glass reveal">
+          <div class="icon icon-circle" aria-hidden="true">◯</div>
+          <h3 data-en="Focus Flow Mode" data-zh="专注节奏模式">Focus Flow Mode</h3>
+          <p data-en="Adaptive focus sessions tuned to energy and rhythm." data-zh="根据节奏自动调整专注时间。">Adaptive focus sessions tuned to energy and rhythm.</p>
+        </article>
+        <article class="feature-card glass reveal">
+          <div class="icon icon-clock" aria-hidden="true">∷</div>
+          <h3 data-en="Pomodoro Timer" data-zh="番茄钟计时器">Pomodoro Timer</h3>
+          <p data-en="Classic pacing with calm visual design." data-zh="经典计时方式，安静不打扰。">Classic pacing with calm visual design.</p>
+        </article>
+        <article class="feature-card glass reveal">
+          <div class="icon icon-square" aria-hidden="true">▢</div>
+          <h3 data-en="Calendar & Tasks" data-zh="日历与任务">Calendar & Tasks</h3>
+          <p data-en="See your schedule without distraction." data-zh="无需切换应用即可查看安排。">See your schedule without distraction.</p>
+        </article>
+        <article class="feature-card glass reveal">
+          <div class="icon icon-wave" aria-hidden="true">≈</div>
+          <h3 data-en="Ambient Audio" data-zh="环境音频">Ambient Audio</h3>
+          <p data-en="Soft soundscapes for deep work." data-zh="适合深度工作的声音环境。">Soft soundscapes for deep work.</p>
+        </article>
+      </div>
+    </section>
+
+    <section class="rhythm" id="screenshots">
+      <div class="section-head reveal">
+        <p class="eyebrow" data-en="Focus Cycle" data-zh="专注循环">Focus Cycle</p>
+        <h2 data-en="Designed for the way you focus" data-zh="为你的专注方式而设计">Designed for the way you focus</h2>
+      </div>
+      <div class="rhythm-card glass reveal breathe">
+        <div class="cycle-inner">
+          <div class="rhythm-graphic" aria-hidden="true">
+            <div class="rhythm-loop">
+              <div class="state-text">
+                <span class="state state-working" data-en="Working" data-zh="专注">Working</span>
+                <span class="state state-break" data-en="Break" data-zh="休息">Break</span>
+              </div>
+              <div class="rhythm-core"></div>
+            </div>
+          </div>
+          <div class="rhythm-copy">
+            <p class="muted" data-en="Work in gentle cycles." data-zh="在柔和的节奏中工作。">Work in gentle cycles.</p>
+            <h3 data-en="Focus, pause, return." data-zh="专注，暂停，再继续。">Focus, pause, return.</h3>
+            <p class="muted" data-en="A quiet rhythm designed for deep attention." data-zh="为深度注意力而设计的安静循环。">A quiet rhythm designed for deep attention.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="docs" id="docs">
+      <div class="section-head reveal">
+        <p class="eyebrow" data-en="Docs" data-zh="文档">Docs</p>
+        <h2 data-en="Documentation is part of the open development process." data-zh="文档是项目开放开发的一部分。">Documentation is part of the open development process.</h2>
+      </div>
+      <div class="doc-grid">
+        <a class="doc-link glass reveal" href="https://github.com/T-1234567890/pomodoro-app/blob/main/Docs/FAQ.md" target="_blank" rel="noreferrer" data-en="FAQ" data-zh="常见问题">FAQ</a>
+        <a class="doc-link glass reveal" href="https://github.com/T-1234567890/pomodoro-app/blob/main/Docs/Future_Pro_Plan.md" target="_blank" rel="noreferrer" data-en="Future Plan" data-zh="未来计划">Future Plan</a>
+        <a class="doc-link glass reveal" href="https://github.com/T-1234567890/pomodoro-app/blob/main/Docs/Gatekeeper.md" target="_blank" rel="noreferrer" data-en="Gatekeeper Guide" data-zh="Gatekeeper 指南">Gatekeeper Guide</a>
+        <a class="doc-link glass reveal" href="https://github.com/T-1234567890/pomodoro-app/blob/main/Docs/Roadmap_1.0-2.0.md" target="_blank" rel="noreferrer" data-en="Roadmap 1.0-2.0" data-zh="路线图 1.0-2.0">Roadmap 1.0-2.0</a>
+      </div>
+      <div class="docs-cta">
+        <a class="primary-btn" href="https://github.com/T-1234567890/pomodoro-app/tree/main/Docs" target="_blank" rel="noreferrer" data-en="More Docs →" data-zh="更多文档 →">More Docs →</a>
+      </div>
+    </section>
+
+    <section class="download" id="download">
+      <div class="section-head reveal">
+        <p class="eyebrow" data-en="Download" data-zh="下载">Download</p>
+        <h2 data-en="Download latest version from GitHub Releases." data-zh="从 GitHub Releases 下载最新版本。">Download latest version from GitHub Releases.</h2>
+        <p class="muted" data-en="macOS may warn about unsigned apps. This is expected for open-source software." data-zh="macOS 可能提示未签名应用，这是开源软件的正常行为。">macOS may warn about unsigned apps. This is expected for open-source software.</p>
+        <div class="cta-row">
+          <a class="primary-btn" href="https://github.com/T-1234567890/pomodoro-app/releases" target="_blank" rel="noreferrer" data-en="Go to Releases" data-zh="前往 Releases">Go to Releases</a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer glass">
+    <p data-en="Open-source project · MIT License" data-zh="开源项目 · MIT 协议">Open-source project · MIT License</p>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>
