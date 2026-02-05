@@ -8,7 +8,9 @@
 
 /* Begin PBXBuildFile section */
 		0406D042B8164EA2B18986C1 /* WindowBackgroundConfigurator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49393474CCC34E2091E176A1 /* WindowBackgroundConfigurator.swift */; };
+		1C500AF364889EDC9C8772BC /* AuthManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83E7FB46B7CF8A7C0F510CF4 /* AuthManager.swift */; };
 		4BDE965F88F5BUILDCBB5DF2 /* CalendarDayView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4BDE965F88F54754BCBB5DF2 /* CalendarDayView.swift */; };
+		4DD2B11CF188B287CE18674F /* APIClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = D95945228BEC2D75F362FF53 /* APIClient.swift */; };
 		7C360D572F191F17007313D3 /* AppState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C360D502F191F17007313D3 /* AppState.swift */; };
 		7C360D582F191F17007313D3 /* CountdownTimerEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C360D512F191F17007313D3 /* CountdownTimerEngine.swift */; };
 		7C360D592F191F17007313D3 /* PomodoroTimerEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C360D522F191F17007313D3 /* PomodoroTimerEngine.swift */; };
@@ -26,9 +28,14 @@
 		7C360D902F191F17007313D3 /* MusicController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C360D962F191F17007313D3 /* MusicController.swift */; };
 		7C360D912F191F17007313D3 /* SystemMediaController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C360D972F191F17007313D3 /* SystemMediaController.swift */; };
 		7C360D922F191F17007313D3 /* MusicPanelView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C360D982F191F17007313D3 /* MusicPanelView.swift */; };
+		7CF71FA32F321EAE0065E7C8 /* GoogleSignIn in Frameworks */ = {isa = PBXBuildFile; productRef = 7CF71FA22F321EAE0065E7C8 /* GoogleSignIn */; };
+		7CF71FA52F321EAE0065E7C8 /* GoogleSignInSwift in Frameworks */ = {isa = PBXBuildFile; productRef = 7CF71FA42F321EAE0065E7C8 /* GoogleSignInSwift */; };
 		815B35241A15471083A7F5C2 /* VisualEffectBlur.swift in Sources */ = {isa = PBXBuildFile; fileRef = 36B4A1D0B6904D3B9A1E8353 /* VisualEffectBlur.swift */; };
 		9F1C2A3B4D5E6F708192A3B5 /* WeekCalendarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9F1C2A3B4D5E6F708192A3B4 /* WeekCalendarView.swift */; };
+		A5E1164621F2FA56280B4889 /* CloudSettingsSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = ECCF7A685FE13468A938ADD7 /* CloudSettingsSection.swift */; };
 		AB9F279C180740EE9216C649 /* MediaControlBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = ABFA2AD704BE4758B0A786D8 /* MediaControlBar.swift */; };
+		ADF8CB8E6B5CD0F9482E94DD /* AuthStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 379E0B0F492E771413BBB197 /* AuthStore.swift */; };
+		E1E1E1E1234567890ABCDEF1 /* FeatureFlags.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1E1E1E1234567890ABCDEF0 /* FeatureFlags.swift */; };
 		B6A200102FFD4BD7B90F8AC1 /* NowPlayingRouter.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6A200022FFD4BD7B90F8AC1 /* NowPlayingRouter.swift */; };
 		B6A200112FFD4BD7B90F8AC1 /* NowPlayingProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6A200032FFD4BD7B90F8AC1 /* NowPlayingProvider.swift */; };
 		B6A200122FFD4BD7B90F8AC1 /* AppleMusicProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6A200042FFD4BD7B90F8AC1 /* AppleMusicProvider.swift */; };
@@ -42,6 +49,7 @@
 		B6A2001B2FFD4BD7B90F8AC1 /* ExternalID.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6A2000B2FFD4BD7B90F8AC1 /* ExternalID.swift */; };
 		B6A2001C2FFD4BD7B90F8AC1 /* IntentMarkers.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6A2000C2FFD4BD7B90F8AC1 /* IntentMarkers.swift */; };
 		B6A2001D2FFD4BD7B90F8AC1 /* SessionRecordStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = B6A2001E2FFD4BD7B90F8AC1 /* SessionRecordStore.swift */; };
+		BE7A1C1C2E644B6D9B3C1E0D /* AuthSession.swift in Sources */ = {isa = PBXBuildFile; fileRef = D04B5B1F0F1B4A5496C6E0B7 /* AuthSession.swift */; };
 		C9E56B409BCB40FCA8485A09 /* LocalMediaPlayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 05F639B95E5345199E439834 /* LocalMediaPlayer.swift */; };
 		D0495D48D1B5BUILDBDA97DE /* CalendarMonthView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D0495D48D1B544D0ABDA97DE /* CalendarMonthView.swift */; };
 		D1A1B0010000000000000001 /* PermissionsManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = D1A1B0020000000000000001 /* PermissionsManager.swift */; };
@@ -54,15 +62,18 @@
 		D1A1B00F0000000000000001 /* SettingsPermissionsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D1A1B0100000000000000001 /* SettingsPermissionsView.swift */; };
 		E7FB0168DAB22D17FF66223F /* AmbientNoiseEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = C67603580DB6C7C7A08CA894 /* AmbientNoiseEngine.swift */; };
 		EC7658622FEE47D78BFEA957 /* DailyStats.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0D409152AD794BA998253C35 /* DailyStats.swift */; };
+		F0F0F0F12FFF000000000001 /* FlowModeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0F0F0F02FFF000000000001 /* FlowModeView.swift */; };
+		F672EC1FBE8E9B71BFD60AC2 /* FeatureGate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 27A07A256CDE64E28DB5028F /* FeatureGate.swift */; };
 		PLANNING001 /* PlanningItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = PLANNING000 /* PlanningItem.swift */; };
 		PLANNING003 /* PlanningStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = PLANNING002 /* PlanningStore.swift */; };
-		F0F0F0F12FFF000000000001 /* FlowModeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0F0F0F02FFF000000000001 /* FlowModeView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
 		05F639B95E5345199E439834 /* LocalMediaPlayer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalMediaPlayer.swift; sourceTree = "<group>"; };
 		0D409152AD794BA998253C35 /* DailyStats.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DailyStats.swift; sourceTree = "<group>"; };
+		27A07A256CDE64E28DB5028F /* FeatureGate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FeatureGate.swift; sourceTree = "<group>"; };
 		36B4A1D0B6904D3B9A1E8353 /* VisualEffectBlur.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VisualEffectBlur.swift; sourceTree = "<group>"; };
+		379E0B0F492E771413BBB197 /* AuthStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthStore.swift; sourceTree = "<group>"; };
 		49393474CCC34E2091E176A1 /* WindowBackgroundConfigurator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WindowBackgroundConfigurator.swift; sourceTree = "<group>"; };
 		4BDE965F88F54754BCBB5DF2 /* CalendarDayView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalendarDayView.swift; sourceTree = "<group>"; };
 		7C360D382F191F17007313D3 /* Pomodoro.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Pomodoro.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -83,6 +94,8 @@
 		7C360D962F191F17007313D3 /* MusicController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MusicController.swift; sourceTree = "<group>"; };
 		7C360D972F191F17007313D3 /* SystemMediaController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SystemMediaController.swift; sourceTree = "<group>"; };
 		7C360D982F191F17007313D3 /* MusicPanelView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MusicPanelView.swift; sourceTree = "<group>"; };
+		83E7FB46B7CF8A7C0F510CF4 /* AuthManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthManager.swift; sourceTree = "<group>"; };
+		E1E1E1E1234567890ABCDEF0 /* FeatureFlags.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FeatureFlags.swift; sourceTree = "<group>"; };
 		9F1C2A3B4D5E6F708192A3B4 /* WeekCalendarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeekCalendarView.swift; sourceTree = "<group>"; };
 		ABFA2AD704BE4758B0A786D8 /* MediaControlBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MediaControlBar.swift; sourceTree = "<group>"; };
 		B6A200022FFD4BD7B90F8AC1 /* NowPlayingRouter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NowPlayingRouter.swift; sourceTree = "<group>"; };
@@ -100,6 +113,7 @@
 		B6A2001E2FFD4BD7B90F8AC1 /* SessionRecordStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionRecordStore.swift; sourceTree = "<group>"; };
 		C67603580DB6C7C7A08CA894 /* AmbientNoiseEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AmbientNoiseEngine.swift; sourceTree = "<group>"; };
 		D0495D48D1B544D0ABDA97DE /* CalendarMonthView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalendarMonthView.swift; sourceTree = "<group>"; };
+		D04B5B1F0F1B4A5496C6E0B7 /* AuthSession.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthSession.swift; sourceTree = "<group>"; };
 		D1A1B0020000000000000001 /* PermissionsManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PermissionsManager.swift; sourceTree = "<group>"; };
 		D1A1B0040000000000000001 /* CalendarManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalendarManager.swift; sourceTree = "<group>"; };
 		D1A1B0060000000000000001 /* CalendarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalendarView.swift; sourceTree = "<group>"; };
@@ -108,9 +122,11 @@
 		D1A1B00C0000000000000001 /* TodoListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TodoListView.swift; sourceTree = "<group>"; };
 		D1A1B00E0000000000000001 /* RemindersSync.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RemindersSync.swift; sourceTree = "<group>"; };
 		D1A1B0100000000000000001 /* SettingsPermissionsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsPermissionsView.swift; sourceTree = "<group>"; };
+		D95945228BEC2D75F362FF53 /* APIClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = APIClient.swift; sourceTree = "<group>"; };
+		ECCF7A685FE13468A938ADD7 /* CloudSettingsSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CloudSettingsSection.swift; sourceTree = "<group>"; };
+		F0F0F0F02FFF000000000001 /* FlowModeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FlowModeView.swift; sourceTree = "<group>"; };
 		PLANNING000 /* PlanningItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlanningItem.swift; sourceTree = "<group>"; };
 		PLANNING002 /* PlanningStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlanningStore.swift; sourceTree = "<group>"; };
-		F0F0F0F02FFF000000000001 /* FlowModeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FlowModeView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -118,6 +134,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				7CF71FA32F321EAE0065E7C8 /* GoogleSignIn in Frameworks */,
+				7CF71FA52F321EAE0065E7C8 /* GoogleSignInSwift in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -128,6 +146,7 @@
 			isa = PBXGroup;
 			children = (
 				7C360D3A2F191F17007313D3 /* Pomodoro */,
+				7CF71FA02F32157B0065E7C8 /* Frameworks */,
 				7C360D392F191F17007313D3 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -148,6 +167,7 @@
 				7C360D5F2F191F17007313D3 /* State */,
 				7C360D602F191F17007313D3 /* Timer */,
 				7C360D612F191F17007313D3 /* UI */,
+				996106FB04F424063369172E /* Cloud */,
 				7C360D622F191F17007313D3 /* Assets */,
 			);
 			path = Pomodoro;
@@ -215,6 +235,7 @@
 				D0495D48D1B544D0ABDA97DE /* CalendarMonthView.swift */,
 				D1A1B00C0000000000000001 /* TodoListView.swift */,
 				D1A1B0100000000000000001 /* SettingsPermissionsView.swift */,
+				ECCF7A685FE13468A938ADD7 /* CloudSettingsSection.swift */,
 			);
 			name = UI;
 			sourceTree = "<group>";
@@ -245,6 +266,26 @@
 			name = Music;
 			sourceTree = "<group>";
 		};
+		7CF71FA02F32157B0065E7C8 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		996106FB04F424063369172E /* Cloud */ = {
+			isa = PBXGroup;
+			children = (
+				D95945228BEC2D75F362FF53 /* APIClient.swift */,
+				379E0B0F492E771413BBB197 /* AuthStore.swift */,
+				27A07A256CDE64E28DB5028F /* FeatureGate.swift */,
+				E1E1E1E1234567890ABCDEF0 /* FeatureFlags.swift */,
+				83E7FB46B7CF8A7C0F510CF4 /* AuthManager.swift */,
+				D04B5B1F0F1B4A5496C6E0B7 /* AuthSession.swift */,
+			);
+			path = Cloud;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -262,6 +303,8 @@
 			);
 			name = Pomodoro;
 			packageProductDependencies = (
+				7CF71FA22F321EAE0065E7C8 /* GoogleSignIn */,
+				7CF71FA42F321EAE0065E7C8 /* GoogleSignInSwift */,
 			);
 			productName = Pomodoro;
 			productReference = 7C360D382F191F17007313D3 /* Pomodoro.app */;
@@ -291,6 +334,9 @@
 			);
 			mainGroup = 7C360D2F2F191F17007313D3;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				7CF71FA12F321EAE0065E7C8 /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 7C360D392F191F17007313D3 /* Products */;
 			projectDirPath = "";
@@ -366,6 +412,13 @@
 				B6A2001C2FFD4BD7B90F8AC1 /* IntentMarkers.swift in Sources */,
 				B6A2001D2FFD4BD7B90F8AC1 /* SessionRecordStore.swift in Sources */,
 				B6A200192FFD4BD7B90F8AC1 /* SyncEngine.swift in Sources */,
+				4DD2B11CF188B287CE18674F /* APIClient.swift in Sources */,
+				ADF8CB8E6B5CD0F9482E94DD /* AuthStore.swift in Sources */,
+				F672EC1FBE8E9B71BFD60AC2 /* FeatureGate.swift in Sources */,
+				E1E1E1E1234567890ABCDEF1 /* FeatureFlags.swift in Sources */,
+				1C500AF364889EDC9C8772BC /* AuthManager.swift in Sources */,
+				A5E1164621F2FA56280B4889 /* CloudSettingsSection.swift in Sources */,
+				BE7A1C1C2E644B6D9B3C1E0D /* AuthSession.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -504,7 +557,7 @@
 				ENABLE_APP_SANDBOX = YES;
 				ENABLE_HARDENED_RUNTIME = YES;
 				ENABLE_INCOMING_NETWORK_CONNECTIONS = NO;
-				ENABLE_OUTGOING_NETWORK_CONNECTIONS = NO;
+				ENABLE_OUTGOING_NETWORK_CONNECTIONS = YES;
 				ENABLE_PREVIEWS = YES;
 				ENABLE_RESOURCE_ACCESS_AUDIO_INPUT = NO;
 				ENABLE_RESOURCE_ACCESS_BLUETOOTH = NO;
@@ -517,6 +570,10 @@
 				ENABLE_RESOURCE_ACCESS_USB = NO;
 				ENABLE_USER_SELECTED_FILES = readonly;
 				GENERATE_INFOPLIST_FILE = YES;
+				GOOGLE_CLIENT_ID = "408122766816-ahi7h5e0nma00dv7o1vutrbacvt34c10.apps.googleusercontent.com";
+				GOOGLE_REVERSED_CLIENT_ID = "com.googleusercontent.apps.408122766816-ahi7h5e0nma00dv7o1vutrbacvt34c10";
+				INFOPLIST_KEY_CFBundleURLTypes = "{\n    CFBundleURLSchemes =     (\n        \"$(GOOGLE_REVERSED_CLIENT_ID)\"\n    );\n}";
+				INFOPLIST_KEY_GOOGLE_CLIENT_ID = "$(GOOGLE_CLIENT_ID)";
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.productivity";
 				INFOPLIST_KEY_NSCalendarsUsageDescription = "Allow access to read your calendars for scheduling.";
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
@@ -560,7 +617,7 @@
 				ENABLE_APP_SANDBOX = YES;
 				ENABLE_HARDENED_RUNTIME = YES;
 				ENABLE_INCOMING_NETWORK_CONNECTIONS = NO;
-				ENABLE_OUTGOING_NETWORK_CONNECTIONS = NO;
+				ENABLE_OUTGOING_NETWORK_CONNECTIONS = YES;
 				ENABLE_PREVIEWS = YES;
 				ENABLE_RESOURCE_ACCESS_AUDIO_INPUT = NO;
 				ENABLE_RESOURCE_ACCESS_BLUETOOTH = NO;
@@ -573,6 +630,10 @@
 				ENABLE_RESOURCE_ACCESS_USB = NO;
 				ENABLE_USER_SELECTED_FILES = readonly;
 				GENERATE_INFOPLIST_FILE = YES;
+				GOOGLE_CLIENT_ID = "408122766816-ahi7h5e0nma00dv7o1vutrbacvt34c10.apps.googleusercontent.com";
+				GOOGLE_REVERSED_CLIENT_ID = "com.googleusercontent.apps.408122766816-ahi7h5e0nma00dv7o1vutrbacvt34c10";
+				INFOPLIST_KEY_CFBundleURLTypes = "{\n    CFBundleURLSchemes =     (\n        \"$(GOOGLE_REVERSED_CLIENT_ID)\"\n    );\n}";
+				INFOPLIST_KEY_GOOGLE_CLIENT_ID = "$(GOOGLE_CLIENT_ID)";
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.productivity";
 				INFOPLIST_KEY_NSCalendarsUsageDescription = "Allow access to read your calendars for scheduling.";
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
@@ -624,6 +685,30 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		7CF71FA12F321EAE0065E7C8 /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/google/GoogleSignIn-iOS";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 7.0.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		7CF71FA22F321EAE0065E7C8 /* GoogleSignIn */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 7CF71FA12F321EAE0065E7C8 /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */;
+			productName = GoogleSignIn;
+		};
+		7CF71FA42F321EAE0065E7C8 /* GoogleSignInSwift */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 7CF71FA12F321EAE0065E7C8 /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */;
+			productName = GoogleSignInSwift;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 7C360D302F191F17007313D3 /* Project object */;
 }

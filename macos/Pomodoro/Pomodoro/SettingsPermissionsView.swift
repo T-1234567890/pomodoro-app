@@ -88,6 +88,11 @@ struct SettingsPermissionsView: View {
         } message: {
             Text("Reminders access is optional but allows you to sync tasks with Apple Reminders. You can enable it in System Settings → Privacy & Security → Reminders.")
         }
+
+        Divider()
+
+        CloudSettingsSection()
+            .frame(maxWidth: .infinity, alignment: .leading)
     }
     
     @ViewBuilder

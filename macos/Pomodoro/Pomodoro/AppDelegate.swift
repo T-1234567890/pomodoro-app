@@ -7,6 +7,9 @@
 
 import AppKit
 import SwiftUI
+#if canImport(GoogleSignIn)
+import GoogleSignIn
+#endif
 
 final class AppDelegate: NSObject, NSApplicationDelegate {
     private weak var mainWindow: NSWindow?
@@ -38,6 +41,16 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
     func applicationWillTerminate(_ notification: Notification) {
         menuBarController?.shutdown()
+    }
+
+    func application(_ application: NSApplication, open urls: [URL]) {
+        #if canImport(GoogleSignIn)
+        for url in urls {
+            if GIDSignIn.sharedInstance.handle(url) {
+                return
+            }
+        }
+        #endif
     }
 
     func applicationDidFinishLaunching(_ notification: Notification) {
