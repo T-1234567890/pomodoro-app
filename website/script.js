@@ -75,3 +75,46 @@ navLinks.forEach((link) => {
 // Init language from storage or default
 const stored = localStorage.getItem('pomodoro-lang');
 applyLanguage(stored === 'zh' ? 'zh' : 'en');
+
+// Hero phrase switcher (headline)
+const phrasePool = [
+  { en: '🧠 Quiet tools for deep work', zh: '🧠 为深度工作准备的安静工具' },
+  { en: '🌿 Focus without pressure', zh: '🌿 无压力的专注' },
+  { en: '🎯 Rhythm over speed', zh: '🎯 节律胜过速度' },
+  { en: '✨ Attention is a resource', zh: '✨ 注意力是一种资源' },
+  { en: '🫧 Work gently', zh: '🫧 温和地工作' },
+  { en: '🌊 Depth over noise', zh: '🌊 深度胜过噪声' },
+  { en: '🧩 Calm is productive', zh: '🧩 平静本身就是效率' },
+  { en: '🕊 Slow focus wins', zh: '🕊 慢节奏的专注更持久' },
+  { en: '🔕 Silence helps thinking', zh: '🔕 安静帮助思考' },
+  { en: '📖 Work like turning pages', zh: '📖 像翻书一样工作' }
+];
+
+const heroArea = document.querySelector('.hero');
+const heroArt = document.querySelector('.hero-illustration');
+const heroTitle = document.querySelector('.hero .switchable-head');
+let phraseAnimating = false;
+
+function pickNewPhrase() {
+  const current = currentLang === 'zh' ? heroTitle?.dataset.zh : heroTitle?.dataset.en;
+  const pool = phrasePool.filter((p) => p.en !== current && p.zh !== current);
+  return pool[Math.floor(Math.random() * pool.length)] || phrasePool[0];
+}
+
+function switchHeroPhrase() {
+  if (!heroTitle || phraseAnimating) return;
+  phraseAnimating = true;
+  heroTitle.classList.add('phrase-out');
+  setTimeout(() => {
+    const next = pickNewPhrase();
+    heroTitle.dataset.en = next.en;
+    heroTitle.dataset.zh = next.zh;
+    applyLanguage(currentLang);
+    heroTitle.classList.remove('phrase-out');
+    phraseAnimating = false;
+  }, 200);
+}
+
+[heroArea, heroArt].forEach((el) => {
+  if (el) el.addEventListener('click', switchHeroPhrase);
+});

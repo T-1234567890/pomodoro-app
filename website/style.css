@@ -179,7 +179,20 @@ body.lang-switching-in [data-en] {
 .hero .hero-illustration { z-index: 0; }
 
 .hero-text h1 { font-family: 'Literata', 'Georgia', 'Times New Roman', serif; font-size: clamp(32px, 6vw, 46px); margin: 6px 0 18px; letter-spacing: -0.02em; font-weight: 700; }
+.switchable-head {
+  display: inline-block;
+  transition: opacity 260ms var(--ease-soft);
+}
+.switchable-head.phrase-out { opacity: 0; }
 .lede { font-size: 17px; line-height: 1.8; color: var(--muted); }
+.lede.switchable { transition: opacity 240ms var(--ease-soft); }
+.lede.switchable.phrase-out { opacity: 0; }
+.micro-hint {
+  font-size: 12.5px;
+  color: var(--muted);
+  opacity: 0.8;
+  margin-top: -4px;
+}
 .eyebrow { text-transform: uppercase; letter-spacing: 0.08em; font-weight: 700; font-size: 12px; color: #8a6f62; font-family: 'Source Sans Pro', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'San Francisco', sans-serif; }
 
 .hero-text { position: relative; z-index: 2; max-width: 640px; }
@@ -250,6 +263,8 @@ body.lang-switching-in [data-en] {
 .muted { color: var(--muted); line-height: 1.6; }
 
 .features, .docs, .download { padding: 40px 20px 72px; max-width: 1180px; margin: 0 auto; }
+.visual-compare { padding: 40px 20px 52px; max-width: 1180px; margin: 0 auto; }
+.waitlist { padding: 40px 20px 72px; max-width: 1180px; margin: 0 auto; text-align: center; }
 
 .feature-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 18px; }
 
@@ -389,6 +404,101 @@ body.lang-switching-in [data-en] {
 }
 
 .download .cta-row { justify-content: center; }
+
+/* Feature comparison */
+.comparison-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: clamp(14px, 3vw, 22px);
+  padding: clamp(16px, 3vw, 24px);
+  border-radius: 18px;
+  border: 1px solid var(--border);
+  background: linear-gradient(140deg, rgba(255,243,233,0.92), rgba(255,240,229,0.86));
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.62),
+              0 0 0 0.5px rgba(255,240,230,0.48),
+              0 12px 22px rgba(114,76,58,0.1);
+}
+.comparison-block {
+  padding: 14px 12px;
+  border-radius: 14px;
+  background: rgba(255, 242, 232, 0.72);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.6);
+}
+.comparison-block ul {
+  list-style: none;
+  padding: 0;
+  margin: 8px 0 0;
+  display: grid;
+  gap: 6px;
+}
+.comparison-block li {
+  margin: 0;
+  font-size: 16px;
+  color: var(--text);
+}
+
+/* Visual comparison grid */
+.compare-wrapper {
+  background: transparent;
+  border-radius: 16px;
+  padding: clamp(12px, 3vw, 18px);
+}
+.compare-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  border: 1px solid rgba(0,0,0,0.05);
+  border-radius: 14px;
+  overflow: hidden;
+}
+.compare-table th,
+.compare-table td {
+  text-align: center;
+  padding: 12px 10px;
+  color: var(--text);
+  font-family: 'Literata', 'Georgia', 'Times New Roman', serif;
+}
+.compare-table th {
+  font-weight: 700;
+  font-size: 16.5px;
+  border-bottom: 1px solid rgba(0,0,0,0.06);
+}
+.compare-table td {
+  font-size: 15.5px;
+  border-bottom: 1px solid rgba(0,0,0,0.05);
+}
+.compare-table tr:last-child td {
+  border-bottom: none;
+}
+.compare-table td:first-child,
+.compare-table th:first-child {
+  background: rgba(255,243,233,0.28);
+  border-right: 1px solid rgba(0,0,0,0.04);
+}
+.compare-table td:last-child,
+.compare-table th:last-child {
+  background: rgba(255,248,242,0.32);
+  border-left: 1px solid rgba(0,0,0,0.03);
+  font-weight: 700;
+  color: #2c1f19;
+}
+
+/* Waitlist */
+.waitlist-inner {
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  background: linear-gradient(150deg, rgba(255,243,233,0.92), rgba(255,240,229,0.86));
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.62),
+              0 0 0 0.5px rgba(255,240,230,0.45),
+              0 12px 22px rgba(114,76,58,0.1);
+  padding: clamp(22px, 4vw, 34px) clamp(20px, 6vw, 40px);
+  display: grid;
+  gap: 10px;
+  justify-items: center;
+}
+.waitlist-inner h2 { margin: 4px 0 0; font-size: clamp(22px, 4vw, 30px); letter-spacing: -0.01em; }
+.waitlist-inner .muted { margin: 0; }
+.waitlist .cta-row { justify-content: center; margin-top: 8px; }
 
 .footer {
   max-width: 1180px;
