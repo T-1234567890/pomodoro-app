@@ -79,9 +79,13 @@ Requires Xcode on macOS 14.6 or later.
 Clone this repository, open the project in Xcode, and build/run as usual.
 
 **Requirements:** <br>
-- GoogleSignIn dependency (>= 7.1)
+- GoogleSignIn (>= 7.1.0)
+- AppAuth 1.7.6
+- GTMAppAuth 4.1.1
+- GTMSessionFetcher 3.5.0
 - Xcode on macOS 14.6 or later
 
+This project uses Swift Package Manager to manage dependencies. <br>
 The current version is fully native Swift; legacy Tauri/Svelte/Python versions are archived.
 
 ## Version status
