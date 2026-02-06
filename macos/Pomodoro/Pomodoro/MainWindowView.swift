@@ -393,49 +393,53 @@ struct MainWindowView: View {
     }
 
     private var settingsView: some View {
-        VStack(alignment: .leading, spacing: 16) {
-            VStack(alignment: .leading, spacing: 8) {
-                Text("Notifications")
-                    .font(.system(.headline, design: .rounded))
-                    .foregroundStyle(.secondary)
-                Picker("Delivery", selection: $appState.notificationDeliveryStyle) {
-                    ForEach(NotificationDeliveryStyle.allCases) { style in
-                        Text(style.title)
-                            .tag(style)
-                    }
-                }
-                .pickerStyle(.segmented)
+        ZStack {
+            VisualEffectBlur(material: .hudWindow, blendingMode: .behindWindow)
+                .ignoresSafeArea()
+            // Subtle overlay to keep text legible while showing wallpaper blur
+            Color(nsColor: .windowBackgroundColor)
+                .opacity(0.32)
+                .ignoresSafeArea()
 
-                Picker("Notifications", selection: $appState.notificationPreference) {
-                    ForEach(NotificationPreference.allCases) { preference in
-                        Text(preference.title)
-                            .tag(preference)
-                    }
-                }
-                .pickerStyle(.segmented)
+            ScrollView(.vertical, showsIndicators: true) {
+                VStack(alignment: .leading, spacing: 18) {
+                    SettingsSectionCard(title: "Notifications") {
+                        Picker("Delivery", selection: $appState.notificationDeliveryStyle) {
+                            ForEach(NotificationDeliveryStyle.allCases) { style in
+                                Text(style.title)
+                                    .tag(style)
+                            }
+                        }
+                        .pickerStyle(.segmented)
 
-                Picker("Reminder", selection: $appState.reminderPreference) {
-                    ForEach(ReminderPreference.allCases) { preference in
-                        Text(preference.title)
-                            .tag(preference)
+                        Picker("Notifications", selection: $appState.notificationPreference) {
+                            ForEach(NotificationPreference.allCases) { preference in
+                                Text(preference.title)
+                                    .tag(preference)
+                            }
+                        }
+                        .pickerStyle(.segmented)
+
+                        Picker("Reminder", selection: $appState.reminderPreference) {
+                            ForEach(ReminderPreference.allCases) { preference in
+                                Text(preference.title)
+                                    .tag(preference)
+                            }
+                        }
+                        .pickerStyle(.segmented)
+                    }
+
+                    SettingsSectionCard(title: "Permissions & Sync") {
+                        SettingsPermissionsView(permissionsManager: permissionsManager)
                     }
                 }
-                .pickerStyle(.segmented)
+                .padding(.vertical, 24)
+                .padding(.horizontal, 24)
+                .padding(.trailing, 8) // keep scrollbar off the content edge
+                .frame(maxWidth: 820, alignment: .leading)
             }
-
-            VStack(alignment: .leading, spacing: 8) {
-                Text("Permissions")
-                    .font(.system(.headline, design: .rounded))
-                    .foregroundStyle(.secondary)
-                
-                SettingsPermissionsView(permissionsManager: permissionsManager)
-            }
-
         }
-        .padding(.top, 28)
-        .padding(.horizontal)
-        .padding(.bottom)
-        .frame(minWidth: 360, alignment: .leading)
+        .frame(minWidth: 520, idealWidth: 680, maxWidth: 900, minHeight: 520, alignment: .topLeading)
         .onAppear {
             refreshPermissionStatuses()
         }
@@ -1476,6 +1480,33 @@ struct MainWindowView: View {
     private func triggerCountdownStateAnimation(from oldValue: TimerState, to newValue: TimerState) {
         guard shouldAnimateTimerTransition(from: oldValue, to: newValue), !reduceMotion else { return }
         countdownStatePulse.toggle()
+    }
+}
+
+private struct SettingsSectionCard<Content: View>: View {
+    let title: String
+    @ViewBuilder var content: Content
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Text(title)
+                .font(.system(.title3, design: .rounded).weight(.semibold))
+                .foregroundStyle(.primary)
+
+            VStack(alignment: .leading, spacing: 12) {
+                content
+            }
+            .padding(16)
+            .background(
+                RoundedRectangle(cornerRadius: 12, style: .continuous)
+                    .fill(Color(nsColor: .controlBackgroundColor))
+            )
+            .overlay(
+                RoundedRectangle(cornerRadius: 12, style: .continuous)
+                    .stroke(Color(nsColor: .separatorColor), lineWidth: 1)
+            )
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
     }
 }
 

@@ -68,7 +68,7 @@ struct SettingsPermissionsView: View {
                 .foregroundStyle(.secondary)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
-        .padding(24)
+        .padding(.vertical, 4)
         .onAppear {
             permissionsManager.refreshAllStatuses()
         }
