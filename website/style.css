@@ -805,6 +805,200 @@ body.lang-switching-in [data-en] {
   to { opacity: 1; }
 }
 
+.project-status-block {
+  padding: 40px 20px 72px;
+  max-width: 1180px;
+  margin: 0 auto;
+}
+.project-status-system {
+  border: 1px solid var(--border);
+  border-radius: 22px;
+  background: linear-gradient(155deg, rgba(255,243,233,0.92), rgba(255,240,229,0.84));
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.62), 0 14px 26px rgba(114,76,58,0.1);
+  padding: clamp(24px, 4vw, 36px);
+  display: grid;
+  gap: 0;
+  justify-items: center;
+  text-align: center;
+}
+.project-status-system .section-head {
+  margin: 0;
+}
+.project-status-system .section-head h2 {
+  margin: 0;
+}
+.project-status-indicator-row {
+  width: 100%;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  margin-top: 12px;
+  column-gap: 14px;
+}
+.project-status-main {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  justify-self: start;
+}
+.project-status-dot {
+  width: 11px;
+  height: 11px;
+  border-radius: 50%;
+  background: #50C878;
+  box-shadow: 0 0 10px rgba(80, 180, 120, 0.5);
+  flex-shrink: 0;
+}
+.project-status-dot.is-updated {
+  background: #50C878;
+  box-shadow: 0 0 10px rgba(80, 180, 120, 0.5);
+  animation: pulse 2s ease-in-out infinite;
+}
+.project-status-dot.is-live {
+  background: #E09F3E;
+  box-shadow: 0 0 10px rgba(224, 159, 62, 0.38);
+}
+.project-status-label {
+  margin: 0;
+  font-size: 19px;
+  font-weight: 600;
+  color: #2B2622;
+  line-height: 1.2;
+}
+.project-status-sub {
+  margin: 0;
+  justify-self: center;
+  text-align: center;
+  white-space: nowrap;
+  font-size: 14px;
+  font-weight: 400;
+  color: #2B2622;
+  opacity: 0.7;
+}
+.project-status-streak {
+  display: inline-flex;
+  align-items: center;
+  justify-self: end;
+  gap: 6px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+  color: var(--text);
+  font-size: 19px;
+  line-height: 1.2;
+  font-weight: 600;
+  letter-spacing: 0;
+  opacity: 0.85;
+}
+.project-status-commits {
+  width: 100%;
+  min-height: 130px;
+  margin-top: 18px;
+}
+.project-status-commit-card {
+  min-height: 130px;
+  border-radius: 16px;
+  border: 1px solid var(--border);
+  background: var(--panel);
+  backdrop-filter: blur(14px);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.58),
+              0 0 0 0.5px rgba(255,240,230,0.45),
+              0 10px 20px rgba(114,76,58,0.1);
+  padding: 20px;
+  display: grid;
+  align-content: space-between;
+  gap: 16px;
+}
+.project-status-commit-card.is-loaded {
+  animation: commitCardFadeIn 300ms ease-out both;
+}
+.project-status-commit-message {
+  margin: 0;
+  color: #2B2622;
+  font-size: 15px;
+  font-weight: 500;
+  line-height: 1.4;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  text-align: left;
+}
+.project-status-commit-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+.project-status-commit-time {
+  margin: 0;
+  color: #2B2622;
+  font-size: 13px;
+  font-weight: 400;
+  opacity: 0.6;
+}
+.project-status-commit-repo-icon {
+  width: 16px;
+  height: 16px;
+  display: block;
+  flex-shrink: 0;
+  color: #8a7466;
+}
+.project-status-commit-repo-icon path {
+  fill: currentColor;
+}
+.project-status-commit-card.is-skeleton {
+  align-content: center;
+  gap: 12px;
+}
+.project-status-skeleton {
+  display: block;
+  border-radius: 10px;
+  background: linear-gradient(
+    90deg,
+    rgba(232, 220, 208, 0.9) 18%,
+    rgba(245, 237, 228, 0.95) 50%,
+    rgba(232, 220, 208, 0.9) 82%
+  );
+  background-size: 220% 100%;
+  animation: projectStatusShimmer 1.3s ease-in-out infinite;
+}
+.project-status-skeleton-line {
+  width: 100%;
+  height: 14px;
+}
+.project-status-skeleton-time {
+  width: 55%;
+  height: 12px;
+}
+.project-status-skeleton-icon {
+  width: 16px;
+  height: 16px;
+  border-radius: 5px;
+}
+@keyframes pulse {
+  0% { box-shadow: 0 0 6px rgba(80,180,120,0.4); }
+  50% { box-shadow: 0 0 12px rgba(80,180,120,0.8); }
+  100% { box-shadow: 0 0 6px rgba(80,180,120,0.4); }
+}
+@keyframes commitCardFadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes projectStatusShimmer {
+  0% { background-position: 100% 0; }
+  100% { background-position: -100% 0; }
+}
+
+.project-status-cta {
+  margin-top: 14px;
+  justify-content: center;
+}
+.project-status-cta .soft-btn.primary-ish {
+  border-radius: 16px;
+  padding: 11px 20px;
+}
+
 .footer {
   max-width: 1180px;
   margin: 0 auto 36px;
@@ -991,6 +1185,9 @@ body.lang-switching-in [data-en] {
   .contributors-ribbon { height: 92px; }
   .contributors-ribbon::before,
   .contributors-ribbon::after { width: 42px; }
+  .project-status-system {
+    padding: 36px 22px;
+  }
   .footer-metrics { flex-wrap: wrap; }
   .footer-metric { min-width: 132px; }
   .join-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }

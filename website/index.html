@@ -321,6 +321,51 @@
       </div>
     </section>
 
+    <section class="project-status-block" id="project-status" aria-live="polite">
+      <div class="project-status-system glass reveal">
+        <div class="section-head">
+          <h2 data-en="Project status">Project status</h2>
+        </div>
+
+        <div class="project-status-indicator-row" aria-label="Project activity status">
+          <div class="project-status-main">
+            <span class="project-status-dot is-live" id="project-status-dot" aria-hidden="true"></span>
+            <p class="project-status-label" id="project-status-label" data-en="Live" data-zh="正在运行">Live</p>
+          </div>
+          <p class="project-status-sub" id="project-status-sub" data-en="Streak begins today" data-zh="今天开始连续记录">Streak begins today</p>
+          <span class="project-status-streak" id="project-status-streak" data-en="🔥 Starting streak" data-zh="🔥 连续记录开始">🔥 Starting streak</span>
+        </div>
+
+        <div class="project-status-commits feature-grid" id="project-status-commits" aria-label="Recent commits">
+          <article class="project-status-commit-card is-skeleton" aria-hidden="true">
+            <span class="project-status-skeleton project-status-skeleton-line"></span>
+            <div class="project-status-commit-meta">
+              <span class="project-status-skeleton project-status-skeleton-time"></span>
+              <span class="project-status-skeleton project-status-skeleton-icon"></span>
+            </div>
+          </article>
+          <article class="project-status-commit-card is-skeleton" aria-hidden="true">
+            <span class="project-status-skeleton project-status-skeleton-line"></span>
+            <div class="project-status-commit-meta">
+              <span class="project-status-skeleton project-status-skeleton-time"></span>
+              <span class="project-status-skeleton project-status-skeleton-icon"></span>
+            </div>
+          </article>
+          <article class="project-status-commit-card is-skeleton" aria-hidden="true">
+            <span class="project-status-skeleton project-status-skeleton-line"></span>
+            <div class="project-status-commit-meta">
+              <span class="project-status-skeleton project-status-skeleton-time"></span>
+              <span class="project-status-skeleton project-status-skeleton-icon"></span>
+            </div>
+          </article>
+        </div>
+
+        <div class="cta-row project-status-cta">
+          <a class="soft-btn primary-ish" href="https://github.com/T-1234567890/pomodoro-app/commits" target="_blank" rel="noreferrer" data-en="View on GitHub">View on GitHub</a>
+        </div>
+      </div>
+    </section>
+
   </main>
 
   <footer class="footer" id="project-heartbeat">

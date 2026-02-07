@@ -526,6 +526,259 @@ async function loadFooterHeartbeat() {
   } catch (err) {}
 }
 
+const PROJECT_STATUS_REFRESH_MS = 5 * 60 * 1000;
+const PROJECT_STATUS_COMMITS_API = `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/commits?per_page=100`;
+const PROJECT_STATUS_UPDATED_WINDOW_MS = 7 * 24 * 60 * 60 * 1000;
+const projectStatusRtf = new Intl.RelativeTimeFormat('en', { numeric: 'always' });
+
+function getProjectStatusDom() {
+  const dot = document.getElementById('project-status-dot');
+  const label = document.getElementById('project-status-label');
+  const sub = document.getElementById('project-status-sub');
+  const streak = document.getElementById('project-status-streak');
+  const commits = document.getElementById('project-status-commits');
+  if (!dot || !label || !sub || !streak || !commits) return null;
+  return { dot, label, sub, streak, commits };
+}
+
+function getRelativeCommitTime(isoDate) {
+  const timestamp = Date.parse(isoDate || '');
+  if (!Number.isFinite(timestamp)) return { text: '--', ageMs: Number.POSITIVE_INFINITY };
+
+  const ageMs = Math.max(0, Date.now() - timestamp);
+  const units = [
+    ['year', 365 * 24 * 60 * 60 * 1000],
+    ['month', 30 * 24 * 60 * 60 * 1000],
+    ['week', 7 * 24 * 60 * 60 * 1000],
+    ['day', 24 * 60 * 60 * 1000],
+    ['hour', 60 * 60 * 1000],
+    ['minute', 60 * 1000]
+  ];
+
+  for (const [unit, size] of units) {
+    if (ageMs >= size) {
+      const value = Math.floor(ageMs / size);
+      return { text: projectStatusRtf.format(-value, unit), ageMs };
+    }
+  }
+
+  return { text: projectStatusRtf.format(0, 'second'), ageMs };
+}
+
+function setLocalizedCopy(node, en, zh) {
+  node.dataset.en = en;
+  node.dataset.zh = zh;
+  node.textContent = currentLang === 'zh' ? zh : en;
+}
+
+function setProjectStatusState(dom, { tone = 'live', labelEn, labelZh }) {
+  dom.dot.classList.remove('is-updated', 'is-live');
+  dom.dot.classList.add(tone === 'updated' ? 'is-updated' : 'is-live');
+  setLocalizedCopy(dom.label, labelEn, labelZh);
+}
+
+function setProjectStatusStreakState(dom, state, days = 0, lastCommitText = '--') {
+  if (state === 'unavailable') {
+    setLocalizedCopy(dom.streak, '🔥 Streak unavailable', '🔥 连续记录加载中');
+    setLocalizedCopy(dom.sub, 'Waiting for streak data', '正在获取连续数据');
+    return;
+  }
+
+  if (state === 'starting') {
+    setLocalizedCopy(dom.streak, '🔥 Starting streak', '🔥 连续记录开始');
+    setLocalizedCopy(dom.sub, 'Streak begins today', '今天开始连续记录');
+    return;
+  }
+
+  const normalizedDays = Number.isFinite(days) && days > 0 ? days : 1;
+  setLocalizedCopy(dom.streak, `🔥 ${normalizedDays} day streak`, `🔥 连续 ${normalizedDays} 天`);
+  setLocalizedCopy(dom.sub, `Last commit: ${lastCommitText}`, `最近提交：${lastCommitText}`);
+}
+
+function createProjectStatusSkeletonCard() {
+  const card = document.createElement('article');
+  card.className = 'project-status-commit-card is-skeleton';
+  card.setAttribute('aria-hidden', 'true');
+
+  const line = document.createElement('span');
+  line.className = 'project-status-skeleton project-status-skeleton-line';
+  card.appendChild(line);
+
+  const meta = document.createElement('div');
+  meta.className = 'project-status-commit-meta';
+
+  const time = document.createElement('span');
+  time.className = 'project-status-skeleton project-status-skeleton-time';
+  meta.appendChild(time);
+
+  const icon = document.createElement('span');
+  icon.className = 'project-status-skeleton project-status-skeleton-icon';
+  meta.appendChild(icon);
+
+  card.appendChild(meta);
+  return card;
+}
+
+function renderProjectStatusSkeleton(dom) {
+  dom.commits.textContent = '';
+  for (let i = 0; i < 3; i += 1) {
+    dom.commits.appendChild(createProjectStatusSkeletonCard());
+  }
+}
+
+function createProjectStatusCommitCard(item, index) {
+  const card = document.createElement('article');
+  card.className = 'project-status-commit-card is-loaded';
+  card.style.animationDelay = `${index * 60}ms`;
+
+  const message = document.createElement('p');
+  message.className = 'project-status-commit-message';
+  message.textContent = item.message || 'Commit update';
+  card.appendChild(message);
+
+  const meta = document.createElement('div');
+  meta.className = 'project-status-commit-meta';
+
+  const time = document.createElement('p');
+  time.className = 'project-status-commit-time';
+  setLocalizedCopy(time, item.relative.text, item.relative.text);
+  meta.appendChild(time);
+
+  const icon = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+  icon.setAttribute('viewBox', '0 0 24 24');
+  icon.setAttribute('aria-hidden', 'true');
+  icon.classList.add('project-status-commit-repo-icon');
+  const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+  path.setAttribute('d', 'M12 2.7a9.3 9.3 0 00-2.94 18.13c.47.08.64-.2.64-.45 0-.22-.01-.96-.01-1.74-2.35.43-2.96-.58-3.15-1.12-.1-.27-.53-1.12-.9-1.34-.31-.17-.74-.6-.01-.61.69-.01 1.18.64 1.34.9.79 1.33 2.05.96 2.55.73.08-.58.31-.96.56-1.18-2.08-.24-4.26-1.04-4.26-4.62 0-1.02.36-1.86.96-2.52-.1-.24-.43-1.22.09-2.54 0 0 .78-.25 2.56.96a8.83 8.83 0 014.66 0c1.78-1.22 2.56-.96 2.56-.96.51 1.32.18 2.3.09 2.54.6.66.96 1.49.96 2.52 0 3.58-2.19 4.38-4.27 4.62.32.28.6.82.6 1.66 0 1.2-.01 2.16-.01 2.46 0 .24.17.53.64.45A9.3 9.3 0 0012 2.7z');
+  icon.appendChild(path);
+  meta.appendChild(icon);
+
+  card.appendChild(meta);
+  return card;
+}
+
+function resetProjectStatusToLive(dom) {
+  setProjectStatusState(dom, {
+    tone: 'live',
+    labelEn: 'Live',
+    labelZh: '正在运行'
+  });
+  setProjectStatusStreakState(dom, 'starting');
+}
+
+function normalizeProjectStatusCommit(entry) {
+  const iso = entry?.commit?.author?.date || entry?.commit?.committer?.date || '';
+  const relative = getRelativeCommitTime(iso);
+  const firstLine = String(entry?.commit?.message || '').split('\n')[0].trim();
+  const timestamp = Date.parse(iso);
+  return {
+    message: firstLine,
+    relative,
+    timestamp: Number.isFinite(timestamp) ? timestamp : null
+  };
+}
+
+function toUtcDayKey(timestamp) {
+  const date = new Date(timestamp);
+  const year = date.getUTCFullYear();
+  const month = String(date.getUTCMonth() + 1).padStart(2, '0');
+  const day = String(date.getUTCDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+}
+
+function calculateCommitStreakDays(commits) {
+  const daySet = new Set(
+    commits
+      .map((item) => item.timestamp)
+      .filter((value) => Number.isFinite(value))
+      .map((value) => toUtcDayKey(value))
+  );
+
+  const latestTimestamp = commits.find((item) => Number.isFinite(item.timestamp))?.timestamp;
+  if (!Number.isFinite(latestTimestamp)) return 0;
+
+  const cursor = new Date(latestTimestamp);
+  cursor.setUTCHours(0, 0, 0, 0);
+
+  let streak = 0;
+  let guard = 0;
+  while (daySet.has(toUtcDayKey(cursor.getTime())) && guard < 3650) {
+    streak += 1;
+    cursor.setUTCDate(cursor.getUTCDate() - 1);
+    guard += 1;
+  }
+  return streak;
+}
+
+async function loadProjectStatus({ showSkeleton = false } = {}) {
+  const dom = getProjectStatusDom();
+  if (!dom) return;
+  if (showSkeleton) renderProjectStatusSkeleton(dom);
+
+  try {
+    const response = await fetch(PROJECT_STATUS_COMMITS_API, {
+      headers: { Accept: 'application/vnd.github+json' }
+    });
+    if (!response.ok) throw new Error('Request failed');
+
+    const payload = await response.json();
+    if (!Array.isArray(payload) || payload.length === 0) throw new Error('Empty payload');
+
+    const normalized = payload.map(normalizeProjectStatusCommit);
+    const commits = normalized.slice(0, 3);
+    const latest = commits[0]?.relative;
+    const isUpdated = latest?.ageMs <= PROJECT_STATUS_UPDATED_WINDOW_MS;
+    const streakDays = calculateCommitStreakDays(normalized);
+    const latestTimestamp = payload[0]?.commit?.author?.date || payload[0]?.commit?.committer?.date || null;
+    const computedStatus = isUpdated ? 'Updated' : 'Live';
+
+    setProjectStatusState(dom, {
+      tone: isUpdated ? 'updated' : 'live',
+      labelEn: isUpdated ? 'Updated' : 'Live',
+      labelZh: isUpdated ? '已更新' : '正在运行'
+    });
+    if (streakDays <= 0) {
+      setProjectStatusStreakState(dom, 'starting');
+    } else {
+      setProjectStatusStreakState(dom, 'active', streakDays, latest?.text || '--');
+    }
+
+    console.groupCollapsed('[Project Status] Diagnostics');
+    console.log('last commit timestamp:', latestTimestamp);
+    console.log('computed status:', computedStatus);
+    console.log('computed streak value:', streakDays);
+    console.log('API response raw data:', payload);
+    console.groupEnd();
+
+    dom.commits.textContent = '';
+    for (let i = 0; i < 3; i += 1) {
+      const commit = commits[i];
+      if (!commit) continue;
+      dom.commits.appendChild(createProjectStatusCommitCard(commit, i));
+    }
+  } catch {
+    resetProjectStatusToLive(dom);
+    setProjectStatusStreakState(dom, 'unavailable');
+    renderProjectStatusSkeleton(dom);
+    console.groupCollapsed('[Project Status] Diagnostics');
+    console.log('last commit timestamp:', null);
+    console.log('computed status:', 'Live');
+    console.log('computed streak value:', 0);
+    console.log('API response raw data:', null);
+    console.groupEnd();
+  }
+}
+
+function startProjectStatus() {
+  const dom = getProjectStatusDom();
+  if (!dom) return;
+  resetProjectStatusToLive(dom);
+  renderProjectStatusSkeleton(dom);
+  loadProjectStatus();
+  window.setInterval(() => loadProjectStatus(), PROJECT_STATUS_REFRESH_MS);
+}
+
 startContributorRibbon();
 loadFooterHeartbeat();
 window.setInterval(loadFooterHeartbeat, FOOTER_REFRESH_MS);
+startProjectStatus();
