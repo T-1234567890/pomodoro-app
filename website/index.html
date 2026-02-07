@@ -130,7 +130,10 @@
     <section class="waitlist" id="waitlist">
       <div class="waitlist-inner glass reveal">
         <p class="eyebrow" data-en="Coming to TestFlight" data-zh="即将登陆 TestFlight">Coming to TestFlight</p>
-        <h2 data-en="Official Apple preview builds are coming soon." data-zh="苹果官方预览版本即将发布。">Official Apple preview builds are coming soon.</h2>
+        <div class="waitlist-title-stack">
+          <h2 data-en="Official Apple preview builds are coming soon." data-zh="苹果官方预览版本即将发布。">Official Apple preview builds are coming soon.</h2>
+          <p class="waitlist-coming-badge" data-en="Coming soon" data-zh="即将推出">Coming soon</p>
+        </div>
         <p class="muted" data-en="Current builds are distributed via GitHub releases." data-zh="当前版本通过 GitHub 发布。">Current builds are distributed via GitHub releases.</p>
         <div class="cta-row center">
           <a class="primary-btn" href="https://forms.gle/hQ7ubqxt39sXca4e9" target="_blank" rel="noreferrer" data-en="Join TestFlight waitlist" data-zh="加入 TestFlight 等待名单">Join TestFlight waitlist</a>
@@ -201,8 +204,8 @@
         <table class="compare-table">
           <thead>
             <tr>
-              <th data-en="Traditional timers" data-zh="传统计时器">Traditional timers</th>
-              <th data-en="Pomodoro" data-zh="Pomodoro">Pomodoro</th>
+              <th data-en="Traditional focus/task apps" data-zh="传统专注 / 任务应用">Traditional focus/task apps</th>
+              <th data-en="Pomodoro-App" data-zh="Pomodoro-App">Pomodoro-App</th>
             </tr>
           </thead>
           <tbody>
@@ -221,6 +224,14 @@
             <tr>
               <td data-en="Gamified stress" data-zh="游戏化压力">Gamified stress</td>
               <td data-en="No pressure design" data-zh="无压力设计">No pressure design</td>
+            </tr>
+            <tr>
+              <td data-en="No intelligent assistance" data-zh="无智能辅助">No intelligent assistance</td>
+              <td data-en="AI focus assistant <span class='pill-soon' data-en='Coming soon' data-zh='即将推出'>Coming soon</span>" data-zh="AI 专注助手 <span class='pill-soon' data-en='Coming soon' data-zh='即将推出'>即将推出</span>">AI focus assistant <span class="pill-soon" data-en="Coming soon" data-zh="即将推出">Coming soon</span></td>
+            </tr>
+            <tr>
+              <td data-en="Manual planning only" data-zh="仅手动规划">Manual planning only</td>
+              <td data-en="AI session suggestions <span class='pill-soon' data-en='Coming soon' data-zh='即将推出'>Coming soon</span>" data-zh="AI 专注建议 <span class='pill-soon' data-en='Coming soon' data-zh='即将推出'>即将推出</span>">AI session suggestions <span class="pill-soon" data-en="Coming soon" data-zh="即将推出">Coming soon</span></td>
             </tr>
           </tbody>
         </table>
@@ -253,10 +264,80 @@
         </div>
       </div>
     </section>
+
+    <section class="join-us" id="join">
+      <div class="join-system glass reveal">
+        <p class="join-label" data-en="JOIN US" data-zh="加入我们">JOIN US</p>
+        <h2 class="join-title" data-en="Build Pomodoro-App together" data-zh="一起打造 Pomodoro-App">Build Pomodoro-App together</h2>
+        <p class="join-subtitle-main" data-en="Help shape the future of calm productivity." data-zh="一起塑造更安静、更专注的未来。">Help shape the future of calm productivity.</p>
+
+        <div class="contributors-ribbon" id="contributors-ribbon">
+          <div class="contributors-track" id="contributors-track"></div>
+          <p class="contributors-fallback" id="contributors-fallback" data-en="Loading contributors…" data-zh="正在加载贡献者…" hidden>Loading contributors…</p>
+          <p class="contributors-error" id="contributors-error" data-en="Unable to load contributors." data-zh="暂时无法加载贡献者。" hidden>Unable to load contributors.</p>
+        </div>
+
+        <div class="join-grid">
+          <article class="join-card">
+            <div class="join-icon" aria-hidden="true">🧪</div>
+            <h3 data-en="TestFlight" data-zh="TestFlight 测试">TestFlight</h3>
+            <div class="join-copy-block">
+              <p class="join-card-subtitle" data-en="Preview upcoming builds" data-zh="提前体验新版本">Preview upcoming builds</p>
+              <p class="join-card-support" data-en="Help shape stable releases early" data-zh="帮助我们打磨正式版本">Help shape stable releases early</p>
+            </div>
+            <a class="soft-btn primary-ish" href="https://forms.gle/hQ7ubqxt39sXca4e9" target="_blank" rel="noreferrer" data-en="Join TestFlight" data-zh="加入测试">Join TestFlight</a>
+          </article>
+
+          <article class="join-card">
+            <div class="join-icon" aria-hidden="true">💬</div>
+            <h3 data-en="Feedback" data-zh="反馈建议">Feedback</h3>
+            <div class="join-copy-block">
+              <p class="join-card-subtitle" data-en="Share ideas and friction" data-zh="分享想法与问题">Share ideas and friction</p>
+              <p class="join-card-support" data-en="Tell us what breaks focus" data-zh="告诉我们哪里影响专注">Tell us what breaks focus</p>
+            </div>
+            <a class="soft-btn primary-ish" href="https://github.com/T-1234567890/pomodoro-app/issues/new/choose" target="_blank" rel="noreferrer" data-en="Send feedback" data-zh="提交反馈">Send feedback</a>
+          </article>
+
+          <article class="join-card">
+            <div class="join-icon" aria-hidden="true">🧑‍💻</div>
+            <h3 data-en="Contributors" data-zh="参与开发">Contributors</h3>
+            <div class="join-copy-block">
+              <p class="join-card-subtitle" data-en="Build the app with us" data-zh="一起参与开发">Build the app with us</p>
+              <p class="join-card-support" data-en="Code, design, docs, reviews" data-zh="代码 / 设计 / 文档 / 评审">Code, design, docs, reviews</p>
+            </div>
+            <a class="soft-btn primary-ish" href="https://github.com/T-1234567890/pomodoro-app" target="_blank" rel="noreferrer" data-en="Contribute code" data-zh="参与贡献">Contribute code</a>
+          </article>
+
+          <article class="join-card">
+            <div class="join-icon" aria-hidden="true">🌍</div>
+            <h3 data-en="Translation" data-zh="翻译本地化">Translation</h3>
+            <div class="join-copy-block">
+              <p class="join-card-subtitle" data-en="Help localize tone" data-zh="帮助语言本地化">Help localize tone</p>
+              <p class="join-card-support" data-en="Make the app feel natural" data-zh="让表达更自然舒适">Make the app feel natural</p>
+            </div>
+            <a class="soft-btn primary-ish" href="https://github.com/T-1234567890/pomodoro-app" target="_blank" rel="noreferrer" data-en="Translate app" data-zh="参与翻译">Translate app</a>
+          </article>
+        </div>
+      </div>
+    </section>
+
   </main>
 
-  <footer class="footer glass">
-    <p data-en="Open-source project · MIT License" data-zh="开源项目 · MIT 协议">Open-source project · MIT License</p>
+  <footer class="footer" id="project-heartbeat">
+    <div class="footer-metrics" id="footer-metrics">
+      <div class="footer-metric">
+        <div class="footer-metric-value"><span class="footer-metric-icon" aria-hidden="true">⭐</span><span class="footer-number" id="footer-stars">--</span></div>
+        <p class="footer-metric-label" data-en="Stars" data-zh="Star 数">Stars</p>
+      </div>
+      <div class="footer-metric">
+        <div class="footer-metric-value"><span class="footer-metric-icon" aria-hidden="true">🧱</span><span class="footer-number" id="footer-commits">--</span></div>
+        <p class="footer-metric-label" data-en="Commits" data-zh="提交数">Commits</p>
+      </div>
+      <div class="footer-metric">
+        <div class="footer-metric-value"><span class="footer-metric-icon" aria-hidden="true">🐛</span><span class="footer-number" id="footer-issues">--</span></div>
+        <p class="footer-metric-label" data-en="Issues" data-zh="问题">Issues</p>
+      </div>
+    </div>
   </footer>
 
   <script src="script.js"></script>
