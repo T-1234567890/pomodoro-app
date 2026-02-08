@@ -20,6 +20,37 @@ struct ContentView: View {
     }
 }
 
+struct PremiumButton: View {
+    let title: String
+    let action: () -> Void
+
+    @EnvironmentObject private var authViewModel: AuthViewModel
+    @State private var showLoginSheet = false
+    @State private var pendingAction = false
+
+    var body: some View {
+        Button(title) {
+            if authViewModel.isLoggedIn {
+                action()
+            } else {
+                pendingAction = true
+                showLoginSheet = true
+            }
+        }
+        .sheet(isPresented: $showLoginSheet) {
+            LoginSheetView()
+                .environmentObject(authViewModel)
+        }
+        .onChange(of: authViewModel.isLoggedIn) { _, isLoggedIn in
+            if isLoggedIn, pendingAction {
+                pendingAction = false
+                showLoginSheet = false
+                action()
+            }
+        }
+    }
+}
+
 #if DEBUG && PREVIEWS_ENABLED
 #Preview {
     let appState = AppState()
@@ -38,5 +69,6 @@ struct ContentView: View {
         .environmentObject(musicController)
         .environmentObject(audioSourceStore)
         .environmentObject(OnboardingState())
+        .environmentObject(AuthViewModel.shared)
 }
 #endif

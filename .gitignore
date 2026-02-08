@@ -22,3 +22,6 @@ yarn.lock
 DerivedData/
 *.xcuserstate
 xcuserdata/
+
+# Google & Firebase
+GoogleService-Info.plist

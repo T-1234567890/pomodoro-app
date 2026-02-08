@@ -42,6 +42,7 @@ struct MainWindowView: View {
     // New: Calendar, Reminders, and Todo system
     @StateObject private var permissionsManager = PermissionsManager.shared
     @StateObject private var todoStore = TodoStore()
+    @StateObject private var planningStore = PlanningStore()
     @StateObject private var remindersSync = RemindersSync(permissionsManager: PermissionsManager.shared)
     @StateObject private var calendarManager = CalendarManager(permissionsManager: PermissionsManager.shared)
 
@@ -67,6 +68,8 @@ struct MainWindowView: View {
             .onAppear {
                 syncDurationTexts()
                 syncLongBreakInterval()
+                todoStore.attachPlanningStore(planningStore)
+                remindersSync.setTodoStore(todoStore)
             }
             .onChange(of: appState.durationConfig) { _, _ in
                 syncDurationTexts()
@@ -335,12 +338,10 @@ struct MainWindowView: View {
     private var tasksView: some View {
         TodoListView(
             todoStore: todoStore,
+            planningStore: planningStore,
             remindersSync: remindersSync,
             permissionsManager: permissionsManager
         )
-        .onAppear {
-            remindersSync.setTodoStore(todoStore)
-        }
     }
 
     private var calendarView: some View {
@@ -430,7 +431,7 @@ struct MainWindowView: View {
                     }
 
                     SettingsSectionCard(title: "Permissions & Sync") {
-                        SettingsPermissionsView(permissionsManager: permissionsManager)
+                        SettingsView(permissionsManager: permissionsManager)
                     }
                 }
                 .padding(.vertical, 24)

@@ -360,6 +360,7 @@ final class AppState: ObservableObject {
     }
 
     private func requestNotificationAuthorizationIfNeeded() {
+        guard notificationDeliveryStyle == .system else { return }
         guard notificationPreference != .off || reminderPreference != .off else { return }
         guard hasRequestedNotificationAuthorization == false else { return }
         hasRequestedNotificationAuthorization = true
@@ -595,6 +596,10 @@ final class AppState: ObservableObject {
 
     private func sendNotification(title: String, body: String) {
         guard notificationPreference != .off else { return }
+        if notificationDeliveryStyle == .inApp {
+            showNotificationPopup(title: title, body: body)
+            return
+        }
 
         notificationCenter.getNotificationSettings { [weak self] settings in
             guard let self = self else { return }

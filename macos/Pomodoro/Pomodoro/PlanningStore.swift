@@ -48,6 +48,10 @@ final class PlanningStore: ObservableObject {
             items[idx].notes = task.notes
             items[idx].startDate = startDate
             items[idx].endDate = endDate
+            items[idx].isTask = true
+            items[idx].isCalendarEvent = false
+            items[idx].completed = task.isCompleted
+            items[idx].source = .local
             items[idx].sourceType = .task
             items[idx].sourceID = task.id.uuidString
             items[idx].linkedCalendarEventId = task.linkedCalendarEventId ?? task.calendarEventIdentifier

@@ -152,4 +152,5 @@ struct SettingsPermissionsView: View {
 #Preview {
     SettingsPermissionsView(permissionsManager: .shared)
         .frame(width: 600, height: 400)
+        .environmentObject(AuthViewModel.shared)
 }

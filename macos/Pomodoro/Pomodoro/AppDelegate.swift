@@ -6,11 +6,10 @@
 //
 
 import AppKit
+import FirebaseCore
 import SwiftUI
-#if canImport(GoogleSignIn)
-import GoogleSignIn
-#endif
 
+@MainActor
 final class AppDelegate: NSObject, NSApplicationDelegate {
     private weak var mainWindow: NSWindow?
     private var appStateConfigured = false
@@ -34,6 +33,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         }
     }
     var onboardingState: OnboardingState?
+    var authViewModel: AuthViewModel?
 
     func applicationShouldTerminateAfterLastWindowClosed(_ sender: NSApplication) -> Bool {
         false
@@ -43,17 +43,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         menuBarController?.shutdown()
     }
 
-    func application(_ application: NSApplication, open urls: [URL]) {
-        #if canImport(GoogleSignIn)
-        for url in urls {
-            if GIDSignIn.sharedInstance.handle(url) {
-                return
-            }
-        }
-        #endif
-    }
-
     func applicationDidFinishLaunching(_ notification: Notification) {
+        configureFirebase()
         if let window = existingWindow() {
             window.applyPomodoroWindowChrome()
             configureWindowPersistence(window)
@@ -81,6 +72,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
                 .environmentObject(musicController)
                 .environmentObject(audioSourceStore)
                 .environmentObject(onboardingState ?? OnboardingState())
+                .environmentObject(authViewModel ?? AuthViewModel.shared)
         )
         window.applyPomodoroWindowChrome()
         configureWindowPersistence(window)
@@ -136,5 +128,20 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
                 self?.quitApp()
             }
         )
+    }
+
+    private func configureFirebase() {
+        if FirebaseApp.app() == nil {
+            FirebaseApp.configure()
+        }
+
+        guard FirebaseApp.app() != nil else {
+            print("[Firebase] ERROR: Firebase failed to initialize. FirebaseApp.app() is nil after configure().")
+            return
+        }
+
+        print("[Firebase] projectID: \(String(describing: FirebaseApp.app()?.options.projectID))")
+        print("[Firebase] googleAppID: \(String(describing: FirebaseApp.app()?.options.googleAppID))")
+        AuthViewModel.shared.startListeningIfNeeded()
     }
 }

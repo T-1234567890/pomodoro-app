@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import FirebaseCore
 
 @MainActor
 @main
@@ -15,8 +16,13 @@ struct PomodoroApp: App {
     @StateObject private var musicController: MusicController
     @StateObject private var audioSourceStore: AudioSourceStore
     @StateObject private var onboardingState: OnboardingState
+    @StateObject private var authViewModel: AuthViewModel
 
     init() {
+        if FirebaseApp.app() == nil {
+            FirebaseApp.configure()
+        }
+
         let appState = AppState()
         let musicController = MusicController(ambientNoiseEngine: appState.ambientNoiseEngine)
         let externalMonitor = ExternalAudioMonitor()
@@ -31,6 +37,7 @@ struct PomodoroApp: App {
             )
         )
         _onboardingState = StateObject(wrappedValue: OnboardingState())
+        _authViewModel = StateObject(wrappedValue: AuthViewModel.shared)
     }
 
     var body: some Scene {
@@ -40,11 +47,13 @@ struct PomodoroApp: App {
                 .environmentObject(musicController)
                 .environmentObject(audioSourceStore)
                 .environmentObject(onboardingState)
+                .environmentObject(authViewModel)
                 .task(id: ObjectIdentifier(appState)) {
                     appDelegate.appState = appState
                     appDelegate.musicController = musicController
                     appDelegate.audioSourceStore = audioSourceStore
                     appDelegate.onboardingState = onboardingState
+                    appDelegate.authViewModel = authViewModel
                 }
         }
         .commands {

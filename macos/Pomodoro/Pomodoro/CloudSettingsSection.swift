@@ -1,116 +1,146 @@
-import AppKit
 import SwiftUI
-import Combine
+import FirebaseAuth
 
-/// User-facing cloud auth section with real Google Sign-In.
 struct CloudSettingsSection: View {
-    private let disabledMessage = """
-    Google Sign-In is coming soon.
-    This feature is currently in beta and temporarily disabled.
-    """
-
-    @State private var statusMessage: String = CloudAuthEnabled ? "" : """
-    Google Sign-In is coming soon.
-    This feature is currently in beta and temporarily disabled.
-    """
-    @State private var isSigningIn = false
-    @State private var signedInEmail: String?
-    @State private var sessionSnippet: String?
-
-    private let authManager = AuthManager.shared
-    private let authStore = AuthStore.shared
+    @EnvironmentObject private var authViewModel: AuthViewModel
+    @State private var email = ""
+    @State private var password = ""
+    @State private var mode: AuthMode = .signIn
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text("Cloud (Beta)")
+            Text("Account")
                 .font(.title3.bold())
 
-            Text("Sign in with Google to sync with the Pomodoro backend.")
+            Text("Login is optional. Sign in to unlock premium features.")
                 .font(.footnote)
                 .foregroundStyle(.secondary)
 
-            HStack(spacing: 12) {
-                statusChip
-
-                Spacer()
-
-                signInButton
-
-                Button("Sign out") {
-                    signOut()
-                }
-                .buttonStyle(.bordered)
-                .disabled(!(authManager.isAuthenticated) || isSigningIn)
-            }
-
-            if let email = signedInEmail {
-                Text("Account: \(email)")
-                    .font(.footnote)
-                    .foregroundStyle(.secondary)
-            }
-
-            if let snippet = sessionSnippet, authManager.isAuthenticated {
-                Text("Session token: \(snippet)")
-                    .font(.footnote.monospaced())
-                    .foregroundStyle(.secondary)
-            }
-
-            if !statusMessage.isEmpty {
-                Text(statusMessage)
-                    .font(.footnote)
-                    .foregroundStyle(.secondary)
+            if authViewModel.isLoggedIn {
+                loggedInSection
+            } else {
+                loginSection
             }
         }
         .padding(16)
         .background(Color.primary.opacity(0.05))
         .cornerRadius(12)
-        .onAppear {
-            refreshStatus()
+    }
+
+    private var loggedInSection: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            HStack(spacing: 12) {
+                avatarView(url: authViewModel.user?.photoURL)
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(authViewModel.user?.displayName ?? "Signed in")
+                        .font(.headline)
+                    Text(authViewModel.currentUserEmail.isEmpty ? "No email provided" : authViewModel.currentUserEmail)
+                        .font(.footnote)
+                        .foregroundStyle(.secondary)
+                }
+                Spacer()
+                statusChip(isLoggedIn: true)
+            }
+
+            Button("Logout") {
+                authViewModel.signOut()
+            }
+            .buttonStyle(.bordered)
+            .disabled(authViewModel.isLoading)
         }
     }
 
-    private var signInButton: some View {
-        if CloudAuthEnabled {
-            return AnyView(
-                Button {
-                    Task { await performSignIn() }
-                } label: {
-                    HStack {
-                        Image(systemName: "g.circle.fill")
-                        Text(isSigningIn ? "Signing in..." : "Sign in with Google")
-                        if isSigningIn {
-                            ProgressView()
-                                .controlSize(.small)
-                                .padding(.leading, 4)
+    private var loginSection: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            HStack {
+                statusChip(isLoggedIn: false)
+                Spacer()
+            }
+
+            Picker("Mode", selection: $mode) {
+                Text("Sign In").tag(AuthMode.signIn)
+                Text("Sign Up").tag(AuthMode.signUp)
+            }
+            .pickerStyle(.segmented)
+
+            Button {
+                Task {
+                    do {
+                        try await authViewModel.signInWithGoogle()
+                        clearCredentials()
+                    } catch {
+                        return
+                    }
+                }
+            } label: {
+                HStack(spacing: 8) {
+                    Image(systemName: "g.circle.fill")
+                    Text(mode == .signUp ? "Continue with Google" : "Sign in with Google")
+                    Spacer()
+                    if authViewModel.isLoading {
+                        ProgressView()
+                            .controlSize(.small)
+                    }
+                }
+            }
+            .buttonStyle(.borderedProminent)
+            .disabled(authViewModel.isLoading)
+
+            Divider()
+
+            VStack(alignment: .leading, spacing: 8) {
+                TextField("Email", text: $email)
+                    .textFieldStyle(.roundedBorder)
+                    .textContentType(.emailAddress)
+                    .disabled(authViewModel.isLoading)
+
+                SecureField("Password", text: $password)
+                    .textFieldStyle(.roundedBorder)
+                    .textContentType(mode == .signUp ? .newPassword : .password)
+                    .disabled(authViewModel.isLoading)
+            }
+
+            Button {
+                Task {
+                    do {
+                        switch mode {
+                        case .signIn:
+                            try await authViewModel.signInWithEmail(email: email, password: password)
+                        case .signUp:
+                            try await authViewModel.signUpWithEmail(email: email, password: password)
                         }
+                        clearCredentials()
+                    } catch {
+                        return
                     }
                 }
-                .buttonStyle(.borderedProminent)
-                .tint(Color(red: 0.22, green: 0.53, blue: 0.96))
-                .disabled(isSigningIn)
-            )
-        } else {
-            return AnyView(
-                Button {
-                } label: {
-                    HStack {
-                        Image(systemName: "g.circle")
-                        Text("Google sign-in coming soon")
+            } label: {
+                HStack {
+                    Text(mode == .signUp ? "Create Account" : "Sign In with Email")
+                    Spacer()
+                    if authViewModel.isLoading {
+                        ProgressView()
+                            .controlSize(.small)
                     }
                 }
-                .buttonStyle(.borderedProminent)
-                .tint(Color.primary.opacity(0.15))
-                .disabled(true)
-            )
+            }
+            .buttonStyle(.bordered)
+            .disabled(authViewModel.isLoading || !canSubmitEmailPassword)
+
+            if let error = authViewModel.errorMessage, !error.isEmpty {
+                Text(error)
+                    .font(.footnote)
+                    .foregroundStyle(.red)
+            }
         }
     }
 
-    private var statusChip: some View {
+    private func statusChip(isLoggedIn: Bool) -> some View {
         HStack(spacing: 8) {
             Circle()
-                .fill(authManager.isAuthenticated ? Color.green : Color.red.opacity(0.45))
+                .fill(isLoggedIn ? Color.green : Color.orange.opacity(0.65))
                 .frame(width: 10, height: 10)
-            Text(authManager.isAuthenticated ? "Signed in" : "Signed out")
+            Text(isLoggedIn ? "Logged in" : "Optional login")
                 .font(.subheadline.weight(.medium))
                 .foregroundStyle(.secondary)
         }
@@ -120,67 +150,90 @@ struct CloudSettingsSection: View {
         .cornerRadius(8)
     }
 
-    // MARK: - Actions
+    @ViewBuilder
+    private func avatarView(url: URL?) -> some View {
+        let fallback = Circle()
+            .fill(Color.primary.opacity(0.1))
+            .overlay {
+                if let initial = userInitial {
+                    Text(initial)
+                        .font(.headline.weight(.semibold))
+                } else {
+                    Image(systemName: "person.fill")
+                        .foregroundStyle(.secondary)
+                }
+            }
 
-    private func signOut() {
-        authManager.logout()
-        signedInEmail = nil
-        sessionSnippet = nil
-        statusMessage = "Signed out."
-    }
-
-    private func refreshStatus() {
-        if !CloudAuthEnabled {
-            statusMessage = disabledMessage
-            return
-        }
-        let current = authStore.loadSession()
-        if let current {
-            sessionSnippet = tokenPreview(from: current.accessToken)
-            statusMessage = "Session token stored in Keychain."
+        if let url {
+            AsyncImage(url: url) { phase in
+                switch phase {
+                case .empty:
+                    fallback
+                case .success(let image):
+                    image
+                        .resizable()
+                        .scaledToFill()
+                        .clipShape(Circle())
+                case .failure:
+                    fallback
+                @unknown default:
+                    fallback
+                }
+            }
+            .frame(width: 40, height: 40)
         } else {
-            statusMessage = "Not signed in."
+            fallback
+                .frame(width: 40, height: 40)
         }
     }
 
-    @MainActor
-    private func performSignIn() async {
-        guard CloudAuthEnabled else {
-            statusMessage = disabledMessage
-            return
+    private var canSubmitEmailPassword: Bool {
+        !email.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty && !password.isEmpty
+    }
+
+    private var userInitial: String? {
+        if let name = authViewModel.user?.displayName?.trimmingCharacters(in: .whitespacesAndNewlines),
+           let first = name.first {
+            return String(first).uppercased()
         }
-        guard !isSigningIn else { return }
-
-        isSigningIn = true
-        statusMessage = "Opening Google sign-in…"
-
-        do {
-            let outcome = try await authManager.signIn(presentingWindow: currentWindow())
-            signedInEmail = outcome.email
-            sessionSnippet = tokenPreview(from: outcome.idToken ?? outcome.accessToken)
-            statusMessage = "Signed in."
-        } catch {
-            statusMessage = (error as? LocalizedError)?.errorDescription ?? error.localizedDescription
+        if let first = authViewModel.currentUserEmail.first {
+            return String(first).uppercased()
         }
-
-        isSigningIn = false
+        return nil
     }
 
-    private func tokenPreview(from token: String?) -> String? {
-        guard let token, !token.isEmpty else { return nil }
-        let trimmed = token.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard trimmed.count > 8 else { return trimmed }
-        let prefix = trimmed.prefix(4)
-        let suffix = trimmed.suffix(4)
-        return "\(prefix)…\(suffix)"
+    private func clearCredentials() {
+        email = ""
+        password = ""
     }
+}
 
-    private func currentWindow() -> NSWindow? {
-        NSApp.keyWindow ?? NSApp.mainWindow ?? NSApp.windows.first
+struct LoginSheetView: View {
+    @Environment(\.dismiss) private var dismiss
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 16) {
+            CloudSettingsSection()
+            HStack {
+                Spacer()
+                Button("Close") {
+                    dismiss()
+                }
+                .buttonStyle(.bordered)
+            }
+        }
+        .padding(20)
+        .frame(minWidth: 460, idealWidth: 520)
     }
+}
+
+private enum AuthMode {
+    case signIn
+    case signUp
 }
 
 #Preview {
     CloudSettingsSection()
         .frame(width: 520)
+        .environmentObject(AuthViewModel.shared)
 }

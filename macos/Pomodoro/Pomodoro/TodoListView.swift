@@ -5,6 +5,7 @@ import AppKit
 /// Shows non-blocking banner when Reminders is unauthorized.
 struct TodoListView: View {
     @ObservedObject var todoStore: TodoStore
+    @ObservedObject var planningStore: PlanningStore
     @ObservedObject var remindersSync: RemindersSync
     @ObservedObject var permissionsManager: PermissionsManager
     
@@ -83,6 +84,10 @@ struct TodoListView: View {
                     .padding(.horizontal, 32)
                     .padding(.bottom, 12)
             }
+
+            planningOverview
+                .padding(.horizontal, 32)
+                .padding(.bottom, 8)
             
             // Toolbar
             HStack {
@@ -212,6 +217,45 @@ struct TodoListView: View {
         } message: {
             Text("Reminders access allows you to sync tasks with Apple Reminders. You can enable it in System Settings → Privacy & Security → Reminders.")
         }
+    }
+
+    private var planningOverview: some View {
+        HStack(spacing: 10) {
+            planningPill(
+                title: "Planned",
+                value: "\(plannedTaskCount)",
+                color: .green
+            )
+            planningPill(
+                title: "Unplanned",
+                value: "\(unplannedTaskCount)",
+                color: .orange
+            )
+            planningPill(
+                title: "Planned Today",
+                value: "\(plannedTodayCount)",
+                color: .blue
+            )
+            Spacer()
+        }
+        .padding(12)
+        .background(Color.primary.opacity(0.04))
+        .cornerRadius(10)
+    }
+
+    private func planningPill(title: String, value: String, color: Color) -> some View {
+        VStack(alignment: .leading, spacing: 2) {
+            Text(title)
+                .font(.caption)
+                .foregroundStyle(.secondary)
+            Text(value)
+                .font(.headline)
+                .foregroundStyle(color)
+        }
+        .padding(.horizontal, 10)
+        .padding(.vertical, 6)
+        .background(color.opacity(0.1))
+        .cornerRadius(8)
     }
     
     private var emptyState: some View {
@@ -349,6 +393,16 @@ This does not start a timer or schedule time—tasks work fine without #.
                             .font(.caption)
                             .foregroundStyle(.green)
                     }
+
+                    if planningItem(for: item) != nil {
+                        Label(planningStatusLabel(for: item), systemImage: "calendar.badge.clock")
+                            .font(.caption)
+                            .foregroundStyle(.blue)
+                    } else if !item.isCompleted {
+                        Label("Unplanned", systemImage: "calendar.badge.exclamationmark")
+                            .font(.caption)
+                            .foregroundStyle(.orange)
+                    }
                 }
             }
             
@@ -379,6 +433,20 @@ This does not start a timer or schedule time—tasks work fine without #.
                     openEditorForEdit(item)
                 } label: {
                     Label("Edit", systemImage: "pencil")
+                }
+
+                if item.dueDate == nil {
+                    Button {
+                        planTaskForToday(item)
+                    } label: {
+                        Label("Plan for Today", systemImage: "calendar.badge.plus")
+                    }
+                } else {
+                    Button {
+                        clearPlanDate(for: item)
+                    } label: {
+                        Label("Remove Plan Date", systemImage: "calendar.badge.minus")
+                    }
                 }
                 
                 Button(role: .destructive, action: {
@@ -467,6 +535,81 @@ This does not start a timer or schedule time—tasks work fine without #.
             return todoStore.pendingItems
         case .completed:
             return todoStore.completedItems.sorted { $0.modifiedAt > $1.modifiedAt }
+        }
+    }
+
+    private var taskPlansByID: [UUID: PlanningItem] {
+        planningStore.items.reduce(into: [UUID: PlanningItem]()) { result, plan in
+            guard plan.sourceType == .task,
+                  let sourceID = plan.sourceID,
+                  let taskID = UUID(uuidString: sourceID) else {
+                return
+            }
+            result[taskID] = plan
+        }
+    }
+
+    private var plannedTaskCount: Int {
+        todoStore.items.filter { taskPlansByID[$0.id] != nil }.count
+    }
+
+    private var unplannedTaskCount: Int {
+        max(0, todoStore.items.count - plannedTaskCount)
+    }
+
+    private var plannedTodayCount: Int {
+        let calendar = Calendar.current
+        return todoStore.pendingItems.filter { item in
+            guard let start = taskPlansByID[item.id]?.startDate else { return false }
+            return calendar.isDateInToday(start)
+        }.count
+    }
+
+    private func planningItem(for item: TodoItem) -> PlanningItem? {
+        taskPlansByID[item.id]
+    }
+
+    private func planningStatusLabel(for item: TodoItem) -> String {
+        guard let start = planningItem(for: item)?.startDate else {
+            return "Unplanned"
+        }
+        let calendar = Calendar.current
+        if calendar.isDateInToday(start) {
+            return item.hasDueTime ? "Today \(Self.dateTimeFormatter.string(from: start))" : "Planned today"
+        }
+        if calendar.isDateInTomorrow(start) {
+            return item.hasDueTime ? "Tomorrow \(Self.dateTimeFormatter.string(from: start))" : "Planned tomorrow"
+        }
+        return item.hasDueTime
+            ? Self.dateTimeFormatter.string(from: start)
+            : Self.dateFormatter.string(from: start)
+    }
+
+    private func planTaskForToday(_ item: TodoItem) {
+        var updated = item
+        updated.dueDate = Calendar.current.startOfDay(for: Date())
+        updated.hasDueTime = false
+        updated.modifiedAt = Date()
+        todoStore.updateItem(updated)
+        syncToRemindersIfLinked(updated)
+    }
+
+    private func clearPlanDate(for item: TodoItem) {
+        var updated = item
+        updated.dueDate = nil
+        updated.hasDueTime = false
+        updated.modifiedAt = Date()
+        todoStore.updateItem(updated)
+        syncToRemindersIfLinked(updated)
+    }
+
+    private func syncToRemindersIfLinked(_ item: TodoItem) {
+        guard permissionsManager.isRemindersAuthorized,
+              item.reminderIdentifier != nil else {
+            return
+        }
+        Task {
+            try? await remindersSync.syncTask(item)
         }
     }
     
@@ -783,11 +926,14 @@ extension TodoListView {
 
 #Preview {
     let store = TodoStore()
+    let planningStore = PlanningStore()
+    store.attachPlanningStore(planningStore)
     let sync = RemindersSync(permissionsManager: .shared)
     sync.setTodoStore(store)
     
     return TodoListView(
         todoStore: store,
+        planningStore: planningStore,
         remindersSync: sync,
         permissionsManager: .shared
     )

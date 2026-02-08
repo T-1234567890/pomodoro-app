@@ -45,8 +45,12 @@ final class TodoStore: ObservableObject {
     }
     
     func deleteItems(at offsets: IndexSet) {
+        let removedIDs: [UUID] = offsets.map { items[$0].id }
         items.remove(atOffsets: offsets)
         saveItems()
+        for id in removedIDs {
+            planningStore?.removeTaskPlan(for: id)
+        }
     }
     
     func toggleCompletion(_ item: TodoItem) {
@@ -114,6 +118,7 @@ final class TodoStore: ObservableObject {
             items[index].calendarEventIdentifier = eventId
             items[index].syncStatus = .synced
             saveItems()
+            planningStore?.upsertFromTask(items[index])
         }
     }
     
@@ -122,6 +127,7 @@ final class TodoStore: ObservableObject {
             items[index].calendarEventIdentifier = nil
             items[index].syncStatus = .local
             saveItems()
+            planningStore?.upsertFromTask(items[index])
         }
     }
 }
