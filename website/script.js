@@ -18,6 +18,37 @@ document.querySelectorAll('.reveal').forEach((el) => revealObserver.observe(el))
 
 let currentLang = 'en';
 
+const translations = {
+  en: {
+    project_status: 'Project status',
+    view_github: 'View on GitHub',
+    minutes_ago: '{n} minutes ago',
+    hours_ago: '{n} hours ago',
+    days_ago: '{n} days ago',
+    weeks_ago: '{n} weeks ago',
+    months_ago: '{n} months ago'
+  },
+  zh: {
+    project_status: '项目状态',
+    view_github: '在 GitHub 查看',
+    minutes_ago: '{n} 分钟前',
+    hours_ago: '{n} 小时前',
+    days_ago: '{n} 天前',
+    weeks_ago: '{n} 周前',
+    months_ago: '{n} 月前'
+  }
+};
+
+function translate(key, params = {}, lang = currentLang) {
+  const localeTable = translations[lang] || translations.en;
+  const fallback = translations.en[key] || '';
+  const template = localeTable[key] || fallback;
+  return template.replace(/\{(\w+)\}/g, (match, token) => {
+    if (!(token in params)) return match;
+    return String(params[token]);
+  });
+}
+
 function applyLanguage(lang) {
   currentLang = lang;
   document.documentElement.lang = lang === 'zh' ? 'zh-Hans' : 'en';
@@ -25,6 +56,12 @@ function applyLanguage(lang) {
   elements.forEach((el) => {
     const next = lang === 'zh' ? el.dataset.zh : el.dataset.en;
     if (next !== undefined) el.innerHTML = next;
+  });
+  const keyedElements = document.querySelectorAll('[data-i18n-key]');
+  keyedElements.forEach((el) => {
+    const key = el.dataset.i18nKey;
+    if (!key) return;
+    el.innerHTML = translate(key, {}, lang);
   });
   const titleElements = document.querySelectorAll('[data-title-en]');
   titleElements.forEach((el) => {
@@ -529,7 +566,6 @@ async function loadFooterHeartbeat() {
 const PROJECT_STATUS_REFRESH_MS = 5 * 60 * 1000;
 const PROJECT_STATUS_COMMITS_API = `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/commits?per_page=100`;
 const PROJECT_STATUS_UPDATED_WINDOW_MS = 7 * 24 * 60 * 60 * 1000;
-const projectStatusRtf = new Intl.RelativeTimeFormat('en', { numeric: 'always' });
 
 function getProjectStatusDom() {
   const dot = document.getElementById('project-status-dot');
@@ -543,26 +579,38 @@ function getProjectStatusDom() {
 
 function getRelativeCommitTime(isoDate) {
   const timestamp = Date.parse(isoDate || '');
-  if (!Number.isFinite(timestamp)) return { text: '--', ageMs: Number.POSITIVE_INFINITY };
+  if (!Number.isFinite(timestamp)) return { minutes: null, ageMs: Number.POSITIVE_INFINITY };
 
   const ageMs = Math.max(0, Date.now() - timestamp);
-  const units = [
-    ['year', 365 * 24 * 60 * 60 * 1000],
-    ['month', 30 * 24 * 60 * 60 * 1000],
-    ['week', 7 * 24 * 60 * 60 * 1000],
-    ['day', 24 * 60 * 60 * 1000],
-    ['hour', 60 * 60 * 1000],
-    ['minute', 60 * 1000]
-  ];
+  const minutes = Math.max(1, Math.floor(ageMs / (60 * 1000)));
+  return { minutes, ageMs };
+}
 
-  for (const [unit, size] of units) {
-    if (ageMs >= size) {
-      const value = Math.floor(ageMs / size);
-      return { text: projectStatusRtf.format(-value, unit), ageMs };
-    }
+function formatRelativeTime(relative, lang = currentLang) {
+  const minuteMs = 60 * 1000;
+  const hourMs = 60 * minuteMs;
+  const dayMs = 24 * hourMs;
+  const weekMs = 7 * dayMs;
+  const monthMs = 30 * dayMs;
+
+  const fallbackAgeMs = Number(relative?.minutes) * minuteMs;
+  const ageMs = Number(relative?.ageMs);
+  const normalizedAgeMs = Number.isFinite(ageMs) ? ageMs : fallbackAgeMs;
+  if (!Number.isFinite(normalizedAgeMs) || normalizedAgeMs < 0) return '--';
+
+  if (normalizedAgeMs < hourMs) {
+    return translate('minutes_ago', { n: Math.max(1, Math.floor(normalizedAgeMs / minuteMs)) }, lang);
   }
-
-  return { text: projectStatusRtf.format(0, 'second'), ageMs };
+  if (normalizedAgeMs < dayMs) {
+    return translate('hours_ago', { n: Math.max(1, Math.floor(normalizedAgeMs / hourMs)) }, lang);
+  }
+  if (normalizedAgeMs < weekMs) {
+    return translate('days_ago', { n: Math.max(1, Math.floor(normalizedAgeMs / dayMs)) }, lang);
+  }
+  if (normalizedAgeMs < monthMs) {
+    return translate('weeks_ago', { n: Math.max(1, Math.floor(normalizedAgeMs / weekMs)) }, lang);
+  }
+  return translate('months_ago', { n: Math.max(1, Math.floor(normalizedAgeMs / monthMs)) }, lang);
 }
 
 function setLocalizedCopy(node, en, zh) {
@@ -577,7 +625,7 @@ function setProjectStatusState(dom, { tone = 'live', labelEn, labelZh }) {
   setLocalizedCopy(dom.label, labelEn, labelZh);
 }
 
-function setProjectStatusStreakState(dom, state, days = 0, lastCommitText = '--') {
+function setProjectStatusStreakState(dom, state, days = 0, lastCommitTextEn = '--', lastCommitTextZh = '--') {
   if (state === 'unavailable') {
     setLocalizedCopy(dom.streak, '🔥 Streak unavailable', '🔥 连续记录加载中');
     setLocalizedCopy(dom.sub, 'Waiting for streak data', '正在获取连续数据');
@@ -592,7 +640,7 @@ function setProjectStatusStreakState(dom, state, days = 0, lastCommitText = '--'
 
   const normalizedDays = Number.isFinite(days) && days > 0 ? days : 1;
   setLocalizedCopy(dom.streak, `🔥 ${normalizedDays} day streak`, `🔥 连续 ${normalizedDays} 天`);
-  setLocalizedCopy(dom.sub, `Last commit: ${lastCommitText}`, `最近提交：${lastCommitText}`);
+  setLocalizedCopy(dom.sub, `Last commit: ${lastCommitTextEn}`, `最近提交：${lastCommitTextZh}`);
 }
 
 function createProjectStatusSkeletonCard() {
@@ -641,7 +689,11 @@ function createProjectStatusCommitCard(item, index) {
 
   const time = document.createElement('p');
   time.className = 'project-status-commit-time';
-  setLocalizedCopy(time, item.relative.text, item.relative.text);
+  setLocalizedCopy(
+    time,
+    formatRelativeTime(item.relative, 'en'),
+    formatRelativeTime(item.relative, 'zh')
+  );
   meta.appendChild(time);
 
   const icon = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
@@ -678,33 +730,37 @@ function normalizeProjectStatusCommit(entry) {
   };
 }
 
-function toUtcDayKey(timestamp) {
+function toLocalDayKey(timestamp) {
   const date = new Date(timestamp);
-  const year = date.getUTCFullYear();
-  const month = String(date.getUTCMonth() + 1).padStart(2, '0');
-  const day = String(date.getUTCDate()).padStart(2, '0');
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
   return `${year}-${month}-${day}`;
 }
 
 function calculateCommitStreakDays(commits) {
+  const timestamps = commits
+    .map((item) => item.timestamp)
+    .filter((value) => Number.isFinite(value));
+  if (timestamps.length === 0) return 0;
+
   const daySet = new Set(
-    commits
-      .map((item) => item.timestamp)
-      .filter((value) => Number.isFinite(value))
-      .map((value) => toUtcDayKey(value))
+    timestamps.map((value) => toLocalDayKey(value))
   );
 
-  const latestTimestamp = commits.find((item) => Number.isFinite(item.timestamp))?.timestamp;
-  if (!Number.isFinite(latestTimestamp)) return 0;
+  const latestTimestamp = Math.max(...timestamps);
+  const latestDayKey = toLocalDayKey(latestTimestamp);
+  const todayKey = toLocalDayKey(Date.now());
+  if (latestDayKey !== todayKey) return 0;
 
   const cursor = new Date(latestTimestamp);
-  cursor.setUTCHours(0, 0, 0, 0);
+  cursor.setHours(0, 0, 0, 0);
 
   let streak = 0;
   let guard = 0;
-  while (daySet.has(toUtcDayKey(cursor.getTime())) && guard < 3650) {
+  while (daySet.has(toLocalDayKey(cursor.getTime())) && guard < 3650) {
     streak += 1;
-    cursor.setUTCDate(cursor.getUTCDate() - 1);
+    cursor.setDate(cursor.getDate() - 1);
     guard += 1;
   }
   return streak;
@@ -740,7 +796,13 @@ async function loadProjectStatus({ showSkeleton = false } = {}) {
     if (streakDays <= 0) {
       setProjectStatusStreakState(dom, 'starting');
     } else {
-      setProjectStatusStreakState(dom, 'active', streakDays, latest?.text || '--');
+      setProjectStatusStreakState(
+        dom,
+        'active',
+        streakDays,
+        formatRelativeTime(latest, 'en'),
+        formatRelativeTime(latest, 'zh')
+      );
     }
 
     console.groupCollapsed('[Project Status] Diagnostics');
