@@ -13,10 +13,6 @@ struct CloudSettingsSection: View {
             Text(localizationManager.text("settings.account.title"))
                 .font(.title3.bold())
 
-            Text(localizationManager.text("settings.account.subtitle"))
-                .font(.footnote)
-                .foregroundStyle(.secondary)
-
             if authViewModel.isLoggedIn {
                 loggedInSection
             } else {

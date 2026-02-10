@@ -6,6 +6,7 @@ import EventKit
 struct SettingsPermissionsView: View {
     @ObservedObject var permissionsManager: PermissionsManager
     @EnvironmentObject private var localizationManager: LocalizationManager
+    @State private var showAdvancedAccountTools = false
     
     var body: some View {
         VStack(alignment: .leading, spacing: 24) {
@@ -92,8 +93,20 @@ struct SettingsPermissionsView: View {
 
         Divider()
 
-        CloudSettingsSection()
-            .frame(maxWidth: .infinity, alignment: .leading)
+        DisclosureGroup(
+            "Account & Cloud (Cloud/AI Features Coming Soon)",
+            isExpanded: $showAdvancedAccountTools
+        ) {
+            CloudSettingsSection()
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .padding(.top, 10)
+        }
+        .accessibilityLabel("Account & Cloud (Cloud/AI Features Coming Soon)")
+        .accessibilityIdentifier("settings.account_cloud_disclosure")
+        .font(.subheadline.weight(.medium))
+        .padding(16)
+        .background(Color.primary.opacity(0.05))
+        .cornerRadius(12)
     }
     
     @ViewBuilder
