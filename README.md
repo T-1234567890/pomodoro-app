@@ -8,10 +8,10 @@ Version **1.1.0** is a feature integration update that deepens system connection
 
 <p align="center">
   <img
-    width="320"
-    height="320"
+    width="240"
+    height="240"
     alt="Pomodoro App Logo"
-    src="https://github.com/user-attachments/assets/629e345e-5540-4439-8e47-30f3db8c6cad"
+    src="https://github.com/user-attachments/assets/b1b265d2-b61e-45de-b3f2-749eff5b6931"
   />
 </p>
 
