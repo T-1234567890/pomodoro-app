@@ -20,6 +20,9 @@ Version **1.1.0** is a feature integration update that deepens system connection
   <img src="https://img.shields.io/badge/platform-macOS-blue?logo=apple" alt="Platform" />
   <img src="https://img.shields.io/github/v/release/T-1234567890/pomodoro-app" alt="Release" />
   <img src="https://img.shields.io/github/downloads/T-1234567890/pomodoro-app/total" alt="Downloads" />
+ <a href="https://vps.town">
+  <img src="https://img.shields.io/badge/Sponsored%20by-VPS.Town-3DAF7C" alt="Sponsor VPS.Town" />
+</a>
 </p>
 
 >## ⚠️ Notice
@@ -284,15 +287,56 @@ A small number of long-term ideas (AI features, cloud sync, deeper analytics) ar
 
 Details: `docs/Future_Pro_Plan.md`
 
+## 🤝 Sponsors & Partners
+
+This project is supported by partners who help keep development sustainable.
+
+---
+
+<p align="center">
+  <a href="https://vps.town" target="_blank">
+    <img
+      alt="VPS.Town Sponsor"
+      src="https://github.com/user-attachments/assets/f968c79a-0700-4a3b-8d76-5a56911650b2"
+      width="900"
+    />
+  </a>
+</p>
+
+<p align="center">
+  VPS.Town provides infrastructure support for testing and cloud experimentation.
+</p>
+
+---
+
+### 💡 Sponsorship Categories
+
+| Category | Partner |
+|----------|---------|
+| Infrastructure Sponsor | VPS.Town |
+| AI Partner | *(open)* |
+| Community Partner | *(open)* |
+| Tools / Integration Partner | *(open)* |
+| Other | *(open)* |
+
+If you are interested in sponsoring or partnering with Pomodoro, please contact us below.
+
 ## 📈 Star History
 
 [![Star History Chart](https://api.star-history.com/svg?repos=T-1234567890/pomodoro-app&type=date&legend=top-left)](https://www.star-history.com/#T-1234567890/pomodoro-app&type=date&legend=top-left)
 
-## ⚠️ 说明
-本项目仍在持续改进中，部分功能或界面可能会发生变化。
+## ⚠️ 说明/Notice
+本项目仍在持续改进中，部分功能或界面可能会发生变化。<br>
 如在使用过程中发现问题或有改进建议，欢迎提交 Issue 或 PR。
 
-
-## ⚠️ Notice
-This project is under active development and some features or UI elements may change over time.
+This project is under active development and some features or UI elements may change over time.<br>
 If you encounter issues or have suggestions, feel free to open an issue or pull request.
+
+
+## 📬 Contact
+
+- 📧 Email: support@pomodoro-app.tech  
+- 🌐 Website: https://pomodoro-app.tech  
+- 💬 Issues / PRs / Discussions are welcome
+
+We’re happy to hear feedback, bug reports, and feature ideas.
