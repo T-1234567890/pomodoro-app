@@ -270,18 +270,24 @@ body.lang-switching-in [data-en] {
 .join-us { padding: 40px 20px 82px; max-width: 1180px; margin: 0 auto; }
 .sponsors-section {
   padding: 80px 20px;
+  min-width: 0;
+  min-height: 0;
 }
 .sponsors-inner {
   max-width: 1100px;
   margin: 0 auto;
   display: grid;
   gap: 32px;
+  min-width: 0;
+  min-height: 0;
 }
 .sponsors-grid {
   display: grid;
   grid-template-columns: minmax(0, 1fr) 1px minmax(0, 1fr);
   align-items: stretch;
   gap: 48px;
+  min-width: 0;
+  min-height: 0;
 }
 .sponsor-panel {
   border-radius: 24px;
@@ -298,6 +304,7 @@ body.lang-switching-in [data-en] {
   gap: 18px;
   align-content: center;
   min-width: 0;
+  min-height: 0;
 }
 .sponsor-table-card {
   display: grid;
@@ -321,15 +328,16 @@ body.lang-switching-in [data-en] {
   border-radius: 999px;
 }
 .sponsor-link {
-  display: inline-block;
+  display: block;
+  width: 100%;
   background-image: none;
   padding-bottom: 0;
   text-decoration: none;
   color: inherit;
 }
 .sponsor-link img {
-  width: min(260px, 100%);
-  max-width: 280px;
+  width: 240px;
+  max-width: 100%;
   height: auto;
   display: block;
   margin: 2px auto 4px;
