@@ -344,7 +344,6 @@
 				7C360D342F191F17007313D3 /* Sources */,
 				7C360D352F191F17007313D3 /* Frameworks */,
 				7C360D362F191F17007313D3 /* Resources */,
-				7C217B2D2F3F66820076D4DA /* Run Script */,
 			);
 			buildRules = (
 			);
@@ -418,28 +417,6 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
-
-/* Begin PBXShellScriptBuildPhase section */
-		7C217B2D2F3F66820076D4DA /* Run Script */ = {
-			isa = PBXShellScriptBuildPhase;
-			alwaysOutOfDate = 1;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputFileListPaths = (
-			);
-			inputPaths = (
-			);
-			name = "Run Script";
-			outputFileListPaths = (
-			);
-			outputPaths = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "sh \"${SRCROOT}/ci_scripts/ci_post_clone.sh\"\n";
-		};
-/* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		7C360D342F191F17007313D3 /* Sources */ = {
