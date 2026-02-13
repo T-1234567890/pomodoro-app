@@ -93,11 +93,11 @@ The current version is fully native Swift; legacy Tauri/Svelte/Python versions a
 
 >## ⚠️ Firebase Config File Usage
 >
->This project includes `GoogleService-Info.plist` for CI build and Firebase integration.
+>This repository does **NOT** contain a real Firebase configuration.
 >
->### ⚠️ DO NOT USE THIS FILE DIRECTLY
+>### ⚠️ DO NOT USE THE INCLUDED FILE
 >
->The included `GoogleService-Info.plist` is specific to this repository’s Firebase project and **should NOT be used (as a template) for other projects**.
+>Any GoogleService-Info.plist file in this repository is a **placeholder** and exists only so the project can compile in CI.
 >
 >If you need to run your own Firebase instance, please follow these steps:
 >1. Create your own Firebase project
