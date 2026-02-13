@@ -12,7 +12,7 @@
 		1C500AF464889EDC9C8772BC /* AuthViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83E7FB47B7CF8A7C0F510CF4 /* AuthViewModel.swift */; };
 		4BDE965F88F5BUILDCBB5DF2 /* CalendarDayView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4BDE965F88F54754BCBB5DF2 /* CalendarDayView.swift */; };
 		4DD2B11CF188B287CE18674F /* APIClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = D95945228BEC2D75F362FF53 /* APIClient.swift */; };
-		7C217B2C2F3F5CD80076D4DA /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 7C217B2B2F3F5CD80076D4DA /* GoogleService-Info.plist */; };
+		7C217B312F3F89DD0076D4DA /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 7C217B302F3F89DD0076D4DA /* GoogleService-Info.plist */; };
 		7C33615C2F3843F600E0779C /* FirebaseAuth in Frameworks */ = {isa = PBXBuildFile; productRef = 7C33615B2F3843F600E0779C /* FirebaseAuth */; };
 		7C33615E2F3843F600E0779C /* FirebaseAuthCombine-Community in Frameworks */ = {isa = PBXBuildFile; productRef = 7C33615D2F3843F600E0779C /* FirebaseAuthCombine-Community */; };
 		7C3361602F3843F600E0779C /* FirebaseCore in Frameworks */ = {isa = PBXBuildFile; productRef = 7C33615F2F3843F600E0779C /* FirebaseCore */; };
@@ -90,7 +90,7 @@
 		379E0B0F492E771413BBB197 /* AuthStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthStore.swift; sourceTree = "<group>"; };
 		49393474CCC34E2091E176A1 /* WindowBackgroundConfigurator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WindowBackgroundConfigurator.swift; sourceTree = "<group>"; };
 		4BDE965F88F54754BCBB5DF2 /* CalendarDayView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalendarDayView.swift; sourceTree = "<group>"; };
-		7C217B2B2F3F5CD80076D4DA /* GoogleService-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
+		7C217B302F3F89DD0076D4DA /* GoogleService-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 		7C360D382F191F17007313D3 /* Pomodoro.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Pomodoro.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		7C360D502F191F17007313D3 /* AppState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppState.swift; sourceTree = "<group>"; };
 		7C360D512F191F17007313D3 /* CountdownTimerEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CountdownTimerEngine.swift; sourceTree = "<group>"; };
@@ -194,7 +194,7 @@
 			isa = PBXGroup;
 			children = (
 				7C4C2FDF2F38D57200994D30 /* Pomodoro.entitlements */,
-				7C217B2B2F3F5CD80076D4DA /* GoogleService-Info.plist */,
+				7C217B302F3F89DD0076D4DA /* GoogleService-Info.plist */,
 				7C360D5E2F191F17007313D3 /* App */,
 				7C360D9C2F191F17007313D3 /* Music */,
 				7C360D5F2F191F17007313D3 /* State */,
@@ -413,7 +413,7 @@
 				E2A1B0021A2B3C4D5E6F7001 /* InfoPlist.strings in Resources */,
 				E2A1B0311A2B3C4D5E6F7001 /* en.json in Resources */,
 				E2A1B0321A2B3C4D5E6F7001 /* zh.json in Resources */,
-				7C217B2C2F3F5CD80076D4DA /* GoogleService-Info.plist in Resources */,
+				7C217B312F3F89DD0076D4DA /* GoogleService-Info.plist in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
