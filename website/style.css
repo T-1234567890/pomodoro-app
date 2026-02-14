@@ -886,40 +886,38 @@ body.lang-switching-in [data-en] {
   background: linear-gradient(150deg, rgba(255,243,233,0.92), rgba(255,240,229,0.86));
   box-shadow: inset 0 1px 0 rgba(255,255,255,0.62),
               0 0 0 0.5px rgba(255,240,230,0.45),
-              0 12px 22px rgba(114,76,58,0.1);
+              0 12px 22px rgba(114,76,58,0.1),
+              0 0 20px rgba(216, 104, 86, 0.12);
   padding: clamp(22px, 4vw, 34px) clamp(20px, 6vw, 40px);
   display: grid;
   gap: 10px;
   justify-items: center;
+}
+.waitlist .eyebrow {
+  margin: 0;
+  padding: 4px 11px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  border: 1px solid rgba(216, 104, 86, 0.36);
+  background: rgba(248, 225, 205, 0.82);
+  color: #8a4f3f;
+  text-transform: none;
+  letter-spacing: 0.03em;
+  line-height: 1.2;
 }
 .waitlist-title-stack {
   display: grid;
   justify-items: center;
 }
 .waitlist-inner h2 { margin: 4px 0 0; font-size: clamp(22px, 4vw, 30px); letter-spacing: -0.01em; }
-.waitlist-coming-badge {
-  margin: 8px 0 12px;
-  padding: 4px 10px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 999px;
-  border: 1px solid rgba(210, 195, 183, 0.9);
-  background: rgba(238, 231, 223, 0.86);
-  color: #5f4f45;
-  font-family: inherit;
-  font-size: 13px;
-  line-height: 1.2;
-  font-weight: 500;
-  letter-spacing: 0;
-  justify-self: center;
-  animation: waitlistBadgeFade 420ms ease-out 120ms both;
-}
 .waitlist-inner .muted { margin: 0; }
 .waitlist .cta-row { justify-content: center; margin-top: 8px; }
-@keyframes waitlistBadgeFade {
-  from { opacity: 0; }
-  to { opacity: 1; }
+.waitlist-note {
+  margin: 4px 0 0;
+  font-size: 13px;
+  color: #7a6960;
 }
 
 .project-status-block {
