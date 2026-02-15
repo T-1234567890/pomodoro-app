@@ -21,7 +21,8 @@ https://pomodoro-app.tech or https://forms.gle/hQ7ubqxt39sXca4e9
 
 ### 🏆 Prize Details
 
-**VPS Service (Virtual Private Server)**  
+**VPS Service (Virtual Private Server)**
+
 Sponsored by VPS Town — servers for early access usage.
 
 - Server access valid for **30 days after activation**  
@@ -41,3 +42,5 @@ Sponsored by VPS Town — servers for early access usage.
 Your email will only be used for TestFlight invitations and giveaway contact; it will not be shared or used for other purposes.
 
 Thank you for your interest and participation!
+
+<img width="4000" height="1000" alt="sponsor" src="https://github.com/user-attachments/assets/a5d1f2fe-f676-4c7c-afd4-a20de0f7e6dc" />
