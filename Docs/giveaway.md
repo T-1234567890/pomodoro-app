@@ -15,6 +15,7 @@ https://pomodoro-app.tech or https://forms.gle/hQ7ubqxt39sXca4e9
 
 ### 🎯 Giveaway Rules
 
+- A total of **3 winners** will be selected by random.
 - The giveaway is a random draw from all valid waitlist emails.
 - The drawing process will be transparent and recorded (screenshots or screen capture).
 - Winners will be announced with partially masked email addresses (e.g., `a***@***.com`) to protect privacy.
