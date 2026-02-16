@@ -98,10 +98,8 @@ Requires Xcode on macOS 14.6 or later.
 Clone this repository, open the project in Xcode, and build/run as usual.
 
 **Requirements:** <br>
-- GoogleSignIn (>= 7.1.0)
-- AppAuth 1.7.6
-- GTMAppAuth 4.1.1
-- GTMSessionFetcher 3.5.0
+- Firebase iOS SDK 12.9.0 or later
+  (Swift Package Manager should automatically download gRPC, GoogleUtilities, etc. for you)
 - Xcode on macOS 14.6 or later
 
 This project uses Swift Package Manager to manage dependencies. <br>
@@ -213,7 +211,7 @@ Legacy see: https://github.com/T-1234567890/Pomodoro-legacy
 
 The current mainline version of Pomodoro is **fully native Swift (macOS)**.
 
----
+<details>
 
 ### Legacy System A — Tauri + Svelte + Python (0.5.x – 0.7.x)
 
@@ -243,24 +241,7 @@ This was the **original prototype** used during the earliest stages of developme
 - Python
 - Tkinter UI
 - Single-process desktop app
-
-## 🏗️ Working on
-
-### 🖥️ Native liquid glass UI/UX
-An upcoming release for the native liquid glass support (currently macOS 15 style)
-
----
-
-### 🔔 Reminders (Improvements)
-Continuing to extend the in-app reminder system introduced in v1.1.0 to gently notify users of important
-events without breaking focus.
-
-Current direction:
-- Feedback
-- General update
-
-The reminder system is intended to complement the Pomodoro workflow,
-not replace it or become distracting.
+</details>
 
 ## Docs
 
