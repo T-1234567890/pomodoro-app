@@ -197,12 +197,12 @@ const RIBBON_INVITE_PLACEHOLDER = {
   kind: 'invite'
 };
 const RIBBON_PLACEHOLDERS = [
-  { login: '__placeholder_1__', avatar_url: 'screenshots/pic1.jpg', html_url: '', placeholder: true },
-  { login: '__placeholder_2__', avatar_url: 'screenshots/pic1.jpg', html_url: '', placeholder: true },
-  { login: '__placeholder_3__', avatar_url: 'screenshots/pic1.jpg', html_url: '', placeholder: true },
-  { login: '__placeholder_4__', avatar_url: 'screenshots/pic1.jpg', html_url: '', placeholder: true },
-  { login: '__placeholder_5__', avatar_url: 'screenshots/pic1.jpg', html_url: '', placeholder: true },
-  { login: '__placeholder_6__', avatar_url: 'screenshots/pic1.jpg', html_url: '', placeholder: true }
+  { login: '__placeholder_1__', avatar_url: 'screenshots/pic1.webp', html_url: '', placeholder: true },
+  { login: '__placeholder_2__', avatar_url: 'screenshots/pic1.webp', html_url: '', placeholder: true },
+  { login: '__placeholder_3__', avatar_url: 'screenshots/pic1.webp', html_url: '', placeholder: true },
+  { login: '__placeholder_4__', avatar_url: 'screenshots/pic1.webp', html_url: '', placeholder: true },
+  { login: '__placeholder_5__', avatar_url: 'screenshots/pic1.webp', html_url: '', placeholder: true },
+  { login: '__placeholder_6__', avatar_url: 'screenshots/pic1.webp', html_url: '', placeholder: true }
 ];
 
 const ribbonState = {
