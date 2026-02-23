@@ -1,3 +1,4 @@
+**Deprecated**
 # Archived version notes
 
 ## 0.3.0 Beta
