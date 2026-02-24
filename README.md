@@ -147,7 +147,7 @@ The goal of upcoming versions is to transition toward a softer, macOS-inspired l
 
 >**🚧 Distribution Status**
 >
->Pomodoro is currently under active development and not yet available on TestFlight or the Mac App Store.<br>
+>Pomodoro is currently under active development and available on TestFlight
 >
 >**🚀 Preview Access Available**
 >
