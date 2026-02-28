@@ -305,6 +305,11 @@ Contact us below.
 This project is under active development and some features or UI elements may change over time.<br>
 If you encounter issues or have suggestions, feel free to open an issue or pull request.
 
+## 📄 Policies
+Official legal and policy documents for the app and website.
+
+[Policies & Legal](https://pomodoro-app.tech/policies.html)
+
 ## 📬 Contact
 
 - 📧 Email: support@pomodoro-app.tech  
