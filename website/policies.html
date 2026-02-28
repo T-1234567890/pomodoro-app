@@ -70,14 +70,14 @@
     }
 
     /* Override global link underline/line-on-hover behavior (prevents black bottom line). */
-    body.legal-page main a.policy-card {
+    body.policy-hub main a.policy-card {
       background: linear-gradient(155deg, rgba(255,243,233,0.92), rgba(255,240,229,0.86)) !important;
       background-size: auto !important;
       background-position: 0 0 !important;
       background-repeat: no-repeat !important;
       padding-bottom: 18px !important;
     }
-    body.legal-page main a.policy-card:hover {
+    body.policy-hub main a.policy-card:hover {
       background: linear-gradient(155deg, rgba(255,245,238,0.94), rgba(255,241,231,0.88)) !important;
       background-size: auto !important;
     }
@@ -123,16 +123,39 @@
     .policy-card:hover .policy-card-arrow {
       transform: translateX(4px);
     }
+    .policy-card-cta {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 11px 16px;
+      border-radius: 14px;
+      border: 1px solid rgba(193,76,58,0.58);
+      background: linear-gradient(145deg, rgba(216,104,86,0.94), rgba(193,76,58,0.9));
+      color: #fffaf6;
+      font-size: 14px;
+      line-height: 1.2;
+      font-weight: 700;
+      letter-spacing: -0.01em;
+      text-decoration: none;
+      transition: transform 180ms var(--ease-soft), box-shadow 180ms var(--ease-soft), filter 180ms var(--ease-soft);
+      box-shadow: 0 7px 15px rgba(200, 110, 90, 0.2);
+      white-space: nowrap;
+    }
+    .policy-card:hover .policy-card-cta {
+      box-shadow: 0 12px 22px rgba(200, 110, 90, 0.24);
+      filter: saturate(1.03);
+      transform: translateY(-2px);
+    }
     .topbar .logo-link {
       color: var(--text);
       text-decoration: none;
     }
-    body.legal-page .footer {
+    body.legal-document .footer {
       display: none;
     }
   </style>
 </head>
-<body class="legal-page">
+<body class="policy-hub legal-document">
   <header class="topbar glass">
     <a class="logo logo-link" href="index.html#overview" data-en="Pomodoro" data-zh="Pomodoro">Pomodoro</a>
     <nav class="nav-links">
@@ -161,7 +184,15 @@
             <h3 class="policy-card-title" data-en="Privacy Policy" data-zh="隐私政策">Privacy Policy</h3>
             <p class="policy-card-sub" data-en="How we collect, use, and safeguard your information." data-zh="我们如何收集、使用并保护你的信息。">How we collect, use, and safeguard your information.</p>
           </div>
-          <span class="policy-card-arrow" aria-hidden="true">→</span>
+          <span class="policy-card-cta" data-en="Read Privacy Policy →" data-zh="阅读隐私政策 →">Read Privacy Policy →</span>
+        </a>
+
+        <a class="policy-card glass reveal" href="legal/terms-of-service/" aria-label="Terms of Service">
+          <div class="policy-card-meta">
+            <h3 class="policy-card-title" data-en="Terms of Service" data-zh="服务条款">Terms of Service</h3>
+            <p class="policy-card-sub" data-en="Rules, usage terms, and legal conditions for using Pomodoro App and related services." data-zh="使用 Pomodoro App 及相关服务的规则、使用条款与法律条件。">Rules, usage terms, and legal conditions for using Pomodoro App and related services.</p>
+          </div>
+          <span class="policy-card-cta" data-en="Read Terms of Service →" data-zh="阅读服务条款 →">Read Terms of Service →</span>
         </a>
       </div>
     </section>

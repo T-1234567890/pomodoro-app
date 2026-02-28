@@ -3,13 +3,13 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title data-en="Privacy Policy · Pomodoro" data-zh="隐私政策 · Pomodoro">Privacy Policy · Pomodoro</title>
-  <meta name="description" content="Pomodoro App privacy policy." />
+  <title data-en="Terms of Service · Pomodoro" data-zh="服务条款 · Pomodoro">Terms of Service · Pomodoro</title>
+  <meta name="description" content="Pomodoro App terms of service." />
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="../../style.css" />
 
   <style>
     .privacy-shell {
@@ -117,6 +117,7 @@
       line-height: 1.55;
       white-space: pre;
     }
+
     body.legal-document .footer {
       display: none;
     }
@@ -124,14 +125,14 @@
 </head>
 <body class="legal-document">
   <header class="topbar glass">
-    <a class="logo logo-link" href="index.html#overview" data-en="Pomodoro" data-zh="Pomodoro">Pomodoro</a>
+    <a class="logo logo-link" href="../../index.html#overview" data-en="Pomodoro" data-zh="Pomodoro">Pomodoro</a>
     <nav class="nav-links">
-      <a href="index.html#overview" data-en="Overview" data-zh="概览">Overview</a>
-      <a href="index.html#features" data-en="Features" data-zh="功能">Features</a>
-      <a href="index.html#screenshots" data-en="Focus Cycle" data-zh="专注循环">Focus Cycle</a>
-      <a href="index.html#visual-compare" data-en="Comparison" data-zh="对比">Comparison</a>
-      <a href="index.html#docs" data-en="Docs" data-zh="文档">Docs</a>
-      <a href="index.html#download" data-en="Download" data-zh="下载">Download</a>
+      <a href="../../index.html#overview" data-en="Overview" data-zh="概览">Overview</a>
+      <a href="../../index.html#features" data-en="Features" data-zh="功能">Features</a>
+      <a href="../../index.html#screenshots" data-en="Focus Cycle" data-zh="专注循环">Focus Cycle</a>
+      <a href="../../index.html#visual-compare" data-en="Comparison" data-zh="对比">Comparison</a>
+      <a href="../../index.html#docs" data-en="Docs" data-zh="文档">Docs</a>
+      <a href="../../index.html#download" data-en="Download" data-zh="下载">Download</a>
       <a href="https://github.com/T-1234567890/pomodoro-app" target="_blank" rel="noreferrer" data-en="GitHub" data-zh="GitHub">GitHub</a>
       <button id="lang-toggle" aria-label="Switch language" data-en="EN / 中文" data-zh="中文 / EN">EN / 中文</button>
     </nav>
@@ -141,42 +142,59 @@
     <section class="privacy-shell">
       <div class="privacy-header reveal">
         <p class="eyebrow" data-en="Legal" data-zh="法律">Legal</p>
-        <h1 data-en="Privacy Policy" data-zh="隐私政策">Privacy Policy</h1>
-        <p class="muted" data-en="This page displays the official privacy policy text (English)." data-zh="本页面展示官方隐私政策原文（英文）。">This page displays the official privacy policy text (English).</p>
+        <h1 data-en="Terms of Service" data-zh="服务条款">Terms of Service</h1>
+        <p class="muted" data-en="This page displays the official terms of service text (English)." data-zh="本页面展示官方服务条款原文（英文）。">This page displays the official terms of service text (English).</p>
       </div>
 
-      <article class="privacy-card glass fade-on-load" aria-label="Privacy policy content">
-        <div id="privacy-content" class="privacy-markdown">
-          <p class="muted" id="privacy-loading" data-en="Loading privacy policy…" data-zh="正在加载隐私政策…">Loading privacy policy…</p>
+      <article class="privacy-card glass fade-on-load" aria-label="Terms of service content">
+        <div id="tos-content" class="privacy-markdown">
+          <p class="muted" id="tos-loading" data-en="Loading terms of service…" data-zh="正在加载服务条款…">Loading terms of service…</p>
         </div>
       </article>
     </section>
   </main>
 
+  <footer class="footer" id="project-heartbeat">
+    <div class="footer-metrics" id="footer-metrics">
+      <div class="footer-metric">
+        <div class="footer-metric-value"><span class="footer-metric-icon" aria-hidden="true">⭐</span><span class="footer-number" id="footer-stars">--</span></div>
+        <p class="footer-metric-label" data-en="Stars" data-zh="Star 数">Stars</p>
+      </div>
+      <div class="footer-metric">
+        <div class="footer-metric-value"><span class="footer-metric-icon" aria-hidden="true">🧱</span><span class="footer-number" id="footer-commits">--</span></div>
+        <p class="footer-metric-label" data-en="Commits" data-zh="提交数">Commits</p>
+      </div>
+      <div class="footer-metric">
+        <div class="footer-metric-value"><span class="footer-metric-icon" aria-hidden="true">🐛</span><span class="footer-number" id="footer-issues">--</span></div>
+        <p class="footer-metric-label" data-en="Issues" data-zh="问题">Issues</p>
+      </div>
+    </div>
+    <div class="footer-contact">
+      <span class="footer-contact-item">📧 <a href="mailto:support@pomodoro-app.tech">support@pomodoro-app.tech</a></span>
+      <span class="footer-contact-item">🌐 <a href="https://pomodoro-app.tech" target="_blank" rel="noreferrer">pomodoro-app.tech</a></span>
+      <span class="footer-contact-item">💬 Issues / PRs / Discussions welcome</span>
+    </div>
+    <div class="footer-legal">
+      <a href="../../policies.html" data-en="Policies" data-zh="政策">Policies</a>
+    </div>
+    <p class="footer-status">© 2026 Pomodoro App. All rights reserved.</p>
+  </footer>
+
   <script src="https://cdn.jsdelivr.net/npm/marked@12.0.2/marked.min.js"></script>
-  <script src="script.js"></script>
+  <script src="../../script.js"></script>
   <script>
     (async () => {
-      const contentEl = document.getElementById('privacy-content');
+      const contentEl = document.getElementById('tos-content');
       if (!contentEl) return;
 
-      const candidates = [
-        'Screenshot/privacy_version_feb_27_2026.md',
-        'screenshots/privacy_version_feb_27_2026.md'
-      ];
-
       let markdownText = null;
-      for (const url of candidates) {
-        try {
-          const res = await fetch(url, { cache: 'no-store' });
-          if (!res.ok) continue;
-          markdownText = await res.text();
-          break;
-        } catch (err) {}
-      }
+      try {
+        const res = await fetch('terms-of-service.md', { cache: 'no-store' });
+        if (res.ok) markdownText = await res.text();
+      } catch (err) {}
 
       if (!markdownText) {
-        contentEl.innerHTML = '<p class="muted">Unable to load privacy policy.</p>';
+        contentEl.innerHTML = '<p class="muted">Unable to load terms of service.</p>';
         return;
       }
 
@@ -207,3 +225,4 @@
   </script>
 </body>
 </html>
+
