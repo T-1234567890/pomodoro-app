@@ -4,17 +4,22 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="2909c215-f590-49b8-8f9e-264ead6228fc" name="Changes" comment="Docs organize">
+    <list default="true" id="2909c215-f590-49b8-8f9e-264ead6228fc" name="Changes" comment="GitHub Pages update (Google Search Console things)">
+      <change afterPath="$PROJECT_DIR$/website/screenshots/privacy_version_feb_27_2026.md" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/macos/Pomodoro/Pomodoro.xcodeproj/project.xcworkspace/xcuserdata/2111832868qq.com.xcuserdatad/UserInterfaceState.xcuserstate" beforeDir="false" afterPath="$PROJECT_DIR$/macos/Pomodoro/Pomodoro.xcodeproj/project.xcworkspace/xcuserdata/2111832868qq.com.xcuserdatad/UserInterfaceState.xcuserstate" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/macos/Pomodoro/Pomodoro/TodoItem.swift" beforeDir="false" afterPath="$PROJECT_DIR$/macos/Pomodoro/Pomodoro/TodoItem.swift" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/macos/Pomodoro/Pomodoro/TodoListView.swift" beforeDir="false" afterPath="$PROJECT_DIR$/macos/Pomodoro/Pomodoro/TodoListView.swift" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/macos/Pomodoro/Pomodoro/TodoStore.swift" beforeDir="false" afterPath="$PROJECT_DIR$/macos/Pomodoro/Pomodoro/TodoStore.swift" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/website/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/website/index.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/website/style.css" beforeDir="false" afterPath="$PROJECT_DIR$/website/style.css" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
     <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="CopilotPersistence">
+    <persistenceIdMap>
+      <entry key="_/Users/2111832868qq.com/PycharmProjects/Learning/pomodoro-app" value="37t7zHOIDPCeg6v0nv8WMShuIrO" />
+    </persistenceIdMap>
   </component>
   <component name="Git.Settings">
     <option name="RECENT_BRANCH_BY_REPOSITORY">
@@ -23,6 +28,7 @@
       </map>
     </option>
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+    <option name="UPDATE_TYPE" value="REBASE" />
   </component>
   <component name="GitHubPullRequestSearchHistory">{
   &quot;lastFilter&quot;: {
@@ -30,12 +36,12 @@
     &quot;assignee&quot;: &quot;T-1234567890&quot;
   }
 }</component>
-  <component name="GithubPullRequestsUISettings"><![CDATA[{
-  "selectedUrlAndAccountId": {
-    "url": "git@github.com:T-1234567890/pomodoro-app.git",
-    "accountId": "9e696c7e-a717-4e5c-8c9c-48d53b4fa09d"
+  <component name="GithubPullRequestsUISettings">{
+  &quot;selectedUrlAndAccountId&quot;: {
+    &quot;url&quot;: &quot;git@github.com:T-1234567890/pomodoro-app.git&quot;,
+    &quot;accountId&quot;: &quot;9e696c7e-a717-4e5c-8c9c-48d53b4fa09d&quot;
   }
-}]]></component>
+}</component>
   <component name="ProjectColorInfo">{
   &quot;associatedIndex&quot;: 2
 }</component>
@@ -47,25 +53,36 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;ASKED_MARK_IGNORED_FILES_AS_EXCLUDED&quot;: &quot;true&quot;,
-    &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
-    &quot;Python.app.executor&quot;: &quot;Run&quot;,
-    &quot;Python.countdown.executor&quot;: &quot;Run&quot;,
-    &quot;Python.pomodoro.executor&quot;: &quot;Run&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
-    &quot;com.intellij.ml.llm.matterhorn.ej.ui.settings.DefaultAutoModeForALLUsers.v1&quot;: &quot;true&quot;,
-    &quot;com.intellij.ml.llm.matterhorn.ej.ui.settings.DefaultModelSelectionForGA.v1&quot;: &quot;true&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;main&quot;,
-    &quot;junie.onboarding.icon.badge.shown&quot;: &quot;true&quot;,
-    &quot;last_opened_file_path&quot;: &quot;/Users/2111832868qq.com/PycharmProjects/Learning/pomodoro-app&quot;,
-    &quot;settings.editor.selected.configurable&quot;: &quot;preferences.keymap&quot;,
-    &quot;to.speed.mode.migration.done&quot;: &quot;true&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "ASKED_MARK_IGNORED_FILES_AS_EXCLUDED": "true",
+    "ModuleVcsDetector.initialDetectionPerformed": "true",
+    "Python.app.executor": "Run",
+    "Python.countdown.executor": "Run",
+    "Python.pomodoro.executor": "Run",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252": "true",
+    "RunOnceActivity.git.unshallow": "true",
+    "com.intellij.ml.llm.matterhorn.ej.ui.settings.DefaultAutoModeForALLUsers.v1": "true",
+    "com.intellij.ml.llm.matterhorn.ej.ui.settings.DefaultModelSelectionForGA.v1": "true",
+    "git-widget-placeholder": "main",
+    "junie.onboarding.icon.badge.shown": "true",
+    "last_opened_file_path": "/Users/2111832868qq.com/PycharmProjects/Learning/pomodoro-app/website/screenshots",
+    "settings.editor.selected.configurable": "preferences.pluginManager",
+    "to.speed.mode.migration.done": "true"
   }
-}</component>
+}]]></component>
+  <component name="RecentsManager">
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/website/screenshots" />
+      <recent name="$PROJECT_DIR$/website" />
+    </key>
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/macos/Pomodoro/Pomodoro" />
+      <recent name="$PROJECT_DIR$/macos/Pomodoro" />
+      <recent name="$PROJECT_DIR$" />
+    </key>
+  </component>
   <component name="SharedIndexes">
     <attachedChunks>
       <set>
@@ -80,110 +97,6 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1767710774559</updated>
-    </task>
-    <task id="LOCAL-00001" summary="bug fix">
-      <option name="closed" value="true" />
-      <created>1767860917970</created>
-      <option name="number" value="00001" />
-      <option name="presentableId" value="LOCAL-00001" />
-      <option name="project" value="LOCAL" />
-      <updated>1767860917970</updated>
-    </task>
-    <task id="LOCAL-00002" summary="bugfix">
-      <option name="closed" value="true" />
-      <created>1767860929850</created>
-      <option name="number" value="00002" />
-      <option name="presentableId" value="LOCAL-00002" />
-      <option name="project" value="LOCAL" />
-      <updated>1767860929850</updated>
-    </task>
-    <task id="LOCAL-00003" summary="Temporary icon used for bug fix">
-      <option name="closed" value="true" />
-      <created>1767861051043</created>
-      <option name="number" value="00003" />
-      <option name="presentableId" value="LOCAL-00003" />
-      <option name="project" value="LOCAL" />
-      <updated>1767861051043</updated>
-    </task>
-    <task id="LOCAL-00004" summary="Bug fix">
-      <option name="closed" value="true" />
-      <created>1767871192037</created>
-      <option name="number" value="00004" />
-      <option name="presentableId" value="LOCAL-00004" />
-      <option name="project" value="LOCAL" />
-      <updated>1767871192037</updated>
-    </task>
-    <task id="LOCAL-00005" summary="Bug fix">
-      <option name="closed" value="true" />
-      <created>1768062023559</created>
-      <option name="number" value="00005" />
-      <option name="presentableId" value="LOCAL-00005" />
-      <option name="project" value="LOCAL" />
-      <updated>1768062023559</updated>
-    </task>
-    <task id="LOCAL-00006" summary="Bug fix">
-      <option name="closed" value="true" />
-      <created>1768074636898</created>
-      <option name="number" value="00006" />
-      <option name="presentableId" value="LOCAL-00006" />
-      <option name="project" value="LOCAL" />
-      <updated>1768074636898</updated>
-    </task>
-    <task id="LOCAL-00007" summary="Some bug fix for noise, engine and gitignore updated">
-      <option name="closed" value="true" />
-      <created>1768746685190</created>
-      <option name="number" value="00007" />
-      <option name="presentableId" value="LOCAL-00007" />
-      <option name="project" value="LOCAL" />
-      <updated>1768746685190</updated>
-    </task>
-    <task id="LOCAL-00008" summary="I forgot what are these">
-      <option name="closed" value="true" />
-      <created>1768827453599</created>
-      <option name="number" value="00008" />
-      <option name="presentableId" value="LOCAL-00008" />
-      <option name="project" value="LOCAL" />
-      <updated>1768827453599</updated>
-    </task>
-    <task id="LOCAL-00009" summary="Bug fix">
-      <option name="closed" value="true" />
-      <created>1768831922350</created>
-      <option name="number" value="00009" />
-      <option name="presentableId" value="LOCAL-00009" />
-      <option name="project" value="LOCAL" />
-      <updated>1768831922350</updated>
-    </task>
-    <task id="LOCAL-00010" summary="Bug fix">
-      <option name="closed" value="true" />
-      <created>1768870714418</created>
-      <option name="number" value="00010" />
-      <option name="presentableId" value="LOCAL-00010" />
-      <option name="project" value="LOCAL" />
-      <updated>1768870714418</updated>
-    </task>
-    <task id="LOCAL-00011" summary="Bug fix">
-      <option name="closed" value="true" />
-      <created>1768903920200</created>
-      <option name="number" value="00011" />
-      <option name="presentableId" value="LOCAL-00011" />
-      <option name="project" value="LOCAL" />
-      <updated>1768903920200</updated>
-    </task>
-    <task id="LOCAL-00012" summary="Bug fix">
-      <option name="closed" value="true" />
-      <created>1768904483186</created>
-      <option name="number" value="00012" />
-      <option name="presentableId" value="LOCAL-00012" />
-      <option name="project" value="LOCAL" />
-      <updated>1768904483186</updated>
-    </task>
-    <task id="LOCAL-00013" summary="Added things into gitignore">
-      <option name="closed" value="true" />
-      <created>1768908226268</created>
-      <option name="number" value="00013" />
-      <option name="presentableId" value="LOCAL-00013" />
-      <option name="project" value="LOCAL" />
-      <updated>1768908226268</updated>
     </task>
     <task id="LOCAL-00014" summary="Bug fix">
       <option name="closed" value="true" />
@@ -361,7 +274,223 @@
       <option name="project" value="LOCAL" />
       <updated>1769236715832</updated>
     </task>
-    <option name="localTasksCounter" value="36" />
+    <task id="LOCAL-00036" summary="General UI/UX update">
+      <option name="closed" value="true" />
+      <created>1769694792590</created>
+      <option name="number" value="00036" />
+      <option name="presentableId" value="LOCAL-00036" />
+      <option name="project" value="LOCAL" />
+      <updated>1769694792590</updated>
+    </task>
+    <task id="LOCAL-00037" summary="GitHub pages">
+      <option name="closed" value="true" />
+      <created>1770209544416</created>
+      <option name="number" value="00037" />
+      <option name="presentableId" value="LOCAL-00037" />
+      <option name="project" value="LOCAL" />
+      <updated>1770209544416</updated>
+    </task>
+    <task id="LOCAL-00038" summary="GitHub pages">
+      <option name="closed" value="true" />
+      <created>1770302674253</created>
+      <option name="number" value="00038" />
+      <option name="presentableId" value="LOCAL-00038" />
+      <option name="project" value="LOCAL" />
+      <updated>1770302674253</updated>
+    </task>
+    <task id="LOCAL-00039" summary="General UI update">
+      <option name="closed" value="true" />
+      <created>1770372397974</created>
+      <option name="number" value="00039" />
+      <option name="presentableId" value="LOCAL-00039" />
+      <option name="project" value="LOCAL" />
+      <updated>1770372397974</updated>
+    </task>
+    <task id="LOCAL-00040" summary="GitHub pages update">
+      <option name="closed" value="true" />
+      <created>1770441312518</created>
+      <option name="number" value="00040" />
+      <option name="presentableId" value="LOCAL-00040" />
+      <option name="project" value="LOCAL" />
+      <updated>1770441312518</updated>
+    </task>
+    <task id="LOCAL-00041" summary="GitHub pages update">
+      <option name="closed" value="true" />
+      <created>1770446777085</created>
+      <option name="number" value="00041" />
+      <option name="presentableId" value="LOCAL-00041" />
+      <option name="project" value="LOCAL" />
+      <updated>1770446777085</updated>
+    </task>
+    <task id="LOCAL-00042" summary="GitHub pages update">
+      <option name="closed" value="true" />
+      <created>1770803336716</created>
+      <option name="number" value="00042" />
+      <option name="presentableId" value="LOCAL-00042" />
+      <option name="project" value="LOCAL" />
+      <updated>1770803336716</updated>
+    </task>
+    <task id="LOCAL-00043" summary="GitHub pages fix">
+      <option name="closed" value="true" />
+      <created>1770804954704</created>
+      <option name="number" value="00043" />
+      <option name="presentableId" value="LOCAL-00043" />
+      <option name="project" value="LOCAL" />
+      <updated>1770804954704</updated>
+    </task>
+    <task id="LOCAL-00044" summary="GitHub pages fix">
+      <option name="closed" value="true" />
+      <created>1770805217436</created>
+      <option name="number" value="00044" />
+      <option name="presentableId" value="LOCAL-00044" />
+      <option name="project" value="LOCAL" />
+      <updated>1770805217436</updated>
+    </task>
+    <task id="LOCAL-00045" summary="GitHub pages fix">
+      <option name="closed" value="true" />
+      <created>1770806896584</created>
+      <option name="number" value="00045" />
+      <option name="presentableId" value="LOCAL-00045" />
+      <option name="project" value="LOCAL" />
+      <updated>1770806896584</updated>
+    </task>
+    <task id="LOCAL-00046" summary="GitHub pages fix">
+      <option name="closed" value="true" />
+      <created>1770807404559</created>
+      <option name="number" value="00046" />
+      <option name="presentableId" value="LOCAL-00046" />
+      <option name="project" value="LOCAL" />
+      <updated>1770807404559</updated>
+    </task>
+    <task id="LOCAL-00047" summary="GitHub pages fix">
+      <option name="closed" value="true" />
+      <created>1770807864906</created>
+      <option name="number" value="00047" />
+      <option name="presentableId" value="LOCAL-00047" />
+      <option name="project" value="LOCAL" />
+      <updated>1770807864907</updated>
+    </task>
+    <task id="LOCAL-00048" summary="GitHub pages fix">
+      <option name="closed" value="true" />
+      <created>1770809247461</created>
+      <option name="number" value="00048" />
+      <option name="presentableId" value="LOCAL-00048" />
+      <option name="project" value="LOCAL" />
+      <updated>1770809247461</updated>
+    </task>
+    <task id="LOCAL-00049" summary="GitHub pages fix">
+      <option name="closed" value="true" />
+      <created>1770809946075</created>
+      <option name="number" value="00049" />
+      <option name="presentableId" value="LOCAL-00049" />
+      <option name="project" value="LOCAL" />
+      <updated>1770809946075</updated>
+    </task>
+    <task id="LOCAL-00050" summary="GitHub pages fix">
+      <option name="closed" value="true" />
+      <created>1770810353951</created>
+      <option name="number" value="00050" />
+      <option name="presentableId" value="LOCAL-00050" />
+      <option name="project" value="LOCAL" />
+      <updated>1770810353951</updated>
+    </task>
+    <task id="LOCAL-00051" summary="GitHub pages fix">
+      <option name="closed" value="true" />
+      <created>1770810685910</created>
+      <option name="number" value="00051" />
+      <option name="presentableId" value="LOCAL-00051" />
+      <option name="project" value="LOCAL" />
+      <updated>1770810685910</updated>
+    </task>
+    <task id="LOCAL-00052" summary="Remove real Firebase config">
+      <option name="closed" value="true" />
+      <created>1770988278814</created>
+      <option name="number" value="00052" />
+      <option name="presentableId" value="LOCAL-00052" />
+      <option name="project" value="LOCAL" />
+      <updated>1770988278814</updated>
+    </task>
+    <task id="LOCAL-00053" summary="Firebase config fix">
+      <option name="closed" value="true" />
+      <created>1770989201412</created>
+      <option name="number" value="00053" />
+      <option name="presentableId" value="LOCAL-00053" />
+      <option name="project" value="LOCAL" />
+      <updated>1770989201412</updated>
+    </task>
+    <task id="LOCAL-00054" summary="Xcode cloud problem fix">
+      <option name="closed" value="true" />
+      <created>1770999848232</created>
+      <option name="number" value="00054" />
+      <option name="presentableId" value="LOCAL-00054" />
+      <option name="project" value="LOCAL" />
+      <updated>1770999848232</updated>
+    </task>
+    <task id="LOCAL-00055" summary="Bug fix">
+      <option name="closed" value="true" />
+      <created>1771000438318</created>
+      <option name="number" value="00055" />
+      <option name="presentableId" value="LOCAL-00055" />
+      <option name="project" value="LOCAL" />
+      <updated>1771000438318</updated>
+    </task>
+    <task id="LOCAL-00056" summary="Bug fix">
+      <option name="closed" value="true" />
+      <created>1771000816878</created>
+      <option name="number" value="00056" />
+      <option name="presentableId" value="LOCAL-00056" />
+      <option name="project" value="LOCAL" />
+      <updated>1771000816878</updated>
+    </task>
+    <task id="LOCAL-00057" summary="Bug fix">
+      <option name="closed" value="true" />
+      <created>1771001383418</created>
+      <option name="number" value="00057" />
+      <option name="presentableId" value="LOCAL-00057" />
+      <option name="project" value="LOCAL" />
+      <updated>1771001383418</updated>
+    </task>
+    <task id="LOCAL-00058" summary="Xcode cloud script Bug fix">
+      <option name="closed" value="true" />
+      <created>1771002625633</created>
+      <option name="number" value="00058" />
+      <option name="presentableId" value="LOCAL-00058" />
+      <option name="project" value="LOCAL" />
+      <updated>1771002625633</updated>
+    </task>
+    <task id="LOCAL-00059" summary="GitHub Pages update">
+      <option name="closed" value="true" />
+      <created>1771043526373</created>
+      <option name="number" value="00059" />
+      <option name="presentableId" value="LOCAL-00059" />
+      <option name="project" value="LOCAL" />
+      <updated>1771043526373</updated>
+    </task>
+    <task id="LOCAL-00060" summary="GitHub Pages update">
+      <option name="closed" value="true" />
+      <created>1771135651250</created>
+      <option name="number" value="00060" />
+      <option name="presentableId" value="LOCAL-00060" />
+      <option name="project" value="LOCAL" />
+      <updated>1771135651250</updated>
+    </task>
+    <task id="LOCAL-00061" summary="GitHub Pages update (Google Search Console things)">
+      <option name="closed" value="true" />
+      <created>1771314256999</created>
+      <option name="number" value="00061" />
+      <option name="presentableId" value="LOCAL-00061" />
+      <option name="project" value="LOCAL" />
+      <updated>1771314256999</updated>
+    </task>
+    <task id="LOCAL-00062" summary="GitHub Pages update (Google Search Console things)">
+      <option name="closed" value="true" />
+      <created>1771315333039</created>
+      <option name="number" value="00062" />
+      <option name="presentableId" value="LOCAL-00062" />
+      <option name="project" value="LOCAL" />
+      <updated>1771315333039</updated>
+    </task>
+    <option name="localTasksCounter" value="63" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -376,13 +505,8 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="bug fix" />
-    <MESSAGE value="bugfix" />
-    <MESSAGE value="Temporary icon used for bug fix" />
-    <MESSAGE value="Some bug fix for noise, engine and gitignore updated" />
     <MESSAGE value="I forgot what are these" />
     <MESSAGE value="Added things into gitignore" />
-    <MESSAGE value="Bug fix" />
     <MESSAGE value="Wallpaper blur update" />
     <MESSAGE value="Wallpaper blur: bug fix" />
     <MESSAGE value="Bug Fix and UI fix" />
@@ -394,6 +518,26 @@
     <MESSAGE value="Calendar and todo list basic update" />
     <MESSAGE value="Calendar and todo list update" />
     <MESSAGE value="Docs organize" />
-    <option name="LAST_COMMIT_MESSAGE" value="Docs organize" />
+    <MESSAGE value="General UI/UX update" />
+    <MESSAGE value="GitHub pages" />
+    <MESSAGE value="General UI update" />
+    <MESSAGE value="GitHub pages update" />
+    <MESSAGE value="GitHub pages fix" />
+    <MESSAGE value="Remove real Firebase config" />
+    <MESSAGE value="Firebase config fix" />
+    <MESSAGE value="Xcode cloud problem fix" />
+    <MESSAGE value="Bug fix" />
+    <MESSAGE value="Xcode cloud script Bug fix" />
+    <MESSAGE value="GitHub Pages update" />
+    <MESSAGE value="GitHub Pages update (Google Search Console things)" />
+    <option name="LAST_COMMIT_MESSAGE" value="GitHub Pages update (Google Search Console things)" />
+  </component>
+  <component name="github-copilot-workspace">
+    <instructionFileLocations>
+      <option value=".github/instructions" />
+    </instructionFileLocations>
+    <promptFileLocations>
+      <option value=".github/prompts" />
+    </promptFileLocations>
   </component>
 </project>

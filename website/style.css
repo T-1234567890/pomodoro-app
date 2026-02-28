@@ -1155,6 +1155,23 @@ body.lang-switching-in [data-en] {
 .footer-contact a:hover {
   color: var(--accent-strong);
 }
+.footer-legal {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  font-size: 13.5px;
+  color: var(--muted);
+  padding-top: 6px;
+  border-top: 1px solid rgba(234, 216, 198, 0.6);
+}
+.footer-legal a {
+  color: inherit;
+  text-decoration: none;
+}
+.footer-legal a:hover {
+  color: var(--accent-strong);
+}
 .footer-metric {
   min-width: 108px;
   padding: 10px 11px 8px;
