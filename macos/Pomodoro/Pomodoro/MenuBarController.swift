@@ -78,15 +78,10 @@ final class MenuBarController: NSObject, NSMenuDelegate {
     }
 
     deinit {
-        MainActor.assumeIsolated {
-            titleTimer?.invalidate()
-            titleTimer = nil
-            cancellables.removeAll()
-            NSStatusBar.system.removeStatusItem(statusItem)
-            if let liveItem = Self.liveStatusItem, liveItem === statusItem {
-                Self.liveStatusItem = nil
-            }
-        }
+        titleTimer?.invalidate()
+        titleTimer = nil
+        cancellables.removeAll()
+        NSStatusBar.system.removeStatusItem(statusItem)
     }
 
     private func configureStatusItem() {
@@ -160,16 +155,13 @@ final class MenuBarController: NSObject, NSMenuDelegate {
 
     private func startTitleTimer() {
         titleTimer?.invalidate()
-        let nextSecond = ceil(Date().timeIntervalSince1970)
-        let fireDate = Date(timeIntervalSince1970: nextSecond)
-        let timer = Timer(fire: fireDate, interval: 1.0, repeats: true) { [weak self] _ in
-            MainActor.assumeIsolated {
-                self?.updateTitleIfNeeded()
+        titleTimer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { [weak self] _ in
+            guard let self else { return }
+            Task { @MainActor in
+                self.updateTitleIfNeeded()
             }
         }
-        timer.tolerance = 0.05
-        RunLoop.main.add(timer, forMode: .common)
-        titleTimer = timer
+        titleTimer?.tolerance = 0.05
     }
 
     private func updateTitleIfNeeded() {

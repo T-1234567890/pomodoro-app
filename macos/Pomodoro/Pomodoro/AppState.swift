@@ -108,7 +108,9 @@ final class AppState: ObservableObject {
 
         pomodoro.objectWillChange
             .sink { [weak self] _ in
-                self?.objectWillChange.send()
+                Task { @MainActor [weak self] in
+                    self?.objectWillChange.send()
+                }
             }
             .store(in: &cancellables)
 
@@ -128,7 +130,9 @@ final class AppState: ObservableObject {
 
         countdown.objectWillChange
             .sink { [weak self] _ in
-                self?.objectWillChange.send()
+                Task { @MainActor [weak self] in
+                    self?.objectWillChange.send()
+                }
             }
             .store(in: &cancellables)
 
@@ -223,8 +227,10 @@ final class AppState: ObservableObject {
     }
 
     func selectPreset(_ preset: Preset) {
-        presetSelection = .preset(preset)
-        durationConfig = preset.durationConfig
+        Task { @MainActor [weak self] in
+            self?.presetSelection = .preset(preset)
+            self?.durationConfig = preset.durationConfig
+        }
     }
 
     func applyCustomDurationConfig(_ config: DurationConfig) {

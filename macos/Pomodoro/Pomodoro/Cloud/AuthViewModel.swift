@@ -2,7 +2,6 @@ import Foundation
 import Combine
 import FirebaseAuth
 import FirebaseCore
-import ObjectiveC.runtime
 
 final class AuthViewModel: ObservableObject {
     static let shared = AuthViewModel()
@@ -13,8 +12,10 @@ final class AuthViewModel: ObservableObject {
 
     private var authStateListener: AuthStateDidChangeListenerHandle?
     private var auth: Auth?
+    private let authManager: AuthManager
 
     private init() {
+        authManager = .shared
         if FirebaseApp.app() != nil {
             let auth = Auth.auth()
             self.auth = auth
@@ -70,9 +71,14 @@ final class AuthViewModel: ObservableObject {
     @MainActor
     func signInWithGoogle() async throws {
         try await performAuthFlow {
-            let provider = OAuthProvider(providerID: "google.com")
-            provider.customParameters = ["prompt": "select_account"]
-            _ = try await signIn(with: provider)
+            _ = try await authManager.signInWithGoogle()
+        }
+    }
+
+    @MainActor
+    func signInWithGitHub() async throws {
+        try await performAuthFlow {
+            _ = try await authManager.signInWithGitHub()
         }
     }
 
@@ -131,18 +137,9 @@ final class AuthViewModel: ObservableObject {
     }
 
     func signOut() {
-        guard let auth = try? currentAuth() else {
-            currentUser = nil
-            errorMessage = nil
-            return
-        }
-        do {
-            try auth.signOut()
-            currentUser = nil
-            errorMessage = nil
-        } catch {
-            errorMessage = error.localizedDescription
-        }
+        authManager.signOut()
+        currentUser = authManager.currentUser()
+        errorMessage = nil
     }
 
     @MainActor
@@ -161,33 +158,6 @@ final class AuthViewModel: ObservableObject {
         } catch {
             errorMessage = (error as NSError).localizedDescription
             throw error
-        }
-    }
-
-    private func signIn(with provider: OAuthProvider) async throws -> AuthDataResult {
-        let auth = try currentAuth()
-        let selector = NSSelectorFromString("signInWithProvider:UIDelegate:completion:")
-        guard let method = class_getInstanceMethod(Auth.self, selector) else {
-            throw AuthViewModelError.missingResult
-        }
-        typealias SignInBlock = @convention(block) (AuthDataResult?, Error?) -> Void
-        typealias SignInFunction = @convention(c) (AnyObject, Selector, AnyObject, AnyObject?, SignInBlock?) -> Void
-        let implementation = method_getImplementation(method)
-        let function = unsafeBitCast(implementation, to: SignInFunction.self)
-
-        return try await withCheckedThrowingContinuation { continuation in
-            let completion: SignInBlock = { result, error in
-                if let result {
-                    continuation.resume(returning: result)
-                    return
-                }
-                if let error {
-                    continuation.resume(throwing: error)
-                    return
-                }
-                continuation.resume(throwing: AuthViewModelError.missingResult)
-            }
-            function(auth, selector, provider, nil, completion)
         }
     }
 
