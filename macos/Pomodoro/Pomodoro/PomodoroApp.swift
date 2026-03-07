@@ -7,6 +7,7 @@
 
 import SwiftUI
 import FirebaseCore
+import AppKit
 
 @MainActor
 @main
@@ -165,6 +166,16 @@ struct PomodoroApp: App {
                 appDelegate.onboardingState = onboardingState
                 appDelegate.authViewModel = authViewModel
             }
+            .onAppear {
+                enforceMaximizeOnlyWindows()
+            }
+            .onReceive(
+                NotificationCenter.default.publisher(
+                    for: NSApplication.willUpdateNotification
+                )
+            ) { _ in
+                enforceMaximizeOnlyWindows()
+            }
 
         content.environment(\.locale, languageManager.effectiveLocale)
     }
@@ -220,5 +231,11 @@ struct PomodoroApp: App {
     private func navigateTo(_ notification: Notification.Name) {
         appDelegate.openMainWindow()
         NotificationCenter.default.post(name: notification, object: nil)
+    }
+
+    private func enforceMaximizeOnlyWindows() {
+        for window in NSApplication.shared.windows {
+            window.collectionBehavior = [.fullScreenAuxiliary]
+        }
     }
 }
