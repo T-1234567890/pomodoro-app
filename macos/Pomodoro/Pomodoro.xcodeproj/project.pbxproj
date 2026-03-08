@@ -11,9 +11,6 @@
 		1C500AF364889EDC9C8772BC /* AuthManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83E7FB46B7CF8A7C0F510CF4 /* AuthManager.swift */; };
 		1C500AF464889EDC9C8772BC /* AuthViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83E7FB47B7CF8A7C0F510CF4 /* AuthViewModel.swift */; };
 		1C500AF564889EDC9C8772BC /* AIService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83E7FB48B7CF8A7C0F510CF4 /* AIService.swift */; };
-		A1B2C3D40000000000000001 /* AIAssistantView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D50000000000000001 /* AIAssistantView.swift */; };
-		A1B2C3D60000000000000001 /* TaskMarkdownView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D70000000000000001 /* TaskMarkdownView.swift */; };
-		A1B2C3D80000000000000001 /* EisenhowerMatrixView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D90000000000000001 /* EisenhowerMatrixView.swift */; };
 		4BDE965F88F5BUILDCBB5DF2 /* CalendarDayView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4BDE965F88F54754BCBB5DF2 /* CalendarDayView.swift */; };
 		4DD2B11CF188B287CE18674F /* APIClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = D95945228BEC2D75F362FF53 /* APIClient.swift */; };
 		7C217B312F3F89DD0076D4DA /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 7C217B302F3F89DD0076D4DA /* GoogleService-Info.plist */; };
@@ -55,6 +52,9 @@
 		7C7920D02F5C38BE00C588C1 /* FirebaseStorageCombine-Community in Frameworks */ = {isa = PBXBuildFile; productRef = 7C7920CF2F5C38BE00C588C1 /* FirebaseStorageCombine-Community */; };
 		815B35241A15471083A7F5C2 /* VisualEffectBlur.swift in Sources */ = {isa = PBXBuildFile; fileRef = 36B4A1D0B6904D3B9A1E8353 /* VisualEffectBlur.swift */; };
 		9F1C2A3B4D5E6F708192A3B5 /* WeekCalendarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9F1C2A3B4D5E6F708192A3B4 /* WeekCalendarView.swift */; };
+		A1B2C3D40000000000000001 /* AIAssistantView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D50000000000000001 /* AIAssistantView.swift */; };
+		A1B2C3D60000000000000001 /* TaskMarkdownView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D70000000000000001 /* TaskMarkdownView.swift */; };
+		A1B2C3D80000000000000001 /* EisenhowerMatrixView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D90000000000000001 /* EisenhowerMatrixView.swift */; };
 		A5E1164621F2FA56280B4889 /* CloudSettingsSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = ECCF7A685FE13468A938ADD7 /* CloudSettingsSection.swift */; };
 		AB9F279C180740EE9216C649 /* MediaControlBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = ABFA2AD704BE4758B0A786D8 /* MediaControlBar.swift */; };
 		ADF8CB8E6B5CD0F9482E94DD /* AuthStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 379E0B0F492E771413BBB197 /* AuthStore.swift */; };
@@ -106,10 +106,6 @@
 		49393474CCC34E2091E176A1 /* WindowBackgroundConfigurator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WindowBackgroundConfigurator.swift; sourceTree = "<group>"; };
 		4BDE965F88F54754BCBB5DF2 /* CalendarDayView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalendarDayView.swift; sourceTree = "<group>"; };
 		7C217B302F3F89DD0076D4DA /* GoogleService-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
-		83E7FB48B7CF8A7C0F510CF4 /* AIService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AIService.swift; sourceTree = "<group>"; };
-		A1B2C3D50000000000000001 /* AIAssistantView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AIAssistantView.swift; sourceTree = "<group>"; };
-		A1B2C3D70000000000000001 /* TaskMarkdownView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TaskMarkdownView.swift; sourceTree = "<group>"; };
-		A1B2C3D90000000000000001 /* EisenhowerMatrixView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EisenhowerMatrixView.swift; sourceTree = "<group>"; };
 		7C360D382F191F17007313D3 /* Pomodoro.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Pomodoro.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		7C360D502F191F17007313D3 /* AppState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppState.swift; sourceTree = "<group>"; };
 		7C360D512F191F17007313D3 /* CountdownTimerEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CountdownTimerEngine.swift; sourceTree = "<group>"; };
@@ -132,7 +128,11 @@
 		7C4C2FDF2F38D57200994D30 /* Pomodoro.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Pomodoro.entitlements; sourceTree = "<group>"; };
 		83E7FB46B7CF8A7C0F510CF4 /* AuthManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthManager.swift; sourceTree = "<group>"; };
 		83E7FB47B7CF8A7C0F510CF4 /* AuthViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthViewModel.swift; sourceTree = "<group>"; };
+		83E7FB48B7CF8A7C0F510CF4 /* AIService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AIService.swift; sourceTree = "<group>"; };
 		9F1C2A3B4D5E6F708192A3B4 /* WeekCalendarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeekCalendarView.swift; sourceTree = "<group>"; };
+		A1B2C3D50000000000000001 /* AIAssistantView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AIAssistantView.swift; sourceTree = "<group>"; };
+		A1B2C3D70000000000000001 /* TaskMarkdownView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TaskMarkdownView.swift; sourceTree = "<group>"; };
+		A1B2C3D90000000000000001 /* EisenhowerMatrixView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EisenhowerMatrixView.swift; sourceTree = "<group>"; };
 		ABFA2AD704BE4758B0A786D8 /* MediaControlBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MediaControlBar.swift; sourceTree = "<group>"; };
 		B6A200022FFD4BD7B90F8AC1 /* NowPlayingRouter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NowPlayingRouter.swift; sourceTree = "<group>"; };
 		B6A200032FFD4BD7B90F8AC1 /* NowPlayingProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NowPlayingProvider.swift; sourceTree = "<group>"; };
@@ -719,7 +719,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 14.6;
-				MARKETING_VERSION = 1.6.2;
+				MARKETING_VERSION = 1.6.3;
 				PRODUCT_BUNDLE_IDENTIFIER = dev.pomodoro.Pomodoro;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				REGISTER_APP_GROUPS = YES;
@@ -778,7 +778,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 14.6;
-				MARKETING_VERSION = 1.6.2;
+				MARKETING_VERSION = 1.6.3;
 				PRODUCT_BUNDLE_IDENTIFIER = dev.pomodoro.Pomodoro;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				REGISTER_APP_GROUPS = YES;
