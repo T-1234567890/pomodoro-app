@@ -1,5 +1,8 @@
 ## 🎉 Pomodoro TestFlight Early Access & Giveaway Rules
 
+> [!IMPORTANT]
+> The giveaway has ended, please check your email
+
 Welcome to the Pomodoro TestFlight Early Access and Giveaway event.  
 This section outlines how to participate, the official rules, and key dates.
 
